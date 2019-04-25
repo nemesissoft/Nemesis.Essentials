@@ -3,8 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
-
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    
     <Authors>Michał Bryłka</Authors>
     <PackageLicenseFile>License.txt</PackageLicenseFile>
     <IncludeSymbols>true</IncludeSymbols>
@@ -13,10 +12,14 @@
     <Description>Contains all essential utils that should be build into .NET but somehow are not.</Description>    
 
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\Nemesis.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\Releases\Nemesis.snk</AssemblyOriginatorKeyFile>
     
     
-    <Version>1.0.6</Version> 
+    <Version>1.0.7</Version> 
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

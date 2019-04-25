@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nemesis.Essentials", "Nemesis.Essentials\Nemesis.Essentials.csproj", "{1EEFDE27-B31D-412B-A010-948B93B30499}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nemesis.Essentials.Tests", "Nemesis.Essentials.Tests\Nemesis.Essentials.Tests.csproj", "{17A65E07-F8CE-46DE-88E3-CD44F99333B6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1EEFDE27-B31D-412B-A010-948B93B30499}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EEFDE27-B31D-412B-A010-948B93B30499}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EEFDE27-B31D-412B-A010-948B93B30499}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EEFDE27-B31D-412B-A010-948B93B30499}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17A65E07-F8CE-46DE-88E3-CD44F99333B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17A65E07-F8CE-46DE-88E3-CD44F99333B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17A65E07-F8CE-46DE-88E3-CD44F99333B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17A65E07-F8CE-46DE-88E3-CD44F99333B6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7ECD776B-536E-4B43-B8C0-319DA84BD6FC}
+	EndGlobalSection
+EndGlobal
