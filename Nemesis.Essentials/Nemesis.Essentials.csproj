@@ -4,18 +4,27 @@
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     
+    
     <Authors>Michał Bryłka</Authors>
-    <PackageLicenseFile>License.txt</PackageLicenseFile>
+    <PackageLicenseExpression>MIT OR Apache-2.0</PackageLicenseExpression>
+    <PackageTags>Essential Essentials AsciiTableFormatter Comparers TextConverter TaskUtils ExpressionUtils TypeMeta methodof fieldof propertyof</PackageTags>
+    <Copyright>Copyright (c) Michał Bryłka. Icon by Good Stuff No Nonsense (http://www.iconarchive.com/artist/goodstuff-no-nonsense.html)</Copyright>
+    <Description>Contains all essential utils that should be build into .NET but somehow are not.</Description>
+
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageIconUrl>http://icons.iconarchive.com/icons/goodstuff-no-nonsense/free-space/1024/alien-2-icon.png</PackageIconUrl>
-    <Description>Contains all essential utils that should be build into .NET but somehow are not.</Description>    
+    
 
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Releases\Nemesis.snk</AssemblyOriginatorKeyFile>
     
+    <Version>1.0.8</Version>
     
-    <Version>1.0.7</Version> 
+    
+    <PackageProjectUrl>https://github.com/nemesissoft/Nemesis.Essentials</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/nemesissoft/Nemesis.Essentials</RepositoryUrl>
+    <RepositoryType>Github</RepositoryType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -25,14 +34,6 @@
   <ItemGroup>
     <None Remove="alien-2.png" />
     <None Remove="alien-2.svg" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="License.txt" Pack="true" PackagePath="License.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" Version="2019.1.1" />
   </ItemGroup>
 
   <ItemGroup>
