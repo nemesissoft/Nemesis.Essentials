@@ -45,6 +45,9 @@ namespace Nemesis.Essentials.Tests
 
             var multiFormats = DecimalPolishFormat($"Int: 0x{31:X} Double: {Math.PI:F6} Decimal:{expectedPrice:Text}");
             Assert.That(multiFormats, Is.EqualTo(@"Int: 0x1F Double: 3,141593 Decimal:+123456789987654321 / 10^9 = 123456789,987654321"));
+
+            var hex = expectedPrice.ToString<DecimalFormatter>("Hex", polishFormatter);
+            Assert.That(hex, Is.EqualTo("0x75BCD15,FCD6E9E07"));
         }
 
         private static string RemoveWhitespace( string input) =>

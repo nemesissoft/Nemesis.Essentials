@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
-using JetBrains.Annotations;
 using Nemesis.Essentials.Design;
 using NUnit.Framework;
 
@@ -34,10 +33,9 @@ namespace Nemesis.Essentials.Tests
 
             public readonly string SecretPassword;
 
-            [UsedImplicitly]
             public string GetPlainTextPassword() => Xorize(Encoding.Unicode.GetString(Convert.FromBase64String(SecretPassword)), PASS);
 
-            public Person(string name, string address, int age, [NotNull] string plainTextPassword)
+            public Person(string name, string address, int age, string plainTextPassword)
             {
                 Name = name;
                 Address = address;
@@ -48,15 +46,14 @@ namespace Nemesis.Essentials.Tests
 
             private const string PASS = "12345";
 
-            private static string Xorize([NotNull] string text, string password) =>
+            private static string Xorize(string text, string password) =>
                 Enumerable.Range(0, text.Length)
                     .Aggregate(new StringBuilder(text.Length),
                         (sb, i) => sb.Append((char)(text[i] ^ password[i % password.Length])),
                         sb => sb.ToString());
         }
 
-        [NotNull]
-        private static IEnumerable<AsciiArtTableFormatter.HeaderStyle> HeaderStyles() 
+        private static IEnumerable<AsciiArtTableFormatter.HeaderStyle> HeaderStyles()
             => Enum.GetValues(typeof(AsciiArtTableFormatter.HeaderStyle)).Cast<AsciiArtTableFormatter.HeaderStyle>();
 
         [TestCaseSource(nameof(HeaderStyles))]
