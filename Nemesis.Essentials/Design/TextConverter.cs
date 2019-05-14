@@ -23,8 +23,7 @@ namespace Nemesis.Essentials.Design
             value is string text ? ParseString(text) : default;
 
         public abstract TValue ParseString(string text);
-
-
+        
 
         public sealed override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType) =>
             destinationType == typeof(string) ?
