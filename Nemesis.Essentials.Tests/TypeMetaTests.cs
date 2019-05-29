@@ -33,6 +33,8 @@ namespace Nemesis.Essentials.Tests
         interface ITransformer<TElement> { }
         private static ITransformer<TElement> CreateTransformer<TElement>() => default;
 
+        private ITransformer<TElement> CreateTransformerInstance<TElement>() => default;
+
         [Test]
         public void MethodOfTest()
         {
@@ -49,6 +51,10 @@ namespace Nemesis.Essentials.Tests
             MethodInfo genericCreate = Method.Of<Func<int>>(Create<int>).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
             MethodInfo genericCreateTransformer = Method.Of<Func<ITransformer<int>>>(CreateTransformer<int>).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
 
+            MethodInfo genericCreateTransformerInstance = Method.OfExpression<Func<TypeMetaTests, ITransformer<int>>>(
+                    test => test.CreateTransformerInstance<int>()
+                    ).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
+
 
             Assert.AreEqual(trimByExpression, trimByDelegate);
             Assert.AreEqual(trimByExpressionChars, trimByDelegateChars);
@@ -63,9 +69,15 @@ namespace Nemesis.Essentials.Tests
 
             Assert.That(genericCreate, Is.Not.Null);
             Assert.That(genericCreateTransformer, Is.Not.Null);
+            Assert.That(genericCreateTransformerInstance, Is.Not.Null);
+
+            Assert.That(genericCreate.Name, Is.EqualTo(nameof(Create)));
+            Assert.That(genericCreateTransformer.Name, Is.EqualTo(nameof(CreateTransformer)));
+            Assert.That(genericCreateTransformerInstance.Name, Is.EqualTo(nameof(CreateTransformerInstance)));
 
             Assert.That(genericCreate.ReturnType, Is.EqualTo(typeof(string)));
             Assert.That(genericCreateTransformer.ReturnType, Is.EqualTo(typeof(ITransformer<string>)));
+            Assert.That(genericCreateTransformerInstance.ReturnType, Is.EqualTo(typeof(ITransformer<string>)));
         }
 
         [Test]

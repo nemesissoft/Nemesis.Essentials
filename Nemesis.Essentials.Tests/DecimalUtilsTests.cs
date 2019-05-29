@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using Nemesis.Essentials.Maths;
 using NUnit.Framework;
 
@@ -42,9 +43,10 @@ namespace Nemesis.Essentials.Tests
             var polishText = expectedPrice.ToString<DecimalFormatter>("Text", polishFormatter);
             Assert.That(polishText, Is.EqualTo(@"+123456789987654321 / 10^9 = 123456789,987654321"));
 
+            var big = BigInteger.Parse("12345678901234567890");
 
-            var multiFormats = DecimalPolishFormat($"Int: 0x{31:X} Double: {Math.PI:F6} Decimal:{expectedPrice:Text}");
-            Assert.That(multiFormats, Is.EqualTo(@"Int: 0x1F Double: 3,141593 Decimal:+123456789987654321 / 10^9 = 123456789,987654321"));
+            var multiFormats = DecimalPolishFormat($"Int: 0x{31:X} Big: {big:G} Decimal:{expectedPrice:Text}");
+            Assert.That(multiFormats, Is.EqualTo(@"Int: 0x1F Big: 12345678901234567890 Decimal:+123456789987654321 / 10^9 = 123456789,987654321"));
 
             var hex = expectedPrice.ToString<DecimalFormatter>("Hex", polishFormatter);
             Assert.That(hex, Is.EqualTo("0x75BCD15,FCD6E9E07"));
