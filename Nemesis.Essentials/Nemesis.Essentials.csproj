@@ -22,7 +22,7 @@
     <AssemblyOriginatorKeyFile>..\Nemesis.Essentials.Public.snk</AssemblyOriginatorKeyFile>
     
     
-    <Version>1.0.10</Version>
+    <Version>1.0.11</Version>
     
     
     <PackageProjectUrl>https://github.com/nemesissoft/Nemesis.Essentials</PackageProjectUrl>

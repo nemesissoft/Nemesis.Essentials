@@ -7,7 +7,8 @@ namespace Nemesis.Essentials.Runtime
 {
     public static class Method
     {
-        public static MethodInfo Of<TDelegate>(TDelegate del) => ((Delegate)(object)del).Method;
+        public static MethodInfo Of<TDelegate>(TDelegate del) where TDelegate : Delegate
+            => del.Method;
 
         public static MethodInfo OfExpression<TDelegate>(Expression<TDelegate> expression) =>
             expression.Body is MethodCallExpression call ? call.Method : throw new NotSupportedException("Only method calls are valid at this point");
@@ -56,7 +57,7 @@ namespace Nemesis.Essentials.Runtime
             var ctorArgumentsExpressions = ctorArguments.Zip(ctorParamsInfos, (o, pi) => Expression.Convert(Expression.Constant(o), pi.ParameterType)).ToList();
 
             var ctorExpr = Expression.New(ctor, ctorArgumentsExpressions);
-            
+
             var λ = Expression.Lambda<Func<TType>>(ctorExpr);
             return λ.Compile();
         }
@@ -68,7 +69,7 @@ namespace Nemesis.Essentials.Runtime
         {
             if (memberExpression.Body is MemberExpression memberAccess && memberAccess.Member is PropertyInfo property)
                 return property;
-            else if (memberExpression.Body.NodeType == ExpressionType.Convert && memberExpression.Body is UnaryExpression convert && 
+            else if (memberExpression.Body.NodeType == ExpressionType.Convert && memberExpression.Body is UnaryExpression convert &&
                      convert.Operand is MemberExpression memberExpr && memberExpr.Member is PropertyInfo property2)
                 return property2;
             else
@@ -107,7 +108,7 @@ namespace Nemesis.Essentials.Runtime
 
     public static class Field
     {
-        public static FieldInfo Of<TType, TField>(Expression<Func<TType, TField>> fieldExpression) => 
+        public static FieldInfo Of<TType, TField>(Expression<Func<TType, TField>> fieldExpression) =>
             fieldExpression.Body is MemberExpression memberAccess && memberAccess.Member is FieldInfo field ? field
             : throw new Exception("Only member (field) expressions are valid at this point");
     }

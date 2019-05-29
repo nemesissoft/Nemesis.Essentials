@@ -14,11 +14,12 @@ namespace Nemesis.Essentials.Tests
     [TestFixture(TestOf = typeof(TypeMeta))]
     public class TypeMetaTests
     {
-        public static Type GetDeclaredType<T>(T x) => typeof(T);
-
         [Test]
         public void GetDeclaredTypeTest()
         {
+            // ReSharper disable once UnusedParameter.Local
+            Type GetDeclaredType<T>(T x) => typeof(T);
+
             IList<string> iList = new List<string>();
             List<string> list = null;
 
@@ -26,6 +27,11 @@ namespace Nemesis.Essentials.Tests
             // ReSharper disable once ExpressionIsAlwaysNull
             Assert.AreEqual(GetDeclaredType(list).Name, "List`1");
         }
+
+        private static TElement Create<TElement>() => default;
+        // ReSharper disable once UnusedTypeParameter
+        interface ITransformer<TElement> { }
+        private static ITransformer<TElement> CreateTransformer<TElement>() => default;
 
         [Test]
         public void MethodOfTest()
@@ -38,8 +44,11 @@ namespace Nemesis.Essentials.Tests
 
             MethodInfo parseByDelegate = Method.Of<Func<string, int>>(int.Parse);
             MethodInfo tryParseByDelegate = Method.Of<Func2Out<string, int, bool>>(int.TryParse);//no magic with by ref
+                                                                                                 //var tryParseMethods = typeof(int).GetMethods().Where(m => m.Name == nameof(int.TryParse)).ToList();
 
-            //var tryParseMethods = typeof(int).GetMethods().Where(m => m.Name == nameof(int.TryParse)).ToList();
+            MethodInfo genericCreate = Method.Of<Func<int>>(Create<int>).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
+            MethodInfo genericCreateTransformer = Method.Of<Func<ITransformer<int>>>(CreateTransformer<int>).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
+
 
             Assert.AreEqual(trimByExpression, trimByDelegate);
             Assert.AreEqual(trimByExpressionChars, trimByDelegateChars);
@@ -50,6 +59,13 @@ namespace Nemesis.Essentials.Tests
             Assert.AreEqual(trimByExpression, typeof(string).GetMethod(nameof(string.Trim), Type.EmptyTypes));
             Assert.AreEqual(parseByDelegate, typeof(int).GetMethod(nameof(int.Parse), new[] { typeof(string) }));
             Assert.AreEqual(tryParseByDelegate, typeof(int).GetMethod(nameof(int.TryParse), new[] { typeof(string), typeof(int).MakeByRefType() }));
+
+
+            Assert.That(genericCreate, Is.Not.Null);
+            Assert.That(genericCreateTransformer, Is.Not.Null);
+
+            Assert.That(genericCreate.ReturnType, Is.EqualTo(typeof(string)));
+            Assert.That(genericCreateTransformer.ReturnType, Is.EqualTo(typeof(ITransformer<string>)));
         }
 
         [Test]
@@ -118,17 +134,17 @@ namespace Nemesis.Essentials.Tests
             Func<CtorClass> factoryFull = Ctor.FactoryOf(() => new CtorClass(default, null, null), 16, 16.5f, "Ala");
 
             var cc = factoryFull(); //warmup
-            const int INTERATIONS = 1000000;
+            const int ITERATIONS = 1000000;
 
             var sw1 = Stopwatch.StartNew();
-            for (int i = 0; i < INTERATIONS; i++)
+            for (int i = 0; i < ITERATIONS; i++)
             {
                 var cc1 = factoryFull();
             }
             sw1.Stop();
 
             var sw2 = Stopwatch.StartNew();
-            for (int i = 0; i < INTERATIONS; i++)
+            for (int i = 0; i < ITERATIONS; i++)
             {
                 var cc2 = new CtorClass(16, 16.5f, "Ala");
             }
@@ -353,7 +369,7 @@ namespace Nemesis.Essentials.Tests
             return
                 (from d in data
                  select new TestCaseData(d.type, d.generic).Returns(d.expectedResult)
-                 .SetName($"{d.type.GetFriendlyName()} {(d.expectedResult?"->":"!->")} {d.generic.GetFriendlyName()})")
+                 .SetName($"{d.type.GetFriendlyName()} {(d.expectedResult ? "->" : "!->")} {d.generic.GetFriendlyName()})")
                 ).ToList();
         }
 
