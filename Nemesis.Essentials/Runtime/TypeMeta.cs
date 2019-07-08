@@ -2,9 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 
+#if NEMESIS_BINARY_PACKAGE
 namespace Nemesis.Essentials.Runtime
+#else
+namespace $rootnamespace$.Runtime
+#endif
 {
-    public static partial class TypeMeta
+#if NEMESIS_BINARY_PACKAGE
+    public
+#else
+    internal
+#endif
+    static partial class TypeMeta
     {
         /// <summary>
         /// Returns <paramref name="type"/> and all his base types.

@@ -2,39 +2,18 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    
-    
-    <Authors>Michał Bryłka</Authors>
-    <PackageLicenseExpression>MIT OR Apache-2.0</PackageLicenseExpression>
-    <PackageTags>Essential Essentials AsciiTableFormatter Comparers TextConverter TaskUtils ExpressionUtils TypeMeta methodof fieldof propertyof</PackageTags>
-    <Copyright>Copyright (c) Michał Bryłka. Icon by Good Stuff No Nonsense (http://www.iconarchive.com/artist/goodstuff-no-nonsense.html)</Copyright>
-    <Description>Contains all essential utils that should be build into .NET but somehow are not.</Description>
 
+    <DefineConstants>$(DefineConstants);NEMESIS_BINARY_PACKAGE</DefineConstants>
+    
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <PackageIconUrl>http://icons.iconarchive.com/icons/goodstuff-no-nonsense/free-space/1024/alien-2-icon.png</PackageIconUrl>
-    
-
-    <SignAssembly>true</SignAssembly>
-    <DelaySign>false</DelaySign>
-    <PublicSign>true</PublicSign>
-    <AssemblyOriginatorKeyFile>..\Nemesis.Essentials.Public.snk</AssemblyOriginatorKeyFile>
-    
-    
-    <Version>1.0.11</Version>
-
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <PackageProjectUrl>https://github.com/nemesissoft/Nemesis.Essentials</PackageProjectUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSourceRevisionInInformationalVersion>true</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19270-01" PrivateAssets="All"/>
-  </ItemGroup>
 
   <ItemGroup>
     <None Remove="alien-2.png" />
@@ -47,10 +26,4 @@
     </AssemblyAttribute>
   </ItemGroup>
 
-
-  <!--
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-  </ItemGroup>
-  -->
 </Project>

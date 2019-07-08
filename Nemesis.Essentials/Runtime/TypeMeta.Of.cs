@@ -3,9 +3,18 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
+#if NEMESIS_BINARY_PACKAGE
 namespace Nemesis.Essentials.Runtime
+#else
+namespace $rootnamespace$.Runtime
+#endif
 {
-    public static class Method
+#if NEMESIS_BINARY_PACKAGE
+    public
+#else
+    internal
+#endif
+    static class Method
     {
         public static MethodInfo Of<TDelegate>(TDelegate del) where TDelegate : Delegate
             => del.Method;

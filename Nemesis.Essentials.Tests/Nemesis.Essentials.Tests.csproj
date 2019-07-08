@@ -2,12 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>net472;net461;net48;netcoreapp2.2</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
+    <DefineConstants>$(DefineConstants);NEMESIS_BINARY_PACKAGE_TESTS</DefineConstants>
 
-    <SignAssembly>true</SignAssembly>
-    <DelaySign>false</DelaySign>
-    <PublicSign>true</PublicSign>
-    <AssemblyOriginatorKeyFile>..\Nemesis.Essentials.Public.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>

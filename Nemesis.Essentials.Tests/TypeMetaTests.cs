@@ -6,10 +6,14 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+#if NEMESIS_BINARY_PACKAGE_TESTS
 using Nemesis.Essentials.Design;
 using Nemesis.Essentials.Runtime;
 
 namespace Nemesis.Essentials.Tests
+#else
+namespace Nemesis.Essentials.Sources.Tests.Runtime
+#endif
 {
     [TestFixture(TestOf = typeof(TypeMeta))]
     public class TypeMetaTests
@@ -45,8 +49,10 @@ namespace Nemesis.Essentials.Tests
             MethodInfo trimByDelegateChars = Method.Of<Func<char[], string>>("".Trim);
 
             MethodInfo parseByDelegate = Method.Of<Func<string, int>>(int.Parse);
+#if NEMESIS_BINARY_PACKAGE_TESTS
             MethodInfo tryParseByDelegate = Method.Of<Func2Out<string, int, bool>>(int.TryParse);//no magic with by ref
                                                                                                  //var tryParseMethods = typeof(int).GetMethods().Where(m => m.Name == nameof(int.TryParse)).ToList();
+#endif
 
             MethodInfo genericCreate = Method.Of<Func<int>>(Create<int>).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
             MethodInfo genericCreateTransformer = Method.Of<Func<ITransformer<int>>>(CreateTransformer<int>).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
@@ -64,8 +70,9 @@ namespace Nemesis.Essentials.Tests
 
             Assert.AreEqual(trimByExpression, typeof(string).GetMethod(nameof(string.Trim), Type.EmptyTypes));
             Assert.AreEqual(parseByDelegate, typeof(int).GetMethod(nameof(int.Parse), new[] { typeof(string) }));
+#if NEMESIS_BINARY_PACKAGE_TESTS
             Assert.AreEqual(tryParseByDelegate, typeof(int).GetMethod(nameof(int.TryParse), new[] { typeof(string), typeof(int).MakeByRefType() }));
-
+#endif
 
             Assert.That(genericCreate, Is.Not.Null);
             Assert.That(genericCreateTransformer, Is.Not.Null);
@@ -324,7 +331,7 @@ namespace Nemesis.Essentials.Tests
             }
         }
 
-        #region ImplementsGenericInterface and DerivesFromGenericClass
+#region ImplementsGenericInterface and DerivesFromGenericClass
 
         private static IEnumerable<TestCaseData> GenericInterfaceTests()
         {
@@ -487,7 +494,7 @@ namespace Nemesis.Essentials.Tests
         private class StringQuery : IQuery<string> { }
 
         private class StringQueryHandler : IQueryHandler<StringQuery, string> { }
-        #endregion
+#endregion
 
         [TestCase("bool", typeof(bool))]
         [TestCase("Dictionary<bool, string>", typeof(Dictionary<bool, string>))]
@@ -515,7 +522,7 @@ namespace Nemesis.Essentials.Tests
         [TestCase("IDictionary<bool, IList<string>>", typeof(IDictionary<bool, IList<string>>))]
         public void GetFriendlyNameTests(string expectedName, Type type) => Assert.That(type.GetFriendlyName(), Is.EqualTo(expectedName));
 
-        #region GetDefault
+#region GetDefault
 
         [TestCase(typeof(int), ExpectedResult = 0)]
         [TestCase(typeof(bool?), ExpectedResult = false)]
@@ -545,6 +552,6 @@ namespace Nemesis.Essentials.Tests
             public MyStruct(T value) => Value = value;
         }
 
-        #endregion
+#endregion
     }
 }

@@ -7,7 +7,7 @@
   <Target Name="_AppendCommonPackageDescription" 
           BeforeTargets="InitializeStandardNuspecProperties;GenerateNuspec" 
           DependsOnTargets="InitializeSourceControlInformation"
-          Condition="'$(IsPackable)' == 'true'">
+          Condition="'$(IsPackable)' == 'true' And '$(EnableSourceLink)' == 'true'">
     <PropertyGroup>
       <PackageDescription>
       $(PackageDescription)

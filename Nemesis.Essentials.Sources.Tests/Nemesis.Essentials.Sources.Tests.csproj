@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net472;net461;net48;netcoreapp2.2</TargetFrameworks>
+    <CustomRestoreDirectory>.\obj\Packages_temp</CustomRestoreDirectory>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RestoreNoCache>true</RestoreNoCache>
+    <RestoreAdditionalProjectSources>
+      ..\Nemesis.Essentials\bin\$(Configuration)
+    </RestoreAdditionalProjectSources>
+    <RestorePackagesPath>$(CustomRestoreDirectory)</RestorePackagesPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
+    <PackageReference Include="NUnit" Version="3.11.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
+    <PackageReference Include="System.ValueTuple" Version ="4.5.0" />
+
+    <PackageReference Include="Nemesis.Essentials.TypeMeta.Sources" Version="$(Version)" /><!--This tries to reference currently build version of the package. -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Remove="Microsoft.SourceLink.GitHub" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../Nemesis.Essentials.Tests/TypeMetaTests.cs" />
+  </ItemGroup>
+
+  <!--Target Name="CleanCustomRestoreDirectory" BeforeTargets="Rebuild;Restore" Condition="$(CustomRestoreDirectory) != ''">
+    <RemoveDir Directories="$(CustomRestoreDirectory)" />
+    <MakeDir Directories="$(CustomRestoreDirectory)"/>
+  </Target>-->
+</Project>

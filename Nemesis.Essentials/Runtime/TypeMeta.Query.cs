@@ -5,11 +5,19 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using Nemesis.Essentials.Design;
 
+#if NEMESIS_BINARY_PACKAGE
 namespace Nemesis.Essentials.Runtime
+#else
+namespace $rootnamespace$.Runtime
+#endif
 {
-    public static partial class TypeMeta
+#if NEMESIS_BINARY_PACKAGE
+    public
+#else
+    internal
+#endif
+    static partial class TypeMeta
     {
         #region Nullable
         /// <summary>
@@ -22,13 +30,13 @@ namespace Nemesis.Essentials.Runtime
         /// </summary>
         public static Type GetNullableUnderlyingType(this Type type)
         {
-            Guard.AgainstViolation(type.IsNullable(), "Type should be nullable");
+            if(!type.IsNullable()) throw new ArgumentException("Type should be nullable");
             return type.GetGenericArguments().Single();
         }
 
         public static Type GetNullableType(Type type)
         {
-            Guard.AgainstNull(type, nameof(type));
+            if (type == null) throw new ArgumentNullException(nameof(type));
             return type.IsValueType && !IsNullable(type) ? typeof(Nullable<>).MakeGenericType(type) : type;
         }
         #endregion
@@ -187,8 +195,7 @@ namespace Nemesis.Essentials.Runtime
         {
             FieldInfo result = (property.DeclaringType ?? throw new ArgumentNullException(nameof(property), $@"{nameof(property)}.DeclaringType is null"))
                 .GetField($"<{property.Name}>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
-            Guard.AgainstViolation(result != null, "No backing field found for property {0} in {1}",
-                property.Name, property.DeclaringType.FullName);
+            if (result == null) throw new ArgumentException($"No backing field found for property {property.Name} in {property.DeclaringType.FullName}");
 
             return result;
         }
