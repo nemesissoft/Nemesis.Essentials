@@ -5,8 +5,6 @@
 
     <DefineConstants>$(DefineConstants);NEMESIS_BINARY_PACKAGE</DefineConstants>
     
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSourceRevisionInInformationalVersion>true</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>

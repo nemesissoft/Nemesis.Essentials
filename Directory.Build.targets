@@ -7,11 +7,11 @@
   <Target Name="_AppendCommonPackageDescription" 
           BeforeTargets="InitializeStandardNuspecProperties;GenerateNuspec" 
           DependsOnTargets="InitializeSourceControlInformation"
-          Condition="'$(IsPackable)' == 'true' And '$(EnableSourceLink)' == 'true'">
+          Condition="'$(IsPackable)' == 'true'">
     <PropertyGroup>
       <PackageDescription>
       $(PackageDescription)
-      This package was built from the source at $(RepositoryUrl)/commit/$(SourceRevisionId).
+      This package was built from the source at $(RepositoryUrl.TrimEnd('.git'))/tree/$(SourceRevisionId)
       </PackageDescription>
     </PropertyGroup>
   </Target>

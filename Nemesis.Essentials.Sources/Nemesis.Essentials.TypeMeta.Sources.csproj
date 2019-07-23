@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.Build.NoTargets/1.0.73">
+﻿<Project Sdk="Microsoft.Build.NoTargets/1.0.80">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
 
@@ -13,15 +13,19 @@
     <NoWarn>$(NoWarn),CS8021</NoWarn>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <NoPackageAnalysis>true</NoPackageAnalysis>
-    <IncludeSymbols>false</IncludeSymbols>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <!--<PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
-  </PropertyGroup>
+    <BuildDependsOn>
+      $(BuildDependsOn);
+      _AppendCommonPackageDescription;
+      TranslateGitHubUrlsInSourceControlInformation
+    </BuildDependsOn>
+  </PropertyGroup>-->
 
   <ItemGroup>
-    <Compile Include="Runtime/TypeMeta*.cs" />
+    <Compile Include="../Nemesis.Essentials/Runtime/TypeMeta*.cs" />
   </ItemGroup>
 
   <Target Name="GeneratePPFiles" AfterTargets="Build" BeforeTargets="GenerateNuspec">
