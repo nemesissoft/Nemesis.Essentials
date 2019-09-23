@@ -2,11 +2,16 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using JetBrains.Annotations;
+#if NETSTANDARD2_1
+    using NotNull = System.Diagnostics.CodeAnalysis.NotNullAttribute;
+#else
+using NotNull = JetBrains.Annotations.NotNullAttribute;
+#endif
 
 namespace Nemesis.Essentials.Runtime
 {
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
+    [SuppressMessage("ReSharper", "RedundantVerbatimPrefix")]
     public static class LambdaHelper
     {
         /// <summary>
@@ -28,7 +33,7 @@ namespace Nemesis.Essentials.Runtime
         /// ]]>
         /// </code>
         /// </example>
-        [NotNull]
+        [return: @NotNull]
         public static Func<TFirst, TThird> Chain<TFirst, TSecond, TThird>(Func<TFirst, TSecond> func1, Func<TSecond, TThird> func2) =>
             x => func2(func1(x));
 
@@ -52,15 +57,15 @@ namespace Nemesis.Essentials.Runtime
         /// ]]>
         /// </code>
         /// </example>
-        [NotNull]
+        [return: @NotNull]
         public static Func<TArg1, TResult> Bind2nd<TArg1, TArg2, TResult>(this Func<TArg1, TArg2, TResult> func, TArg2 constant) =>
             x => func(x, constant);
 
-        [NotNull]
+        [return: @NotNull]
         public static Func<TArg1, TArg2, TResult> Bind3rd<TArg1, TArg2, TArg3, TResult>(this Func<TArg1, TArg2, TArg3, TResult> func, TArg3 constant) =>
             (x, y) => func(x, y, constant);
 
-        [NotNull]
+        [return: @NotNull]
         public static Action<TArg1, TArg2> Bind3rd<TArg1, TArg2, TArg3>(this Action<TArg1, TArg2, TArg3> action, TArg3 constant) =>
             (x, y) => action(x, y, constant);
         // ReSharper restore InconsistentNaming
@@ -147,7 +152,7 @@ namespace Nemesis.Essentials.Runtime
         /// ]]> 
         /// </code>
         /// </example> 
-        [NotNull]
+        [return: @NotNull]
         public static Func<TInput, TOutput> Memoize<TInput, TOutput>(this Func<TInput, TOutput> resultFunc)
         {
             //var affinity = new ThreadAffinity();
@@ -156,7 +161,7 @@ namespace Nemesis.Essentials.Runtime
             return x => map.TryGetValue(x, out var result) ? result : (map[x] = resultFunc(x));
         }
 
-        [NotNull]
+        [return: @NotNull]
         public static Func<TInput, TOutput> MemoizeThreadSafe<TInput, TOutput>(this Func<TInput, TOutput> func)
         {
             var cache = new ConcurrentDictionary<TInput, TOutput>();
@@ -170,7 +175,7 @@ namespace Nemesis.Essentials.Runtime
         /// <typeparam name="TArg1"></typeparam>
         /// <param name="func"></param>
         /// <returns></returns>
-        [NotNull]
+        [return: @NotNull]
         public static Func<TArg1, bool> Negate<TArg1>(this Func<TArg1, bool> func) => arg1 => !func(arg1);
 
         /// <summary>
@@ -180,10 +185,10 @@ namespace Nemesis.Essentials.Runtime
         /// <typeparam name="TArg2"></typeparam>
         /// <param name="func"></param>
         /// <returns></returns>
-        [NotNull]
+        [return: @NotNull]
         public static Func<TArg1, TArg2, bool> Negate<TArg1, TArg2>(this Func<TArg1, TArg2, bool> func) => (arg1, arg2) => !func(arg1, arg2);
 
-        [NotNull]
+        [return: @NotNull]
         public static Func<TArg1, TArg2, TArg3, bool> Negate<TArg1, TArg2, TArg3>(this Func<TArg1, TArg2, TArg3, bool> func) =>
             (arg1, arg2, arg3) => !func(arg1, arg2, arg3);
     }

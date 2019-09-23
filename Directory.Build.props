@@ -1,6 +1,6 @@
 ﻿<Project>
   <PropertyGroup>
-    <Version>1.0.11</Version>
+    <Version>1.0.18</Version>
     <LangVersion>latest</LangVersion>
 
     <Authors>Michał Bryłka</Authors>
@@ -9,7 +9,7 @@
     <Copyright>Copyright (c) Michał Bryłka. Icon by Good Stuff No Nonsense (http://www.iconarchive.com/artist/goodstuff-no-nonsense.html)</Copyright>
     <Description>Contains all essential utils that should be build into .NET but somehow are not.</Description>
     
-    <PackageIconUrl>http://icons.iconarchive.com/icons/goodstuff-no-nonsense/free-space/1024/alien-2-icon.png</PackageIconUrl>
+    <PackageIcon>alien-2.svg</PackageIcon>
 
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageProjectUrl>https://github.com/nemesissoft/Nemesis.Essentials</PackageProjectUrl>
@@ -28,5 +28,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19367-01" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\images\alien-2.svg" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>

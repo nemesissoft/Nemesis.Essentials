@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net472;net461;net48;netcoreapp2.2</TargetFrameworks>
+    <TargetFrameworks>net472;net461;net48;netcoreapp2.2;netcoreapp3.0</TargetFrameworks>
     <DefineConstants>$(DefineConstants);NEMESIS_BINARY_PACKAGE_TESTS</DefineConstants>
 
   </PropertyGroup>

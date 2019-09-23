@@ -62,7 +62,8 @@ namespace JetBrains.Annotations
     [AttributeUsage(
       AttributeTargets.Method | AttributeTargets.Parameter | AttributeTargets.Property |
       AttributeTargets.Delegate | AttributeTargets.Field | AttributeTargets.Event |
-      AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.GenericParameter)]
+      AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.GenericParameter |
+      AttributeTargets.ReturnValue)]
     internal sealed class NotNullAttribute : Attribute { }
 
     /// <summary>

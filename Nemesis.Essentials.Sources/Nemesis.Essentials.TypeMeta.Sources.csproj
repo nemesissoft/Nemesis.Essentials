@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.Build.NoTargets/1.0.80">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
 
     <ContentTargetFolders>contentFiles</ContentTargetFolders>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
