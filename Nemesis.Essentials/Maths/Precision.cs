@@ -150,14 +150,13 @@ namespace Nemesis.Essentials.Maths
         /// <returns>
         ///   The resulting <c>long</c> value.
         /// </returns>
-        private static long GetLongFromDouble(double value)
-        {
+        private static long GetLongFromDouble(double value) =>
 #if PORTABLE
             return DoubleToInt64Bits(value);
 #else
-            return BitConverter.DoubleToInt64Bits(value);
+            BitConverter.DoubleToInt64Bits(value);
 #endif
-        }
+
 
         /// <summary>
         ///   Returns a 'directional' long value. This is a long value which acts the same as a double,

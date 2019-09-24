@@ -53,7 +53,7 @@ namespace Nemesis.Essentials.Design
         [PureMethod, PublicAPI]
         public static string EscapeUnicodeNonPrintableCharacters(string text)
         {
-            bool ShouldEscape(char c) =>
+            static bool ShouldEscape(char c) =>
                 c >= 0xFFFC
                 ||
                 CharUnicodeInfo.GetUnicodeCategory(c) is UnicodeCategory cat

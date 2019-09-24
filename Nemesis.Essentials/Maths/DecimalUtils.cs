@@ -37,25 +37,15 @@ namespace Nemesis.Essentials.Maths
         /// Bits 24 to 30 are unused and must be zero.
         /// Bit 31 contains the sign; 0 meaning positive, and 1 meaning negative.
         /// </returns>
-        public int this[int index]
-        {
-            get
-            {
-                switch (index)
+        public int this[int index] =>
+            index switch
                 {
-                    case 0:
-                        return Low;
-                    case 1:
-                        return Mid;
-                    case 2:
-                        return High;
-                    case 3:
-                        return Flags;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(index), "Index should be in 0..3 range");
-                }
-            }
-        }
+                0 => Low,
+                1 => Mid,
+                2 => High,
+                3 => Flags,
+                _ => throw new ArgumentOutOfRangeException(nameof(index), "Index should be in 0..3 range"),
+                };
 
         public byte Scale => (byte)((Flags >> 16) & 0xFF);
         public bool IsNegative => (Flags & 0b_1000_0000_0000_0000_0000_0000_0000_0000) != 0; //not (bits[3] >> 31) == 1 for integers 

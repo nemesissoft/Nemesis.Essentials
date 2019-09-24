@@ -51,11 +51,9 @@ namespace Nemesis.Essentials.Design
             }
             try
             {
-                using (var ms = new MemoryStream())
-                {
-                    stream.CopyTo(ms, BUFFER_SIZE);
-                    return ms.ToArray();
-                }
+                using var ms = new MemoryStream();
+                stream.CopyTo(ms, BUFFER_SIZE);
+                return ms.ToArray();
             }
             finally
             {
@@ -93,19 +91,17 @@ namespace Nemesis.Essentials.Design
         /// </example>
         public static byte[] ReadAllBytes(this BinaryReader reader)
         {
-            using (var ms = new MemoryStream())
+            using var ms = new MemoryStream();
+            int count;
+            var buffer = new byte[BUFFER_SIZE];
+            do
             {
-                int count;
-                var buffer = new byte[BUFFER_SIZE];
-                do
-                {
-                    count = reader.Read(buffer, 0, BUFFER_SIZE);
-                    if (count == 0) break;
-                    ms.Write(buffer, 0, count);
-                } while (count > 0);
+                count = reader.Read(buffer, 0, BUFFER_SIZE);
+                if (count == 0) break;
+                ms.Write(buffer, 0, count);
+            } while (count > 0);
 
-                return ms.ToArray();
-            }
+            return ms.ToArray();
         }
 
         /// <summary>Asynchronously reads all available bytes from the stream. </summary>
@@ -121,19 +117,18 @@ namespace Nemesis.Essentials.Design
                 try
                 {
                     var buffer = new byte[16 * 1024];
-                    using (var ms = new MemoryStream())
+
+                    using var ms = new MemoryStream();
+                    int read;
+                    long totalRead = 0;
+                    while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
                     {
-                        int read;
-                        long totalRead = 0;
-                        while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
-                        {
-                            token.ThrowIfCancellationRequested();
-                            ms.Write(buffer, 0, read);
-                            totalRead += read;
-                            progress?.Report(totalRead);
-                        }
-                        source.SetResult(ms.ToArray());
+                        token.ThrowIfCancellationRequested();
+                        ms.Write(buffer, 0, read);
+                        totalRead += read;
+                        progress?.Report(totalRead);
                     }
+                    source.SetResult(ms.ToArray());
                 }
                 catch (Exception ex)
                 {
@@ -185,7 +180,9 @@ namespace Nemesis.Essentials.Design
             }
             try
             {
+#pragma warning disable IDE0067 // Dispose objects before losing scope
                 var sr = new StreamReader(stream);
+#pragma warning restore IDE0067 // Dispose objects before losing scope
                 string line;
                 while ((line = sr.ReadLine()) != null)
                     yield return line;
@@ -211,7 +208,9 @@ namespace Nemesis.Essentials.Design
             }
             try
             {
+#pragma warning disable IDE0067 // Dispose objects before losing scope
                 var sr = new StreamReader(stream);
+#pragma warning restore IDE0067 // Dispose objects before losing scope
                 return sr.ReadToEnd();
             }
             finally
@@ -223,7 +222,9 @@ namespace Nemesis.Essentials.Design
 
         public static void WriteAllLines(this Stream stream, IEnumerable<string> lines)
         {
+#pragma warning disable IDE0067 // Dispose objects before losing scope
             var sw = new StreamWriter(stream);
+#pragma warning restore IDE0067 // Dispose objects before losing scope
             foreach (string line in lines)
                 sw.WriteLine(line);
             sw.Flush();
@@ -231,7 +232,9 @@ namespace Nemesis.Essentials.Design
 
         public static void WriteAllText(this Stream stream, string text)
         {
+#pragma warning disable IDE0067 // Dispose objects before losing scope
             var sw = new StreamWriter(stream);
+#pragma warning restore IDE0067 // Dispose objects before losing scope
             sw.Write(text);
             sw.Flush();
         }
@@ -271,7 +274,7 @@ namespace Nemesis.Essentials.Design
 
         internal static bool TryOpenOrCreateFile2(string path, out FileStream fileStream, FileAccess access = FileAccess.ReadWrite, FileShare share = FileShare.None)
         {
-            bool IsFileLockedException(Exception exception)
+            static bool IsFileLockedException(Exception exception)
             {
                 const int ERROR_SHARING_VIOLATION = 32;
                 const int ERROR_LOCK_VIOLATION = 33;
@@ -306,8 +309,8 @@ namespace Nemesis.Essentials.Design
         /// <returns>Detected file encoding. Returns Encoding.Default if no Unicode BOM (byte order mark) is found</returns>
         public static Encoding GetFileEncoding(string fileName)
         {
-            using (var fs = File.OpenRead(fileName))
-                return GetFileEncoding(fs);
+            using var fs = File.OpenRead(fileName);
+            return GetFileEncoding(fs);
         }
 
         /// <summary>

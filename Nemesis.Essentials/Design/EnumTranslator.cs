@@ -437,7 +437,7 @@ namespace Nemesis.Essentials.Design
         /// </example>
         public static bool IsEnumValueValid(Enum value, Type enumType=null)
         {
-            enumType = enumType ?? value.GetType();
+            enumType ??= value.GetType();
 
             if (!enumType.IsEnum) throw new ArgumentException("enumType has to be runtime type's description of Enum class descendant.");
 
@@ -454,7 +454,7 @@ namespace Nemesis.Essentials.Design
         /// <example>For example see <see cref="IsEnumValueValid(Enum, Type)"/></example>
         public static bool IsEnumValueValid(Enum value, Type enumType, int maxNumberOfBitsOn)
         {
-            int GetBitCount(long x)
+            static int GetBitCount(long x)
             {
                 int num = 0;
                 while (x > 0)

@@ -70,7 +70,7 @@ namespace Nemesis.Essentials.Design
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
 
-            string GetSyntax(MemberInfo t) => t?.GetCustomAttribute<TextConverterSyntaxAttribute>(true)?.Syntax;
+            static string GetSyntax(MemberInfo t) => t?.GetCustomAttribute<TextConverterSyntaxAttribute>(true)?.Syntax;
 
             string fromType = GetSyntax(type);
 

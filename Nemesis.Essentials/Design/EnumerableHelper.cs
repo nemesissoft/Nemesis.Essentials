@@ -19,7 +19,7 @@ namespace Nemesis.Essentials.Design
     {
         #region Dictionary Extensions
 
-        [PureMethod, PublicAPI]
+        [PublicAPI]
         public static void AddToMultiDictionary<TKeyType, TCollectionType, TMultiElement>(this IDictionary<TKeyType, TCollectionType> multiDict,
             TKeyType key, TMultiElement element)
             where TCollectionType : ICollection<TMultiElement>, new()
@@ -30,7 +30,7 @@ namespace Nemesis.Essentials.Design
                 multiDict[key] = new TCollectionType { element };
         }
 
-        [PureMethod, PublicAPI]
+        [PublicAPI]
         public static void AddToMultiDictionary<TKeyType, TCollectionType, TMultiElement>(this IDictionary<TKeyType, TCollectionType> multiDict,
             TKeyType key, params TMultiElement[] elements)
             where TCollectionType : ICollection<TMultiElement>, new()
@@ -209,7 +209,7 @@ namespace Nemesis.Essentials.Design
         /// <param name="index1">The first value's index.</param>
         /// <param name="index2">The second value's index.</param>
         [ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-        [PureMethod, PublicAPI]
+        [PublicAPI]
         [CollectionAccess(CollectionAccessType.ModifyExistingContent)]
         public static void Swap<T>(IList<T> list, int index1, int index2)
         {
@@ -225,7 +225,7 @@ namespace Nemesis.Essentials.Design
         /// <param name="index1">The first value's index.</param>
         /// <param name="index2">The second value's index.</param>
         [ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-        [PureMethod, PublicAPI]
+        [PublicAPI]
         [CollectionAccess(CollectionAccessType.ModifyExistingContent)]
         public static void SwapNg(IList list, int index1, int index2)
         {
@@ -281,7 +281,7 @@ namespace Nemesis.Essentials.Design
         /// <param name="items">Enumeration that is to be enumerated</param>
         /// <param name="action">The <see cref="Action{T}" /> delegate to perform on each element of given enumeration</param>
         /// <exception cref="ArgumentNullException">action is null</exception>
-        [PureMethod, PublicAPI]
+        [PublicAPI]
         public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
         {
             if (action == null) throw new ArgumentNullException(nameof(action), @"action parameter cannot be null");
@@ -290,7 +290,7 @@ namespace Nemesis.Essentials.Design
                     action(item);
         }
 
-        [PureMethod, PublicAPI]
+        [PublicAPI]
         public static void ForEach<T>(this IEnumerable<T> items, Action<T, int> action)
         {
             if (action == null) throw new ArgumentNullException(nameof(action), @"action parameter cannot be null");
@@ -308,7 +308,7 @@ namespace Nemesis.Essentials.Design
         /// <param name="items">Enumeration that is to be enumerated</param>
         /// <param name="action">The <see cref="Action{T}" /> delegate to perform on each element of given enumeration</param>
         /// <exception cref="ArgumentNullException">action is null</exception>
-        [PureMethod, PublicAPI]
+        [PublicAPI]
         public static void ForEachNoExceptions<T>(this IEnumerable<T> items, Action<T> action)
         {
             if (action == null) throw new ArgumentNullException(nameof(action), @"action parameter cannot be null");
@@ -460,7 +460,10 @@ namespace Nemesis.Essentials.Design
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), @"count should be greater than zero");
 
+#pragma warning disable IDE0063 // Use simple 'using' statement
+            // ReSharper disable once ConvertToUsingDeclaration
             using (var enumerator = source.GetEnumerator())
+#pragma warning restore IDE0063 // Use simple 'using' statement
             {
                 var i = 0;
                 var queue = new Queue<TSource>(count);
@@ -509,7 +512,13 @@ namespace Nemesis.Essentials.Design
             }
             else
             {
+#pragma warning disable IDE0063 // Use simple 'using' statement
+                // ReSharper disable ConvertToUsingDeclaration
                 using (var enumerator = source.GetEnumerator())
+                // ReSharper restore ConvertToUsingDeclaration
+#pragma warning restore IDE0063 // Use simple 'using' statement
+
+
                 {
                     var queue = new Queue<TSource>(count);
                     while (enumerator.MoveNext())
@@ -679,7 +688,11 @@ namespace Nemesis.Essentials.Design
 
             var comparer = Comparer<T>.Default;
 
+#pragma warning disable IDE0063 // Use simple 'using' statement
+            // ReSharper disable ConvertToUsingDeclaration
             using (var iterator = sequence.GetEnumerator())
+            // ReSharper restore ConvertToUsingDeclaration
+#pragma warning restore IDE0063 // Use simple 'using' statement
             {
                 if (!iterator.MoveNext())
                     return true;
@@ -861,7 +874,11 @@ namespace Nemesis.Essentials.Design
         {
             if (skip < 0) throw new ArgumentOutOfRangeException(nameof(skip), @"skip value must be greater than zero.");
 
+#pragma warning disable IDE0063 // Use simple 'using' statement
+            // ReSharper disable ConvertToUsingDeclaration
             using (var enu = enumerable.GetEnumerator())
+            // ReSharper restore ConvertToUsingDeclaration
+#pragma warning restore IDE0063 // Use simple 'using' statement
                 while (enu.MoveNext())
                 {
                     yield return enu.Current;
@@ -1051,14 +1068,14 @@ namespace Nemesis.Essentials.Design
         /// </summary>
         /// <param name="list">list that is to be sorted</param>
         /// <param name="comparer">Object used to compare generic values</param>
-        [PureMethod, PublicAPI] public static void Sort<T>(IList<T> list, IComparer<T> comparer = null) => Sort(list, 0, list.Count, comparer ?? Comparer<T>.Default);
+        [PublicAPI] public static void Sort<T>(IList<T> list, IComparer<T> comparer = null) => Sort(list, 0, list.Count, comparer ?? Comparer<T>.Default);
 
         /// <summary>
         ///   Sorts entire list using quick-sort procedure using given comparison delegate.
         /// </summary>
         /// <param name="list">list that is to be sorted</param>
         /// <param name="comparison">Comparison delegate used to compare generic values</param>
-        [PureMethod, PublicAPI] public static void Sort<T>(IList<T> list, Comparison<T> comparison) => Sort(list, 0, list.Count, Comparer<T>.Create(comparison));
+        [PublicAPI] public static void Sort<T>(IList<T> list, Comparison<T> comparison) => Sort(list, 0, list.Count, Comparer<T>.Create(comparison));
 
         /// <summary>
         ///   Sorts list fragment using quick-sort procedure using given comparer.
@@ -1068,7 +1085,7 @@ namespace Nemesis.Essentials.Design
         /// <param name="length">sort count</param>
         /// <param name="comparer">Object used to compare generic values</param>
         /// <exception cref="ArgumentException"></exception>
-        [PureMethod, PublicAPI]
+        [PublicAPI]
         public static void Sort<T>(IList<T> list, int index, int length, IComparer<T> comparer)
         {
             if (index < 0 || index >= list.Count)

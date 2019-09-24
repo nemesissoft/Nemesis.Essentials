@@ -19,30 +19,17 @@ namespace Nemesis.Essentials.Design
     /// </remarks>
     public sealed class EnumerableComparer<T> : IComparer<IEnumerable<T>>
     {
-        #region Fields and properties
-
-        /// <summary>
-        /// Object used for comparing each element.
-        /// </summary>
-        private readonly IComparer<T> _comp;
-
-        #endregion
-
-        #region Constructors and singletons
+        private readonly IComparer<T> _comparer;
 
         /// <summary>
         /// Create a sequence comparer, using the specified item comparer for <typeparamref name="T"/>.
         /// </summary>
         /// <param name="comparer">Comparer for comparing each pair of items from the sequences. Pass null to use default comparer</param>
-        private EnumerableComparer(IComparer<T> comparer = null) => _comp = comparer ?? Comparer<T>.Default;
+        private EnumerableComparer(IComparer<T> comparer = null) => _comparer = comparer ?? Comparer<T>.Default;
 
         public static readonly EnumerableComparer<T> DefaultInstance = new EnumerableComparer<T>();
 
         public static EnumerableComparer<T> CreateInstance(IComparer<T> comparer) => new EnumerableComparer<T>(comparer);
-
-        #endregion
-
-        #region IComparer members
 
         /// <summary>
         /// Compares two sequences and returns a value indicating whether one is less than, equal to, or greater than the other.
@@ -58,14 +45,15 @@ namespace Nemesis.Essentials.Design
         {
             if (x is null)
                 return y is null ? 0 : -1;
-            else
-            {
-                if (y is null)
-                    return 1;
-            }
+            else if (y is null)
+                return 1;
 
+#pragma warning disable IDE0063 // Use simple 'using' statement
+// ReSharper disable ConvertToUsingDeclaration
             using (var leftIt = x.GetEnumerator())
             using (var rightIt = y.GetEnumerator())
+// ReSharper restore ConvertToUsingDeclaration
+#pragma warning restore IDE0063 // Use simple 'using' statement
             {
                 while (true)
                 {
@@ -77,13 +65,11 @@ namespace Nemesis.Essentials.Design
                     if (!left) return -1;
                     if (!right) return 1;
 
-                    int itemResult = _comp.Compare(leftIt.Current, rightIt.Current);
+                    int itemResult = _comparer.Compare(leftIt.Current, rightIt.Current);
                     if (itemResult != 0) return itemResult;
                 }
             }
         }
-
-        #endregion
     }
 
     public sealed class EnumerableEqualityComparer<TElement> : IEqualityComparer<IEnumerable<TElement>>
@@ -199,7 +185,7 @@ namespace Nemesis.Essentials.Design
         [PureMethod, PublicAPI]
         public static bool ArrayEquals<T>(this T[] left, T[] right, IEqualityComparer<T> equalityComparer = null)
         {
-            equalityComparer = equalityComparer ?? EqualityComparer<T>.Default;
+            equalityComparer ??= EqualityComparer<T>.Default;
 
             if (left is null)
                 return right is null;
@@ -211,7 +197,7 @@ namespace Nemesis.Essentials.Design
         [PureMethod, PublicAPI]
         public static bool CollectionEquals<T>(this ICollection<T> left, ICollection<T> right, IEqualityComparer<T> equalityComparer = null)
         {
-            equalityComparer = equalityComparer ?? EqualityComparer<T>.Default;
+            equalityComparer ??= EqualityComparer<T>.Default;
 
             if (left is null)
                 return right is null;

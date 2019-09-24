@@ -77,7 +77,11 @@ namespace Nemesis.Essentials.Design
 
         public IEnumerator<Entry> GetEnumerator()
         {
-            using (IEnumerator<T> enumerator = _enumerable.GetEnumerator())
+#pragma warning disable IDE0063 // Use simple 'using' statement
+            // ReSharper disable ConvertToUsingDeclaration
+            using (var enumerator = _enumerable.GetEnumerator())
+            // ReSharper restore ConvertToUsingDeclaration
+#pragma warning restore IDE0063 // Use simple 'using' statement
             {
                 if (!enumerator.MoveNext())
                     yield break;

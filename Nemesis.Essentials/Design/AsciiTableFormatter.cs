@@ -233,11 +233,9 @@ namespace Nemesis.Essentials.Design
         [Pure, PublicAPI]
         public string ToAsciiCharactersTable<T>(IEnumerable<T> elements)
         {
-            using (var sw = new StringWriter())
-            {
-                ToAsciiCharactersTable(elements, sw);
-                return sw.ToString();
-            }
+            using var sw = new StringWriter();
+            ToAsciiCharactersTable(elements, sw);
+            return sw.ToString();
         }
 
         [PublicAPI]
@@ -284,29 +282,18 @@ namespace Nemesis.Essentials.Design
         private static string GetTextFromInstanceMember<T>(MemberInfo member, T elem)
         {
             object value;
-
             try
             {
-                switch (member)
+                value = member switch
                 {
-                    case null:
-                        value = null;
-                        break;
-                    case PropertyInfo pi:
-                        value = pi.GetValue(elem);
-                        break;
-                    case FieldInfo fi:
-                        value = fi.GetValue(elem);
-                        break;
-                    case MethodBase mb:
-                        value = mb.Invoke(elem,
+                    null => null,
+                    PropertyInfo pi => pi.GetValue(elem),
+                    FieldInfo fi => fi.GetValue(elem),
+                    MethodBase mb => mb.Invoke(elem,
                             mb.GetParameters().Select(param => Activator.CreateInstance(param.ParameterType))
-                                .ToArray());
-                        break;
-                    default:
-                        value = null;
-                        break;
-                }
+                                .ToArray()),
+                    _ => null,
+                };
             }
             catch (Exception e)
             {
@@ -319,11 +306,9 @@ namespace Nemesis.Essentials.Design
         [Pure, PublicAPI]
         public string ToAsciiCharactersTable(string[,] content)
         {
-            using (var sw = new StringWriter())
-            {
-                ToAsciiCharactersTable(content, sw);
-                return sw.ToString();
-            }
+            using var sw = new StringWriter();
+            ToAsciiCharactersTable(content, sw);
+            return sw.ToString();
         }
 
         [PublicAPI]

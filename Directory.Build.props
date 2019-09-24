@@ -9,7 +9,7 @@
     <Copyright>Copyright (c) Michał Bryłka. Icon by Good Stuff No Nonsense (http://www.iconarchive.com/artist/goodstuff-no-nonsense.html)</Copyright>
     <Description>Contains all essential utils that should be build into .NET but somehow are not.</Description>
     
-    <PackageIcon>alien-2.svg</PackageIcon>
+    <PackageIcon>alien-2.png</PackageIcon>
 
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageProjectUrl>https://github.com/nemesissoft/Nemesis.Essentials</PackageProjectUrl>
@@ -31,6 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\images\alien-2.svg" Pack="true" PackagePath="\"/>
+    <None Include="..\images\alien-2.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>

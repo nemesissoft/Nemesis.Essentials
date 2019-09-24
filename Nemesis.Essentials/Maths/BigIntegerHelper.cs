@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Numerics;
@@ -8,6 +9,7 @@ namespace Nemesis.Essentials.Maths
     //TODO: generate Next and Next min max if not existing in Random extensions
     //TODO: check SecureRandom, -Primality tests from Nemesis, Generate not only positive numbers
     //http://stackoverflow.com/questions/17357760/how-can-i-generate-a-random-biginteger-within-a-certain-range
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public static class BigIntegerHelper
     {
         #region Fields and properties
@@ -42,7 +44,7 @@ namespace Nemesis.Essentials.Maths
         /// </summary>
         public static BigInteger GenerateCoPrime(this BigInteger bi, int bits, Random rand = null)
         {
-            rand = rand ?? new Random();
+            rand ??= new Random();
 
             while (true)
             {
@@ -61,7 +63,7 @@ namespace Nemesis.Essentials.Maths
         /// <returns></returns>
         public static BigInteger GeneratePseudoPrime(int bits, int confidence = 1024, Random rand = null)
         {
-            rand = rand ?? new Random();
+            rand ??= new Random();
 
             while (true)
             {
@@ -83,7 +85,7 @@ namespace Nemesis.Essentials.Maths
         [Pure]
         public static bool IsProbablePrime(this BigInteger bi, int confidence = 1024, Random rand = null)
         {
-            rand = rand ?? new Random();
+            rand ??= new Random();
 
             if (bi == 0 || bi.IsEven) return false;
 
@@ -128,7 +130,7 @@ namespace Nemesis.Essentials.Maths
         /// ]]></remarks>
         public static bool RabinMillerTest(this BigInteger n, int confidence = 1024, Random rand = null)
         {
-            rand = rand ?? new Random();
+            rand ??= new Random();
 
             if (n < 0) n = -n;
             if (n == 2 || n == 3) return true;
@@ -173,7 +175,7 @@ namespace Nemesis.Essentials.Maths
         /// <returns>A random number of the specified length.</returns>
         public static BigInteger GenerateRandom(int bits, Random random = null)
         {
-            random = random ?? new Random();
+            random ??= new Random();
 
             uint numBytes = (uint)bits >> 3;
             byte numBits = (byte)(bits & 7);
@@ -229,9 +231,9 @@ namespace Nemesis.Essentials.Maths
             {
                 if (step > 1)
                 {
-                    BigInteger pval = (p[0] - (p[1] * q[0])) % modulus;
+                    BigInteger pValue = (p[0] - p[1] * q[0]) % modulus;
                     p[0] = p[1];
-                    p[1] = pval;
+                    p[1] = pValue;
                 }
                 BigInteger quotient = BigInteger.DivRem(a, b, out var remainder);
 
