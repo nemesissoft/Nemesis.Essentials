@@ -8,7 +8,6 @@
     
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSourceRevisionInInformationalVersion>true</IncludeSourceRevisionInInformationalVersion>
-    <LangVersion>8</LangVersion>
     
   </PropertyGroup>
 

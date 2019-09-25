@@ -3,7 +3,7 @@
     <Version>1.0.0</Version><!--This will get replaced by AppVeyor-->
     <LangVersion>latest</LangVersion>
 
-    <Authors>Michał Bryłka</Authors>
+    <Authors>Michał Bryłka, Leszek Kowalski</Authors>
     <PackageLicenseExpression>MIT OR Apache-2.0</PackageLicenseExpression>
     <PackageTags>Essential Essentials AsciiTableFormatter Comparers TextConverter TaskUtils ExpressionUtils TypeMeta methodof fieldof propertyof</PackageTags>
     <Copyright>Copyright (c) Michał Bryłka. Icon by Good Stuff No Nonsense (http://www.iconarchive.com/artist/goodstuff-no-nonsense.html)</Copyright>
@@ -15,7 +15,7 @@
     <PackageProjectUrl>https://github.com/nemesissoft/Nemesis.Essentials</PackageProjectUrl>
 
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <LangVersion>latest</LangVersion>
+    
     <NoWarn>NU5105</NoWarn>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

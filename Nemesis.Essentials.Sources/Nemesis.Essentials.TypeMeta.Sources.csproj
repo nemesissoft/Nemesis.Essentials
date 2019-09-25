@@ -2,6 +2,10 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
 
+    <PackageTags>Essential Essentials TypeMeta methodof fieldof propertyof lightweight</PackageTags>
+    <Description>Lightweight source only package with TypeMeta class - set of utils that aids in reflection tasks. Consume via &lt;PackageReference Include=&quot;Nemesis.Essentials.TypeMeta.Sources&quot; Version=&quot;VERSION&quot; PrivateAssets=&quot;All&quot; /&gt;</Description>
+    <PackageProjectUrl>https://github.com/nemesissoft/Nemesis.Essentials/tree/master/Nemesis.Essentials.Sources</PackageProjectUrl>
+
     <ContentTargetFolders>contentFiles</ContentTargetFolders>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -13,7 +17,6 @@
     <NoWarn>$(NoWarn),CS8021</NoWarn>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <NoPackageAnalysis>true</NoPackageAnalysis>
-    <LangVersion>8</LangVersion>
   </PropertyGroup>
 
   <!--<PropertyGroup>
