@@ -10,8 +10,7 @@ init:
     else
     {
         Update-AppveyorBuild -Version "0.0.1+dev-$($env:APPVEYOR_REPO_COMMIT.Substring(0, 7))"
-    }
-    Write-Host $env:APPVEYOR_REPO_COMMIT_MESSAGE
+    }    
 dotnet_csproj:
   patch: true
   file: '**\*.csproj;**\*.props'
@@ -25,8 +24,13 @@ before_build:
 build:
   project: Nemesis.Essentials.sln
   verbosity: normal
+after_build:
+- ps: >-
+    .\UpdatePackage.ps1 -basePath "$env:APPVEYOR_BUILD_FOLDER" -releaseNotes "$env:APPVEYOR_REPO_COMMIT_MESSAGE"
 test: off
 artifacts:
+- path: '**\*.nuspec'
+  name: NuGet Specification
 - path: '**\*.nupkg'
   name: NuGet Packages
 - path: '**\*.snupkg'

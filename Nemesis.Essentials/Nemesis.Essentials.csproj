@@ -8,6 +8,7 @@
     
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSourceRevisionInInformationalVersion>true</IncludeSourceRevisionInInformationalVersion>
+    <PackageReleaseNotes>Release Notes<!--This will be changed by AppVeyor--></PackageReleaseNotes>
     
   </PropertyGroup>
 
@@ -15,7 +16,6 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   
-
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>$(MSBuildProjectName).Tests, PublicKey=00240000048000001a010000060200000024000052534131300800000100010081337054a0b98694f48be067547628b50d085065528724758af5ff088adfab31c2c64a7ec158f8f50f00705f9043ab6e402795f70ac34cc011d660e0bc7a6b8b5eeb83f6f3c8b9bfbf8d9c60278fd9424370df2595c695295307659a0d19c285e81c1c2178f43fb189a55415e0f807426973f9f278e498e17b4fa22db5234ebf95f1999f819aaf8a0c799c0aff43e9763c71cd4ad6a886bf23363bdc413ad6f0b135a0cf8abebe2c41fe56d2e04bb944c887345223503080211f3e8f47a7bc3405dcd708e4a036b8870165466bd1c9e86fce5f9d2c4c1847b4328d1fa4d40733c75e7d450496146cf29504bf6a8f67295125e81a738ef258a2856b858e3df4ccd24c0380fcbc</_Parameter1>
