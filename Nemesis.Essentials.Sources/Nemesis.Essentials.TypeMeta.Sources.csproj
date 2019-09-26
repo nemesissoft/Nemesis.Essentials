@@ -2,14 +2,17 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
 
+    <!--Packaging-->
+    <PackageReleaseNotes>RELEASE_NOTES_PLACEHOLDER<!--starts with "RELEASE_NOTES_PLACEHOLDER" == this will be patched by AppVeyor--></PackageReleaseNotes>
     <PackageTags>Essential Essentials TypeMeta methodof fieldof propertyof lightweight</PackageTags>
-    <Description>Lightweight source only package with TypeMeta class - set of utils that aids in reflection tasks. Consume via &lt;PackageReference Include=&quot;Nemesis.Essentials.TypeMeta.Sources&quot; Version=&quot;VERSION&quot; PrivateAssets=&quot;All&quot; /&gt;</Description>
+    <Description>Lightweight source only package with TypeMeta class - set of utils that aids in reflection tasks. Consume via &lt;PackageReference Include="Nemesis.Essentials.TypeMeta.Sources" Version="VERSION" PrivateAssets="All" /&gt;</Description>
     <PackageProjectUrl>https://github.com/nemesissoft/Nemesis.Essentials/tree/master/Nemesis.Essentials.Sources</PackageProjectUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
+    
     <ContentTargetFolders>contentFiles</ContentTargetFolders>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>    
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <IsPackable>true</IsPackable>
@@ -17,6 +20,7 @@
     <NoWarn>$(NoWarn),CS8021</NoWarn>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <NoPackageAnalysis>true</NoPackageAnalysis>
+        
   </PropertyGroup>
 
   <!--<PropertyGroup>

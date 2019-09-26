@@ -10,8 +10,7 @@ init:
     else
     {
         Update-AppveyorBuild -Version "0.0.1+dev-$($env:APPVEYOR_REPO_COMMIT.Substring(0, 7))"
-    }
-    Write-Host $env:APPVEYOR_REPO_COMMIT_MESSAGE
+    }    
 dotnet_csproj:
   patch: true
   file: '**\*.csproj;**\*.props'
@@ -21,11 +20,27 @@ dotnet_csproj:
   file_version: '{version}'
   informational_version: '{version}'
 before_build:
-- cmd: nuget restore Nemesis.Essentials.sln
+- ps: >-
+    nuget restore Nemesis.Essentials.sln
+
+    if ($env:APPVEYOR_REPO_TAG_NAME)
+    {
+        $releaseNotes = .\GetGithubReleaseNotes.ps1 -tagName "$env:APPVEYOR_REPO_TAG_NAME" -repoOwner "nemesissoft" -repoName "Nemesis.Essentials"
+
+        if($releaseNotes)
+        {
+            $shortDesc = $releaseNotes.Item1
+            $longDesc = $releaseNotes.Item2
+
+            Update-AppveyorBuild -Message "$shortDesc"
+
+            .\UpdateReleaseNotes.ps1 -basePath "$env:APPVEYOR_BUILD_FOLDER" -releaseNotes "$longDesc"
+        }        
+    }       
+
 build:
   project: Nemesis.Essentials.sln
   verbosity: normal
-test: off
 artifacts:
 - path: '**\*.nupkg'
   name: NuGet Packages
