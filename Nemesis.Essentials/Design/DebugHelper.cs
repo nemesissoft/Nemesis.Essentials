@@ -7,24 +7,21 @@ namespace Nemesis.Essentials.Design
 {
     public static class DebugHelper
     {
-        #region Info
-
-        /// <summary>
-        /// Returns caller method names up to given level
-        /// </summary>
-        /// <param name="numbersOfLevelUp">Determines how many levels up should search be conducted</param>
-        /// <returns>Textual representation of caller methods</returns>
-        [NotNull]
-        public static string GetCallerMethodStack(short numbersOfLevelUp = short.MaxValue)
+        [NotNull, DebuggerHidden, DebuggerStepThrough]
+        public static string GetCallerMethodStack(ushort numbersOfLevelUp = ushort.MaxValue,
+            ushort additionalMethodSkip = 0, bool prependWithTypeName = false)
         {
-            var st = new StackTrace(2);
-            if (st.FrameCount == 0) return "";
+            return
+                new StackTrace(1 + additionalMethodSkip, false).GetFrames() is { } frames && frames.Length > 0
+                    ? string.Join(" ← ", frames
+                        .Take(Math.Min(numbersOfLevelUp, frames.Length))
+                        .Select(frame => $"{(prependWithTypeName ? $"{frame.GetMethod().ReflectedType?.Name}." : "")}{frame.GetMethod().Name}"))
+                    : "<NULL>";
 
-            var methods = st.GetFrames()?.Select(frame => frame.GetMethod().Name) ?? Enumerable.Empty<string>();
 
-            return string.Join(", ", methods.Take(Math.Min(numbersOfLevelUp, st.FrameCount)));
+            //var methods = st.GetFrames()?.Select(frame => frame.GetMethod().Name) ?? Enumerable.Empty<string>();
+
+            //return string.Join("<- ", );
         }
-
-        #endregion
     }
 }

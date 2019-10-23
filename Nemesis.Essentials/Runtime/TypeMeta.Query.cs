@@ -26,6 +26,7 @@ namespace $rootnamespace$.Runtime
         public static bool IsNullable(this Type type) =>
             type.IsValueType && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
 
+        //TODO support nullables - CanBeNull + Conditional null post condition attribute 
         public static bool IsNullable(this Type type, out Type underlyingType)
         {
             if (type.IsValueType &&
