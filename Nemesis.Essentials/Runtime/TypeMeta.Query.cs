@@ -23,14 +23,32 @@ namespace $rootnamespace$.Runtime
         /// <summary>
         /// Checks whether the given <paramref name="type"/> cref="type"/> is <see cref="Nullable{T}"/>.
         /// </summary>
-        public static bool IsNullable(this Type type) => type.IsValueType && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+        public static bool IsNullable(this Type type) =>
+            type.IsValueType && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+
+        public static bool IsNullable(this Type type, out Type underlyingType)
+        {
+            if (type.IsValueType &&
+                type.IsGenericType &&
+                type.GetGenericTypeDefinition() == typeof(Nullable<>)
+            )
+            {
+                underlyingType = Nullable.GetUnderlyingType(type);
+                return true;
+            }
+            else
+            {
+                underlyingType = null;
+                return false;
+            }
+        }
 
         /// <summary>
         /// Gets the underlying <see cref="ValueType"/> from type of <see cref="Nullable{T}"/>.
         /// </summary>
         public static Type GetNullableUnderlyingType(this Type type)
         {
-            if(!type.IsNullable()) throw new ArgumentException("Type should be nullable");
+            if (!type.IsNullable()) throw new ArgumentException("Type should be nullable");
             return type.GetGenericArguments().Single();
         }
 
