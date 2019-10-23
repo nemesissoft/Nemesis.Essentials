@@ -7,11 +7,13 @@
 [![GitHub stars](https://img.shields.io/github/stars/nemesissoft/Nemesis.Essentials?style=flat-square)](https://github.com/nemesissoft/Nemesis.Essentials/stargazers)
 ![Activity](https://img.shields.io/github/commit-activity/y/nemesissoft/Nemesis.Essentials)
 
+Essentials   
 [
  ![Version - Nemesis.Essentials](https://img.shields.io/nuget/v/Nemesis.Essentials.svg?style=flat-square)
  ![Downloads - Nemesis.Essentials](https://img.shields.io/nuget/dt/Nemesis.Essentials.svg?style=flat-square)
 ](https://www.nuget.org/packages/Nemesis.Essentials/)
 
+Essentials.Sources   
 [
  ![Version - Nemesis.Essentials.TypeMeta.Sources](https://img.shields.io/nuget/v/Nemesis.Essentials.TypeMeta.Sources.svg?style=flat-square)
  ![Downloads - Nemesis.Essentials.TypeMeta.Sources](https://img.shields.io/nuget/dt/Nemesis.Essentials.TypeMeta.Sources.svg?style=flat-square)

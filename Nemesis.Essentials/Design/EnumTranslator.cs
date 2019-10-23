@@ -6,6 +6,8 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
+#nullable enable
+
 namespace Nemesis.Essentials.Design
 {
     /// <summary> Provides a static utility object of methods and properties to interact with enumerated types.</summary>
@@ -260,8 +262,7 @@ namespace Nemesis.Essentials.Design
         public static string ToDescription<TEnum>(this TEnum @enum) where TEnum : Enum
         {
             var enumType = typeof(TEnum);
-            //CheckEnumParameter<TEnum>();
-
+            
             var map = (IDictionary<TEnum, string>)_enumMaps.GetOrAdd(enumType, t => ToMappingDictionary<TEnum>());
             
             if (IsFlagEnum(enumType))
@@ -285,8 +286,7 @@ namespace Nemesis.Essentials.Design
         public static TEnum FromDescription<TEnum>(this string description) where TEnum : Enum
         {
             var enumType = typeof(TEnum);
-            //CheckEnumParameter<TEnum>();
-
+            
             var map = (IDictionary<string, TEnum>)_enumParsers.GetOrAdd(enumType, t => ToParsingDictionary<TEnum>());
 
             if (IsFlagEnum(enumType))
@@ -324,17 +324,11 @@ namespace Nemesis.Essentials.Design
 
         public static string ToEnumName<TEnum>(this TEnum @enum) where TEnum : Enum => @enum.ToString("G");
 
-        public static TEnum FromEnumName<TEnum>(this string value) where TEnum : Enum
-        {
-            if (string.IsNullOrEmpty(value)) throw new ArgumentException(@"string passed to be parsed can't be null nor empty.", nameof(value));
-            //CheckEnumParameter<TEnum>();
-            return (TEnum)Enum.Parse(typeof(TEnum), value, true);
-        }
+        public static TEnum FromEnumName<TEnum>(this string value) where TEnum : Enum =>
+            string.IsNullOrEmpty(value)
+                ? throw new ArgumentException(@"string passed to be parsed can't be null nor empty.", nameof(value))
+                : (TEnum) Enum.Parse(typeof(TEnum), value, true);
 
-        /*private static void CheckEnumParameter<TEnum>() where TEnum : Enum
-        {
-            if (!typeof(TEnum).Is Enum) throw new ArgumentException($@"{typeof(TEnum).FullName} has to be valid Enum type.", typeof(TEnum).FullName);
-        }*/
         public static IList<TEnum> ToList<TEnum>() where TEnum : Enum => Enum.GetValues(typeof(TEnum)).Cast<TEnum>().ToList(); //if (!typeof(TEnum).IsEnum) throw new ArgumentException("T has to be descendant of Enum class.");
 
         public static IDictionary<TEnum, string> ToMappingDictionary<TEnum>()
@@ -371,36 +365,27 @@ namespace Nemesis.Essentials.Design
         /// </example>
         public static IDictionary<TEnum, TResult> ToMappingDictionary<TEnum, TResult, TAttribute>(Func<TAttribute, TResult> descriptionFunc)
             where TEnum : Enum
-            where TAttribute : Attribute
-        {
-            Type enumType = typeof(TEnum);
-            //if (!enumType.IsEnum) throw new ArgumentException("TEnum has to be descendant of Enum class.");
-
-            return enumType.GetFields(BindingFlags.Public | BindingFlags.Static).ToDictionary(
-                f => (TEnum)f.GetValue(null),
-                f => descriptionFunc(f.GetCustomAttribute<TAttribute>())
+            where TAttribute : Attribute 
+            =>
+                typeof(TEnum).GetFields(BindingFlags.Public | BindingFlags.Static).ToDictionary(
+                    f => (TEnum)f.GetValue(null),
+                    f => descriptionFunc(f.GetCustomAttribute<TAttribute>())
                 );
-        }
 
         public static IDictionary<string, TEnum> ToParsingDictionary<TEnum>(bool caseSensitiveKey = true) where TEnum : Enum
             => ToParsingDictionary<TEnum, string, DescriptionAttribute>(da => da.Description,
                 caseSensitiveKey ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase
                 );
 
-        public static IDictionary<TResult, TEnum> ToParsingDictionary<TEnum, TResult, TAttribute>(Func<TAttribute, TResult> descriptionFunc, IEqualityComparer<TResult> comparer = null)
+        public static IDictionary<TResult, TEnum> ToParsingDictionary<TEnum, TResult, TAttribute>(Func<TAttribute, TResult> descriptionFunc, IEqualityComparer<TResult>? comparer = null)
               where TEnum : Enum
-              where TAttribute : Attribute
-        {
-            Type enumType = typeof(TEnum);
-            //if (!enumType.IsEnum) throw new ArgumentException("TEnum has to be descendant of Enum class.");
-
-
-            return enumType.GetFields(BindingFlags.Public | BindingFlags.Static).ToDictionary(
+              where TAttribute : Attribute 
+            =>
+            typeof(TEnum).GetFields(BindingFlags.Public | BindingFlags.Static).ToDictionary(
                 f => descriptionFunc(f.GetCustomAttribute<TAttribute>()),
                 f => (TEnum)f.GetValue(null),
                 comparer ?? EqualityComparer<TResult>.Default
             );
-        }
 
         #endregion
 
@@ -435,14 +420,10 @@ namespace Nemesis.Essentials.Design
         /// ]]>
         /// </code>
         /// </example>
-        public static bool IsEnumValueValid(Enum value, Type enumType=null)
-        {
-            enumType ??= value.GetType();
-
-            if (!enumType.IsEnum) throw new ArgumentException("enumType has to be runtime type's description of Enum class descendant.");
-
-            return value.GetType() == enumType && Array.IndexOf(Enum.GetValues(enumType), value) > -1;
-        }
+        public static bool IsEnumValueValid<TEnum>(TEnum value, Type? enumType=null) where TEnum : Enum =>
+            enumType == null
+                ? Enum.IsDefined(value.GetType(), value)
+                : value.GetType() == enumType && Enum.IsDefined(enumType, value);
 
         /// <summary>
         /// Checks whether given enum value is valid in terms of being of given enum type and it's integer value is explicitly set in enum declaration
@@ -451,8 +432,8 @@ namespace Nemesis.Essentials.Design
         /// <param name="value">Enum value</param>
         /// <param name="maxNumberOfBitsOn">Maximal number of set bits in enum value</param>
         /// <returns>true if given enum value is valid, false otherwise</returns>
-        /// <example>For example see <see cref="IsEnumValueValid(Enum, Type)"/></example>
-        public static bool IsEnumValueValid(Enum value, Type enumType, int maxNumberOfBitsOn)
+        /// <example>For example see <see cref="IsEnumValueValid{TEnum}(TEnum,System.Type)"/></example>
+        public static bool IsEnumValueValid<TEnum>(TEnum value, Type enumType, int maxNumberOfBitsOn) where TEnum : Enum
         {
             static int GetBitCount(long x)
             {

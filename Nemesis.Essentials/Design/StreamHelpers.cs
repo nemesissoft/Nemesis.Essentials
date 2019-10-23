@@ -1,20 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
+#nullable enable
 
 namespace Nemesis.Essentials.Design
 {
+    [UsedImplicitly]
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public static class StreamHelpers
     {
         internal const int BUFFER_SIZE = 4096;
+        private static readonly Encoding DefaultEncoding = Encoding.UTF8;
 
         #region Copy / Read / Write
-        
+
         /// <summary>
         /// Reads all bytes that are left to the end of given stream and advances stream position to the end
         /// </summary>
@@ -109,7 +115,7 @@ namespace Nemesis.Essentials.Design
         /// <param name="token">The cancellation token. </param>
         /// <param name="progress">The progress. </param>
         /// <returns>The read byte array. </returns>
-        public static Task<byte[]> ReadToEndAsync(this Stream stream, CancellationToken token = default, IProgress<long> progress = null)
+        public static Task<byte[]> ReadToEndAsync(this Stream stream, CancellationToken token = default, IProgress<long>? progress = null)
         {
             var source = new TaskCompletionSource<byte[]>();
             Task.Factory.StartNew(() =>
@@ -170,7 +176,7 @@ namespace Nemesis.Essentials.Design
         /// ]]>
         /// </code>
         /// </example>
-        public static IEnumerable<string> ReadAllLines(this Stream stream)
+        public static IEnumerable<string> ReadAllLines(this Stream stream, Encoding? encoding = null)
         {
             long? originalPosition = null;
             if (stream.CanSeek)
@@ -180,9 +186,7 @@ namespace Nemesis.Essentials.Design
             }
             try
             {
-#pragma warning disable IDE0067 // Dispose objects before losing scope
-                var sr = new StreamReader(stream);
-#pragma warning restore IDE0067 // Dispose objects before losing scope
+                using var sr = new StreamReader(stream, encoding ?? DefaultEncoding, true, -1, true);
                 string line;
                 while ((line = sr.ReadLine()) != null)
                     yield return line;
@@ -198,7 +202,7 @@ namespace Nemesis.Essentials.Design
         /// Reads a complete stream's textual content from current position to end
         /// </summary>            
         /// <returns>The textual contents of the stream</returns>
-        public static string ReadAllText(this Stream stream)
+        public static string ReadAllText(this Stream stream, Encoding? encoding = null)
         {
             long? originalPosition = null;
             if (stream.CanSeek)
@@ -208,9 +212,7 @@ namespace Nemesis.Essentials.Design
             }
             try
             {
-#pragma warning disable IDE0067 // Dispose objects before losing scope
-                var sr = new StreamReader(stream);
-#pragma warning restore IDE0067 // Dispose objects before losing scope
+                using var sr = new StreamReader(stream, encoding ?? DefaultEncoding, true, -1, true);
                 return sr.ReadToEnd();
             }
             finally
@@ -220,21 +222,18 @@ namespace Nemesis.Essentials.Design
             }
         }
 
-        public static void WriteAllLines(this Stream stream, IEnumerable<string> lines)
+        public static void WriteAllLines(this Stream stream, IEnumerable<string> lines, Encoding? encoding = null)
         {
-#pragma warning disable IDE0067 // Dispose objects before losing scope
-            var sw = new StreamWriter(stream);
-#pragma warning restore IDE0067 // Dispose objects before losing scope
-            foreach (string line in lines)
+            using var sw = new StreamWriter(stream, encoding ?? DefaultEncoding, -1, true);
+
+            foreach (var line in lines)
                 sw.WriteLine(line);
             sw.Flush();
         }
 
-        public static void WriteAllText(this Stream stream, string text)
+        public static void WriteAllText(this Stream stream, string text, Encoding? encoding = null)
         {
-#pragma warning disable IDE0067 // Dispose objects before losing scope
-            var sw = new StreamWriter(stream);
-#pragma warning restore IDE0067 // Dispose objects before losing scope
+            using var sw = new StreamWriter(stream, encoding ?? DefaultEncoding, -1, true);
             sw.Write(text);
             sw.Flush();
         }
@@ -243,7 +242,7 @@ namespace Nemesis.Essentials.Design
 
         #region Check file availability
 
-        public static bool TryOpenOrCreateFile(string path, out FileStream fileStream, FileAccess access = FileAccess.ReadWrite, FileShare share = FileShare.None)
+        public static bool TryOpenOrCreateFile(string path, out FileStream? fileStream, FileAccess access = FileAccess.ReadWrite, FileShare share = FileShare.None)
         {
             try
             {
@@ -261,18 +260,18 @@ namespace Nemesis.Essentials.Design
             }
         }
 
-        public static FileStream WaitAndOpenFile(string path, TimeSpan timeout = default, FileAccess access = FileAccess.ReadWrite, FileShare share = FileShare.None)
+        public static FileStream? WaitAndOpenFile(string path, TimeSpan timeout = default, FileAccess access = FileAccess.ReadWrite, FileShare share = FileShare.None)
         {
             //if (timeout == default(TimeSpan)) timeout = TimeSpan.Zero;//for clarity only 
 
             var dt = DateTime.UtcNow;
-            FileStream fs;
+            FileStream? fs;
             while (!TryOpenOrCreateFile(path, out fs, access, share) && DateTime.UtcNow - dt < timeout)
                 Thread.Sleep(250); // who knows better way than spin waiting and wants a free cookie? ;)
             return fs;
         }
 
-        internal static bool TryOpenOrCreateFile2(string path, out FileStream fileStream, FileAccess access = FileAccess.ReadWrite, FileShare share = FileShare.None)
+        internal static bool TryOpenOrCreateFile2(string path, out FileStream? fileStream, FileAccess access = FileAccess.ReadWrite, FileShare share = FileShare.None)
         {
             static bool IsFileLockedException(Exception exception)
             {
@@ -289,7 +288,7 @@ namespace Nemesis.Essentials.Design
             }
             catch (Exception ex) when (ex is FileNotFoundException || ex is IOException || ex is UnauthorizedAccessException)
             {
-                fileStream = null;
+                fileStream = default;
                 if (IsFileLockedException(ex))
                 {
                     // do something, eg File.Copy or present the user with a MsgBox - I do not recommend Killing the process that is locking the file

@@ -1,6 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
-
+#nullable enable
 namespace Nemesis.Essentials.Design
 {
     /// <summary>

@@ -5,6 +5,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using JetBrains.Annotations;
 
+#nullable enable
+
 namespace Nemesis.Essentials.Maths
 {
     [StructLayout(LayoutKind.Explicit)]
@@ -39,13 +41,13 @@ namespace Nemesis.Essentials.Maths
         /// </returns>
         public int this[int index] =>
             index switch
-                {
+            {
                 0 => Low,
                 1 => Mid,
                 2 => High,
                 3 => Flags,
                 _ => throw new ArgumentOutOfRangeException(nameof(index), "Index should be in 0..3 range"),
-                };
+            };
 
         public byte Scale => (byte)((Flags >> 16) & 0xFF);
         public bool IsNegative => (Flags & 0b_1000_0000_0000_0000_0000_0000_0000_0000) != 0; //not (bits[3] >> 31) == 1 for integers 
@@ -75,9 +77,8 @@ namespace Nemesis.Essentials.Maths
         /// </summary>
         /// <param name="format">"L", "LATEX", "M", "MATH", "MATHML", "R", "RAW", "T", "TEXT"</param>
         /// <param name="formatProvider"></param>
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string? format, IFormatProvider formatProvider)
         {
-            //TODO add hex format 
             switch (format?.ToUpperInvariant() ?? "T")
             {
                 case "L":
@@ -185,7 +186,7 @@ namespace Nemesis.Essentials.Maths
                 for (int i = 0; i < maxDigits; i++)
                 {
                     var nv = fraction * 16;
-                    
+
                     sb.Append(_hexDigits[(int)Math.Floor(nv)]);
                     fraction = nv % 1;
                 }
@@ -203,11 +204,11 @@ namespace Nemesis.Essentials.Maths
 
         public static readonly DecimalFormatter InvariantInstance = new DecimalFormatter(CultureInfo.InvariantCulture);
 
-        public object GetFormat(Type service) =>
+        public object? GetFormat(Type service) =>
             typeof(ICustomFormatter).IsAssignableFrom(service) || typeof(IFormatProvider).IsAssignableFrom(service)
             ? this : null;
 
-        public string Format(string format, object arg, IFormatProvider provider)
+        public string Format(string? format, object arg, IFormatProvider provider)
         {
             if (arg is decimal number)
                 return ((DecimalMeta)number).ToString(format, _underlyingProvider);
@@ -220,9 +221,6 @@ namespace Nemesis.Essentials.Maths
 
     public static class DecimalFormatterHelper
     {
-        public static string ToString<TFormatProvider>(this decimal value, TFormatProvider provider) where TFormatProvider : IFormatProvider
-            => ToString(value, null, provider);
-
         ///<example>
         /// <![CDATA[
         /// string DecimalInvariantFormat(FormattableString formattable) => formattable.ToString(DecimalFormatter.InvariantInstance);
@@ -241,7 +239,7 @@ namespace Nemesis.Essentials.Maths
         /// var thisWontWork = expectedPrice.ToString("L", DecimalFormatter.InvariantInstance); //shame
         /// ]]>
         ///</example>>
-        public static string ToString<TFormatProvider>(this decimal value, string format, TFormatProvider provider) where TFormatProvider : IFormatProvider
+        public static string ToString<TFormatProvider>(this decimal value, TFormatProvider provider, string? format = null) where TFormatProvider : IFormatProvider
             => (provider as DecimalFormatter)?.Format(format, value, provider) ?? value.ToString(format, provider);
 
     }
