@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using JetBrains.Annotations;
 
 #if NEMESIS_BINARY_PACKAGE
 namespace Nemesis.Essentials.Runtime
@@ -13,8 +12,8 @@ namespace Nemesis.Essentials.Runtime
 namespace $rootnamespace$.Runtime
 #endif
 {
-    [PublicAPI]
 #if NEMESIS_BINARY_PACKAGE
+    [JetBrains.Annotations.PublicAPI]
     public
 #else
     internal
