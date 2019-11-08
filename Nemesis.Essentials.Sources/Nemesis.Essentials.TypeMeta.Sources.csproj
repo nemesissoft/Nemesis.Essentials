@@ -20,7 +20,8 @@
     <NoWarn>$(NoWarn),CS8021</NoWarn>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <NoPackageAnalysis>true</NoPackageAnalysis>
-        
+    <DevelopmentDependency>true</DevelopmentDependency>
+    
   </PropertyGroup>
 
   <!--<PropertyGroup>
