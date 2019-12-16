@@ -48,26 +48,22 @@ namespace Nemesis.Essentials.Design
             else if (y is null)
                 return 1;
 
-#pragma warning disable IDE0063 // Use simple 'using' statement
-// ReSharper disable ConvertToUsingDeclaration
-            using (var leftIt = x.GetEnumerator())
-            using (var rightIt = y.GetEnumerator())
-// ReSharper restore ConvertToUsingDeclaration
-#pragma warning restore IDE0063 // Use simple 'using' statement
+
+            using var enumerator1 = x.GetEnumerator();
+            using var enumerator2 = y.GetEnumerator();
+
+            while (true)
             {
-                while (true)
-                {
-                    bool left = leftIt.MoveNext();
-                    bool right = rightIt.MoveNext();
+                var left = enumerator1.MoveNext();
+                var right = enumerator2.MoveNext();
 
-                    if (!(left || right)) return 0;
+                if (!(left || right)) return 0;
 
-                    if (!left) return -1;
-                    if (!right) return 1;
+                if (!left) return -1;
+                if (!right) return 1;
 
-                    int itemResult = _comparer.Compare(leftIt.Current, rightIt.Current);
-                    if (itemResult != 0) return itemResult;
-                }
+                int itemResult = _comparer.Compare(enumerator1.Current, enumerator2.Current);
+                if (itemResult != 0) return itemResult;
             }
         }
     }
@@ -77,7 +73,6 @@ namespace Nemesis.Essentials.Design
         private readonly IEqualityComparer<TElement> _equalityComparer;
 
 
-
         private EnumerableEqualityComparer(IEqualityComparer<TElement> equalityComparer = null) =>
             _equalityComparer = equalityComparer ?? EqualityComparer<TElement>.Default;
 
@@ -85,7 +80,6 @@ namespace Nemesis.Essentials.Design
 
         public static EnumerableEqualityComparer<TElement> CreateInstance(IEqualityComparer<TElement> equalityComparer) =>
             new EnumerableEqualityComparer<TElement>(equalityComparer);
-
 
 
         public bool Equals(IEnumerable<TElement> left, IEnumerable<TElement> right)
@@ -99,22 +93,20 @@ namespace Nemesis.Essentials.Design
             if (ReferenceEquals(left, right)) return true;
 
 
-            using (var enumerator = left.GetEnumerator())
-            using (var enumerator2 = right.GetEnumerator())
-            {
-                while (enumerator.MoveNext())
-                    if (!enumerator2.MoveNext() || !_equalityComparer.Equals(enumerator.Current, enumerator2.Current))
-                        return false;
+            using var enumerator1 = left.GetEnumerator();
+            using var enumerator2 = right.GetEnumerator();
 
-                if (enumerator2.MoveNext())
+            while (enumerator1.MoveNext())
+                if (!enumerator2.MoveNext() || !_equalityComparer.Equals(enumerator1.Current, enumerator2.Current))
                     return false;
-            }
 
-            return true;
+            return !enumerator2.MoveNext(); //both enumerations reached the end
         }
 
         public int GetHashCode(IEnumerable<TElement> enumerable)
-            => unchecked(enumerable.Aggregate(0, (current, element) => (current * 397) ^ _equalityComparer.GetHashCode(element)));
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            => enumerable is null ? 0 :
+                unchecked(enumerable.Aggregate(0, (current, element) => (current * 397) ^ _equalityComparer.GetHashCode(element)));
     }
 
     /// <summary>

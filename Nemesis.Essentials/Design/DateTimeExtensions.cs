@@ -55,18 +55,37 @@ namespace Nemesis.Essentials.Design
 
         #region Time operations
 
-        public static TimeSpan Multiply(this TimeSpan multiplicand, long multiplier) => TimeSpan.FromTicks(multiplicand.Ticks * multiplier);
+        public static TimeSpan Multiply(this TimeSpan multiplicand, long multiplier) =>
+            TimeSpan.FromTicks(multiplicand.Ticks * multiplier);
 
-        public static TimeSpan Multiply(this TimeSpan multiplicand, double multiplier) => TimeSpan.FromTicks((long)(multiplicand.Ticks * multiplier));
+        public static TimeSpan Multiply(this TimeSpan multiplicand, double multiplier) =>
+            TimeSpan.FromTicks((long)(multiplicand.Ticks * multiplier));
 
-        public static TimeSpan Divide(this TimeSpan dividend, long divisor) => TimeSpan.FromTicks((long)(dividend.Ticks / (double)divisor));
+        public static TimeSpan Divide(this TimeSpan dividend, long divisor) =>
+            TimeSpan.FromTicks((long)(dividend.Ticks / (double)divisor));
 
-        public static TimeSpan Divide(this TimeSpan dividend, double divisor) => TimeSpan.FromTicks((long)(dividend.Ticks / divisor));
+        public static TimeSpan Divide(this TimeSpan dividend, double divisor) =>
+            TimeSpan.FromTicks((long)(dividend.Ticks / divisor));
 
-        public static double Divide(this TimeSpan dividend, TimeSpan divisor) => dividend.Ticks / (double)divisor.Ticks;
+        public static double Divide(this TimeSpan dividend, TimeSpan divisor) =>
+            dividend.Ticks / (double)divisor.Ticks;
 
-        public static TimeSpan Modulo(this TimeSpan dividend, TimeSpan divisor)
-            => TimeSpan.FromTicks(dividend.Ticks % divisor.Ticks);
+        public static TimeSpan Modulo(this TimeSpan dividend, TimeSpan divisor) =>
+            TimeSpan.FromTicks(dividend.Ticks % divisor.Ticks);
+
+        #endregion
+
+        #region Kind
+
+        public static DateTime MakeLocal(this DateTime date) =>
+            date.Kind == DateTimeKind.Unspecified
+                ? DateTime.SpecifyKind(date, DateTimeKind.Local)
+                : date.ToLocalTime();
+
+        public static DateTime SetLocalIfUnspecified(this DateTime date) =>
+            date.Kind == DateTimeKind.Unspecified
+                ? DateTime.SpecifyKind(date, DateTimeKind.Local)
+                : date;
 
         #endregion
     }
