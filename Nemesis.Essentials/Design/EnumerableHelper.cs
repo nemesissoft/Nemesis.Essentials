@@ -1023,11 +1023,11 @@ namespace Nemesis.Essentials.Design
         #region ToReadOnlyDictionary
 
         [PureMethod, PublicAPI]
-        public static IDictionary<TKey, TSource> ToReadOnlyDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer = null)
+        public static IReadOnlyDictionary<TKey, TSource> ToReadOnlyDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer = null)
           => ToReadOnlyDictionary(source, keySelector, s => s, comparer);
 
         [PureMethod, PublicAPI]
-        public static IDictionary<TKey, TElement> ToReadOnlyDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer = null)
+        public static IReadOnlyDictionary<TKey, TElement> ToReadOnlyDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer = null)
             => (source ?? throw new ArgumentNullException(nameof(source)))
                 .ToDictionary(keySelector ?? throw new ArgumentNullException(nameof(keySelector)),
                               elementSelector ?? throw new ArgumentNullException(nameof(elementSelector)),
@@ -1035,7 +1035,7 @@ namespace Nemesis.Essentials.Design
                 .ToReadOnlyDictionary();
 
         [PureMethod, PublicAPI]
-        public static IDictionary<TKey, TElement> ToReadOnlyDictionary<TKey, TElement>(this IDictionary<TKey, TElement> dict) =>
+        public static IReadOnlyDictionary<TKey, TElement> ToReadOnlyDictionary<TKey, TElement>(this IDictionary<TKey, TElement> dict) =>
             new ReadOnlyDictionary<TKey, TElement>(dict);
 
         #endregion
