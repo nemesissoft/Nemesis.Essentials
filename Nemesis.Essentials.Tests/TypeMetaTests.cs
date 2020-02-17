@@ -40,8 +40,21 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
         private ITransformer<TElement> CreateTransformerInstance<TElement>() => default;
 
         [Test]
+        public void MethodOfTestNegative()
+        {
+            MethodInfo toUpperShort = Method.Of<Func<string>>("".ToUpperInvariant);
+            MethodInfo toUpperLong = Method.Of<Func<string, string>>(s => s.ToUpperInvariant());
+            
+            Assert.That(toUpperShort, Is.Not.EqualTo(toUpperLong));
+        }
+
+        [Test]
         public void MethodOfTest()
         {
+            MethodInfo toUpperShort = Method.Of<Func<string>>("".ToUpperInvariant);
+            MethodInfo toUpperExpected = typeof(string).GetMethod(nameof(string.ToUpperInvariant)) 
+                                         ?? throw new MissingMethodException(typeof(string).FullName, nameof(string.ToUpperInvariant));
+         
             MethodInfo trimByExpression = Method.OfExpression<Func<string, string>>(s => s.Trim());
             MethodInfo trimByDelegate = Method.Of<Func<string>>("".Trim);// no problem with ambiguous match
 
@@ -61,6 +74,8 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
                     test => test.CreateTransformerInstance<int>()
                     ).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
 
+
+            Assert.AreEqual(toUpperExpected, toUpperShort);
 
             Assert.AreEqual(trimByExpression, trimByDelegate);
             Assert.AreEqual(trimByExpressionChars, trimByDelegateChars);
