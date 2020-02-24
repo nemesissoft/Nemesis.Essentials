@@ -70,11 +70,11 @@ namespace $rootnamespace$.Runtime
         /// <returns>When <paramref name="genericTypeDefinition"/> represents interface then interface list is being tested. Otherwise, whole derivation chain is being traversed up and checked </returns>
         /// <example>
         /// For the following input pairs, one can expect the following output: <![CDATA[
-        /// (typeof(int?), typeof(Nullable<>))                                =>, typeof(int?)
-        /// (typeof(int[]), typeof(ICollection<>))                            =>, typeof(ICollection<int>)
-        /// (typeof(int[]), typeof(IEnumerable<>))                            =>, typeof(IEnumerable<int>)
-        /// (typeof(Dictionary<int?, string>), typeof(IEnumerable<>))         =>, typeof(IEnumerable<KeyValuePair<int?, string>>)
-        /// (typeof(Dictionary<int, string>), typeof(IReadOnlyDictionary<,>)) =>, typeof(IReadOnlyDictionary<int, string>)
+        /// (typeof(int?), typeof(Nullable<>))                                => typeof(int?)
+        /// (typeof(int[]), typeof(ICollection<>))                            => typeof(ICollection<int>)
+        /// (typeof(int[]), typeof(IEnumerable<>))                            => typeof(IEnumerable<int>)
+        /// (typeof(Dictionary<int?, string>), typeof(IEnumerable<>))         => typeof(IEnumerable<KeyValuePair<int?, string>>)
+        /// (typeof(Dictionary<int, string>), typeof(IReadOnlyDictionary<,>)) => typeof(IReadOnlyDictionary<int, string>)
         /// ]]>
         /// </example>
         public static Type GetConcreteGenericTypeFromDefinition(Type type, Type genericTypeDefinition)
