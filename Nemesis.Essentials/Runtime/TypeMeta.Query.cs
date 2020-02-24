@@ -62,15 +62,47 @@ namespace $rootnamespace$.Runtime
 
         #region Generics
 
-        public static Type GetConcreteInterfaceOfType(Type type, Type generic)
+        /// <summary>
+        /// Retrieve concrete generic type from give generic definition
+        /// </summary>
+        /// <param name="type">Input type</param>
+        /// <param name="genericTypeDefinition">Type that represents GenericTypeDefinition i.e. IEnumerable&lt;&gt; </param>
+        /// <returns>When <paramref name="genericTypeDefinition"/> represents interface then interface list is being tested. Otherwise, whole derivation chain is being traversed up and checked </returns>
+        /// <example>
+        /// For the following input pairs, one can expect the following output: <![CDATA[
+        /// (typeof(int?), typeof(Nullable<>))                                =>, typeof(int?)
+        /// (typeof(int[]), typeof(ICollection<>))                            =>, typeof(ICollection<int>)
+        /// (typeof(int[]), typeof(IEnumerable<>))                            =>, typeof(IEnumerable<int>)
+        /// (typeof(Dictionary<int?, string>), typeof(IEnumerable<>))         =>, typeof(IEnumerable<KeyValuePair<int?, string>>)
+        /// (typeof(Dictionary<int, string>), typeof(IReadOnlyDictionary<,>)) =>, typeof(IReadOnlyDictionary<int, string>)
+        /// ]]>
+        /// </example>
+        public static Type GetConcreteGenericTypeFromDefinition(Type type, Type genericTypeDefinition)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
-            if (generic == null) throw new ArgumentNullException(nameof(generic));
-            if (!generic.IsGenericTypeDefinition) throw new ArgumentException($@"{nameof(generic)} has to be GenericTypeDefinition", nameof(generic));
+            if (genericTypeDefinition == null) throw new ArgumentNullException(nameof(genericTypeDefinition));
+            if (!genericTypeDefinition.IsGenericTypeDefinition)
+                throw new ArgumentException($@"{nameof(genericTypeDefinition)} has to be GenericTypeDefinition",
+                    nameof(genericTypeDefinition));
 
-            foreach (Type @interface in type.GetInterfaces())
-                if (@interface.IsGenericType && !@interface.IsGenericTypeDefinition && @interface.GetGenericTypeDefinition() == generic)
-                    return @interface;
+            if (genericTypeDefinition.IsInterface)
+            {
+                foreach (Type @interface in type.GetInterfaces())
+                    if (@interface.IsGenericType && !@interface.IsGenericTypeDefinition &&
+                        @interface.GetGenericTypeDefinition() == genericTypeDefinition)
+                        return @interface;
+            }
+            else
+            {
+                Type currentType = type;
+                while (currentType != typeof(object) && currentType != null)
+                {
+                    if (currentType.IsGenericType && !currentType.IsGenericTypeDefinition &&
+                        currentType.GetGenericTypeDefinition() == genericTypeDefinition)
+                        return currentType;
+                    currentType = currentType.BaseType;
+                }
+            }
 
             return null;
         }

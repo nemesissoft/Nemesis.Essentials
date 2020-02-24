@@ -44,7 +44,7 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
         {
             MethodInfo toUpperShort = Method.Of<Func<string>>("".ToUpperInvariant);
             MethodInfo toUpperLong = Method.Of<Func<string, string>>(s => s.ToUpperInvariant());
-            
+
             Assert.That(toUpperShort, Is.Not.EqualTo(toUpperLong));
         }
 
@@ -52,9 +52,9 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
         public void MethodOfTest()
         {
             MethodInfo toUpperShort = Method.Of<Func<string>>("".ToUpperInvariant);
-            MethodInfo toUpperExpected = typeof(string).GetMethod(nameof(string.ToUpperInvariant)) 
+            MethodInfo toUpperExpected = typeof(string).GetMethod(nameof(string.ToUpperInvariant))
                                          ?? throw new MissingMethodException(typeof(string).FullName, nameof(string.ToUpperInvariant));
-         
+
             MethodInfo trimByExpression = Method.OfExpression<Func<string, string>>(s => s.Trim());
             MethodInfo trimByDelegate = Method.Of<Func<string>>("".Trim);// no problem with ambiguous match
 
@@ -346,7 +346,7 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
             }
         }
 
-#region ImplementsGenericInterface and DerivesFromGenericClass
+        #region ImplementsGenericInterface and DerivesFromGenericClass
 
         private static IEnumerable<TestCaseData> GenericInterfaceTests()
         {
@@ -509,7 +509,7 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
         private class StringQuery : IQuery<string> { }
 
         private class StringQueryHandler : IQueryHandler<StringQuery, string> { }
-#endregion
+        #endregion
 
         [TestCase("bool", typeof(bool))]
         [TestCase("Dictionary<bool, string>", typeof(Dictionary<bool, string>))]
@@ -537,7 +537,7 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
         [TestCase("IDictionary<bool, IList<string>>", typeof(IDictionary<bool, IList<string>>))]
         public void GetFriendlyNameTests(string expectedName, Type type) => Assert.That(type.GetFriendlyName(), Is.EqualTo(expectedName));
 
-#region GetDefault
+        #region GetDefault
 
         [TestCase(typeof(int), ExpectedResult = 0)]
         [TestCase(typeof(bool?), ExpectedResult = false)]
@@ -567,6 +567,35 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
             public MyStruct(T value) => Value = value;
         }
 
-#endregion
+        #endregion
+
+        class MyNullable<T> { }
+        class DerivedNullable<T> : MyNullable<T> { }
+        class IntNullable : DerivedNullable<int> { }
+
+        private static IEnumerable<(string name, Type input, Type generic, Type expected)> GetConcreteInterfaceOfType_Data()
+        {
+            var data = new (Type input, Type generic, Type expected)[]
+            {
+                (typeof(IntNullable), typeof(Nullable<>), null),
+                (typeof(IntNullable), typeof(DerivedNullable<>), typeof(DerivedNullable<int>)),
+                (typeof(IntNullable), typeof(MyNullable<>), typeof(MyNullable<int>)),
+                (typeof(int?), typeof(Nullable<>), typeof(int?)),
+                (typeof(int[]), typeof(ICollection<>), typeof(ICollection<int>)),
+                (typeof(int[]), typeof(IEnumerable<>), typeof(IEnumerable<int>)),
+                (typeof(Dictionary<int?, string>), typeof(IEnumerable<>), typeof(IEnumerable<KeyValuePair<int?, string>>)),
+                (typeof(Dictionary<int, string>), typeof(IReadOnlyDictionary<,>), typeof(IReadOnlyDictionary<int, string>)),
+            };
+            return data.Select(t => (
+                $"{t.input.GetFriendlyName()} ? {t.generic.GetFriendlyName()} => {(t.expected == null ? "<NULL>" : t.expected.GetFriendlyName())}",
+                t.input, t.generic, t.expected));
+        }
+
+        [TestCaseSource(nameof(GetConcreteInterfaceOfType_Data))]
+        public void GetConcreteInterfaceOfType_Tests((string _, Type input, Type generic, Type expected) data)
+        {
+            var actual = TypeMeta.GetConcreteGenericTypeFromDefinition(data.input, data.generic);
+            Assert.That(actual, Is.EqualTo(data.expected));
+        }
     }
 }
