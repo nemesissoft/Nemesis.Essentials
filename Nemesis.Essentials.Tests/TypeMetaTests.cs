@@ -580,11 +580,14 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
                 (typeof(IntNullable), typeof(Nullable<>), null),
                 (typeof(IntNullable), typeof(DerivedNullable<>), typeof(DerivedNullable<int>)),
                 (typeof(IntNullable), typeof(MyNullable<>), typeof(MyNullable<int>)),
+                (typeof(MyNullable<float>), typeof(MyNullable<>), typeof(MyNullable<float>)),
                 (typeof(int?), typeof(Nullable<>), typeof(int?)),
                 (typeof(int[]), typeof(ICollection<>), typeof(ICollection<int>)),
                 (typeof(int[]), typeof(IEnumerable<>), typeof(IEnumerable<int>)),
                 (typeof(Dictionary<int?, string>), typeof(IEnumerable<>), typeof(IEnumerable<KeyValuePair<int?, string>>)),
                 (typeof(Dictionary<int, string>), typeof(IReadOnlyDictionary<,>), typeof(IReadOnlyDictionary<int, string>)),
+                (typeof(IDictionary<float, string>), typeof(ICollection<>), typeof(ICollection<KeyValuePair<float, string>>)),
+                (typeof(IDictionary<float?, string>), typeof(IDictionary<,>), typeof(IDictionary<float?, string>)),
             };
             return data.Select(t => (
                 $"{t.input.GetFriendlyName()} ? {t.generic.GetFriendlyName()} => {(t.expected == null ? "<NULL>" : t.expected.GetFriendlyName())}",

@@ -85,11 +85,16 @@ namespace $rootnamespace$.Runtime
                 throw new ArgumentException($@"{nameof(genericTypeDefinition)} has to be GenericTypeDefinition",
                     nameof(genericTypeDefinition));
 
+            bool IsConstructedFromGeneric(Type t, Type gtd) =>
+                t.IsGenericType && !t.IsGenericTypeDefinition && t.GetGenericTypeDefinition() == gtd;
+
             if (genericTypeDefinition.IsInterface)
             {
+                if (IsConstructedFromGeneric(type, genericTypeDefinition))
+                    return type;
+
                 foreach (Type @interface in type.GetInterfaces())
-                    if (@interface.IsGenericType && !@interface.IsGenericTypeDefinition &&
-                        @interface.GetGenericTypeDefinition() == genericTypeDefinition)
+                    if (IsConstructedFromGeneric(@interface, genericTypeDefinition))
                         return @interface;
             }
             else
@@ -97,8 +102,7 @@ namespace $rootnamespace$.Runtime
                 Type currentType = type;
                 while (currentType != typeof(object) && currentType != null)
                 {
-                    if (currentType.IsGenericType && !currentType.IsGenericTypeDefinition &&
-                        currentType.GetGenericTypeDefinition() == genericTypeDefinition)
+                    if (IsConstructedFromGeneric(currentType, genericTypeDefinition))
                         return currentType;
                     currentType = currentType.BaseType;
                 }
