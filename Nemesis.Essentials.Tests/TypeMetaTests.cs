@@ -22,7 +22,9 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
         public void GetDeclaredTypeTest()
         {
             // ReSharper disable once UnusedParameter.Local
-            Type GetDeclaredType<T>(T x) => typeof(T);
+#pragma warning disable IDE0060 // Remove unused parameter
+            static Type GetDeclaredType<T>(T x) => typeof(T);
+#pragma warning restore IDE0060 // Remove unused parameter
 
             IList<string> iList = new List<string>();
             List<string> list = null;
@@ -561,19 +563,22 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
 
         private struct MyStruct<T>
         {
+            // ReSharper disable once UnassignedGetOnlyAutoProperty
             public T Value { get; }
-
-            [SuppressMessage("ReSharper", "UnusedMember.Local")]
-            public MyStruct(T value) => Value = value;
         }
 
         #endregion
 
-        class MyNullable<T> { }
+        class MyNullable<T>
+        {
+            // ReSharper disable once UnusedMember.Local
+            // ReSharper disable once UnassignedGetOnlyAutoProperty
+            public T Value { get;  }
+        }
         class DerivedNullable<T> : MyNullable<T> { }
         class IntNullable : DerivedNullable<int> { }
 
-        private static IEnumerable<(string name, Type input, Type generic, Type expected)> GetConcreteInterfaceOfType_Data()
+        private static IEnumerable<(string name, Type input, Type generic, Type expected)> GetGenericRealization_Data()
         {
             var data = new (Type input, Type generic, Type expected)[]
             {
@@ -594,10 +599,10 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
                 t.input, t.generic, t.expected));
         }
 
-        [TestCaseSource(nameof(GetConcreteInterfaceOfType_Data))]
-        public void GetConcreteInterfaceOfType_Tests((string _, Type input, Type generic, Type expected) data)
+        [TestCaseSource(nameof(GetGenericRealization_Data))]
+        public void GetGenericRealization_Tests((string _, Type input, Type generic, Type expected) data)
         {
-            var actual = TypeMeta.GetConcreteGenericTypeFromDefinition(data.input, data.generic);
+            var actual = TypeMeta.GetGenericRealization(data.input, data.generic);
             Assert.That(actual, Is.EqualTo(data.expected));
         }
     }

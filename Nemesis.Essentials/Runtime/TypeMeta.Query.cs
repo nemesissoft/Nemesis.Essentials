@@ -77,7 +77,7 @@ namespace $rootnamespace$.Runtime
         /// (typeof(Dictionary<int, string>), typeof(IReadOnlyDictionary<,>)) => typeof(IReadOnlyDictionary<int, string>)
         /// ]]>
         /// </example>
-        public static Type GetConcreteGenericTypeFromDefinition(Type type, Type genericTypeDefinition)
+        public static Type GetGenericRealization(Type type, Type genericTypeDefinition)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
             if (genericTypeDefinition == null) throw new ArgumentNullException(nameof(genericTypeDefinition));
@@ -85,31 +85,55 @@ namespace $rootnamespace$.Runtime
                 throw new ArgumentException($@"{nameof(genericTypeDefinition)} has to be GenericTypeDefinition",
                     nameof(genericTypeDefinition));
 
-            bool IsConstructedFromGeneric(Type t, Type gtd) =>
-                t.IsGenericType && !t.IsGenericTypeDefinition && t.GetGenericTypeDefinition() == gtd;
+            return TryGetGenericRealization(type, genericTypeDefinition, out var genericRealization)
+                ? genericRealization
+                : null;
+        }
+
+        public static bool TryGetGenericRealization(Type type, Type genericTypeDefinition, out Type genericRealization)
+        {
+            if (type == null || genericTypeDefinition == null || !genericTypeDefinition.IsGenericTypeDefinition)
+            {
+                genericRealization = null;
+                return false;
+            }
 
             if (genericTypeDefinition.IsInterface)
             {
                 if (IsConstructedFromGeneric(type, genericTypeDefinition))
-                    return type;
+                {
+                    genericRealization = type;
+                    return true;
+                }
 
-                foreach (Type @interface in type.GetInterfaces())
+                foreach (var @interface in type.GetInterfaces())
                     if (IsConstructedFromGeneric(@interface, genericTypeDefinition))
-                        return @interface;
+                    {
+                        genericRealization = @interface;
+                        return true;
+                    }
             }
             else
             {
-                Type currentType = type;
+                var currentType = type;
                 while (currentType != typeof(object) && currentType != null)
                 {
                     if (IsConstructedFromGeneric(currentType, genericTypeDefinition))
-                        return currentType;
+                    {
+                        genericRealization = currentType;
+                        return true;
+                    }
                     currentType = currentType.BaseType;
                 }
             }
 
-            return null;
+            genericRealization = null;
+            return false;
         }
+
+        private static bool IsConstructedFromGeneric(Type type, Type genericTypeDefinition) =>
+            type.IsGenericType && !type.IsGenericTypeDefinition &&
+            type.GetGenericTypeDefinition() == genericTypeDefinition;
 
         public static IEnumerable<Type> GetAllInterfaces(Type type)
         {
@@ -207,7 +231,9 @@ namespace $rootnamespace$.Runtime
         public static bool IsPublic(this MemberInfo mi)
         {
             // ReSharper disable once ConvertSwitchStatementToSwitchExpression
+#pragma warning disable IDE0066 // Convert switch statement to expression
             switch (mi)
+#pragma warning restore IDE0066 // Convert switch statement to expression
             {
                 case null:
                     return false;
