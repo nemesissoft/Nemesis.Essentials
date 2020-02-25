@@ -25,8 +25,8 @@ before_build:
 
     if ($env:APPVEYOR_REPO_TAG_NAME)
     {
-        $releaseNotes = .\GetGithubReleaseNotes.ps1 -tagName "$env:APPVEYOR_REPO_TAG_NAME" -repoOwner "nemesissoft" -repoName "Nemesis.Essentials"
-
+        $releaseNotes = & $([scriptblock]::Create((New-Object Net.WebClient).DownloadString( 'https://raw.githubusercontent.com/nemesissoft/BuildTools/master/GetGithubReleaseNotes.ps1' ))) -tagName "$env:APPVEYOR_REPO_TAG_NAME" -repoName "$env:APPVEYOR_REPO_NAME"
+    
         if($releaseNotes)
         {
             $shortDesc = $releaseNotes.Item1
@@ -34,7 +34,7 @@ before_build:
 
             Update-AppveyorBuild -Message "$shortDesc"
 
-            .\UpdateReleaseNotes.ps1 -basePath "$env:APPVEYOR_BUILD_FOLDER" -releaseNotes "$longDesc"
+            & $([scriptblock]::Create((New-Object Net.WebClient).DownloadString( 'https://raw.githubusercontent.com/nemesissoft/BuildTools/master/UpdateReleaseNotes.ps1' ))) -basePath "$env:APPVEYOR_BUILD_FOLDER" -releaseNotes "$longDesc"
         }        
     }       
 
