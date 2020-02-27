@@ -537,6 +537,8 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
         [TestCase("IQueryHandler<IQuery<string>, string>", typeof(IQueryHandler<IQuery<string>, string>))]
         [TestCase("IQueryHandler<StringQuery, string>", typeof(IQueryHandler<StringQuery, string>))]
         [TestCase("IDictionary<bool, IList<string>>", typeof(IDictionary<bool, IList<string>>))]
+        [TestCase("IDictionary<,>", typeof(IDictionary<,>))]
+        [TestCase("IDictionary<bool?[], IList<string>>[]", typeof(IDictionary<bool?[], IList<string>>[]))]
         public void GetFriendlyNameTests(string expectedName, Type type) => Assert.That(type.GetFriendlyName(), Is.EqualTo(expectedName));
 
         #region GetDefault
@@ -573,7 +575,7 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
         {
             // ReSharper disable once UnusedMember.Local
             // ReSharper disable once UnassignedGetOnlyAutoProperty
-            public T Value { get;  }
+            public T Value { get; }
         }
         class DerivedNullable<T> : MyNullable<T> { }
         class IntNullable : DerivedNullable<int> { }
