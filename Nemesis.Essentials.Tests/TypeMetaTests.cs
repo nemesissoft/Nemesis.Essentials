@@ -217,22 +217,19 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
             var autoProp = Property.Of((PropFieldClass pfc) => pfc.AutoProp);
             var staticProp = Property.Of((PropFieldClass pfc) => PropFieldClass.StaticProp);
             var stringLength = Property.Of((string s) => s.Length);
-
+            var secondLevel = Property.Of((PropFieldClass pfc) => pfc.AutoProp.Length);
 
             Assert.AreEqual(prop, typeof(PropFieldClass).GetProperty(nameof(PropFieldClass.Prop)));
             Assert.AreEqual(autoProp, typeof(PropFieldClass).GetProperty(nameof(PropFieldClass.AutoProp)));
             Assert.AreEqual(staticProp, typeof(PropFieldClass).GetProperty(nameof(PropFieldClass.StaticProp)));
             Assert.AreEqual(stringLength, typeof(string).GetProperty(nameof(string.Length)));
+            Assert.AreEqual(secondLevel, typeof(string).GetProperty(nameof(string.Length)));
 
 
-            Assert.DoesNotThrow(() => { var p = prop.GetValue(new PropFieldClass(15, 15, 15, "")); });
-            Assert.DoesNotThrow(() => { var p = autoProp.GetValue(new PropFieldClass(15, 15, 15, "")); });
-            Assert.DoesNotThrow(() => { var p = staticProp.GetValue(null); });
-            Assert.DoesNotThrow(() =>
-            {
-                int len = (int)stringLength.GetValue("12345");
-                Assert.AreEqual(5, len);
-            });
+            Assert.That(prop.GetValue(new PropFieldClass(15, 150, 1500, "Text")), Is.EqualTo(1500m));
+            Assert.That(autoProp.GetValue(new PropFieldClass(15, 150, 1500, "Text")), Is.EqualTo("Text") );
+            Assert.That(staticProp.GetValue(null), Is.EqualTo("STATIC"));
+            Assert.That((int) stringLength.GetValue("123456789"), Is.EqualTo(9));
         }
 
         [Test]
@@ -251,16 +248,16 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
             Assert.AreEqual(stringEmpty, typeof(string).GetField(nameof(string.Empty)));
 
 
-            Assert.DoesNotThrow(() => { var p = field.GetValue(new PropFieldClass(15, 15, 15, "")); });
-            Assert.DoesNotThrow(() => { var p = readOnlyField.GetValue(new PropFieldClass(15, 15, 15, "")); });
-            Assert.DoesNotThrow(() => { var p = staticField.GetValue(null); });
-            Assert.DoesNotThrow(() =>
-            {
-                string empty = (string)stringEmpty.GetValue(null);
-                Assert.That(empty, Is.Empty);
-            });
+            Assert.That(field.GetValue(new PropFieldClass(15, 150, 1500, "00")), Is.EqualTo(31));
+            Assert.That(readOnlyField.GetValue(new PropFieldClass(15, 150, 1500, "00")), Is.EqualTo(150));
+            Assert.That(staticField.GetValue(null), Is.EqualTo(16));
+            Assert.That((string) stringEmpty.GetValue(null), Is.EqualTo(""));
 
-            Assert.DoesNotThrow(() => { readOnlyField.SetValue(new PropFieldClass(15, 15, 15, ""), 15.5f); });
+
+            var instance = new PropFieldClass(15, 15, 15, "");
+            readOnlyField.SetValue(instance, 15.5f);
+
+            Assert.That(instance.ReadOnlyField, Is.EqualTo(15.5f));
         }
 
         [Test]
@@ -299,7 +296,7 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
         {
             public int NormalField;
             public readonly float ReadOnlyField;
-            public static float StaticField = 15;
+            public static float StaticField = 16;
 
 #pragma warning disable IDE0032 // Use auto property
             private decimal _prop;
@@ -337,7 +334,7 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
             // ReSharper restore UnusedMember.Local
             // ReSharper restore ArrangeAccessorOwnerBody
 
-            public static string StaticProp { get; set; }
+            public static string StaticProp { get; set; } = "STATIC";
 
             public PropFieldClass(int normalField, float readOnlyField, decimal prop, string autoProp)
             {
