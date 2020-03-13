@@ -34,7 +34,8 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
             Assert.AreEqual(GetDeclaredType(list).Name, "List`1");
         }
 
-        private static TElement Create<TElement>() => default;
+        private static void GenericAction<TElement>() { }
+        private static TElement GenericFunc<TElement>() => default;
         // ReSharper disable once UnusedTypeParameter
         interface ITransformer<TElement> { }
         private static ITransformer<TElement> CreateTransformer<TElement>() => default;
@@ -69,7 +70,8 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
                                                                                                  //var tryParseMethods = typeof(int).GetMethods().Where(m => m.Name == nameof(int.TryParse)).ToList();
 #endif
 
-            MethodInfo genericCreate = Method.Of<Func<int>>(Create<int>).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
+            MethodInfo genericAction = Method.Of<Action>(GenericAction<int>).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
+            MethodInfo genericFunc = Method.Of<Func<int>>(GenericFunc<int>).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
             MethodInfo genericCreateTransformer = Method.Of<Func<ITransformer<int>>>(CreateTransformer<int>).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
 
             MethodInfo genericCreateTransformerInstance = Method.OfExpression<Func<TypeMetaTests, ITransformer<int>>>(
@@ -91,15 +93,18 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
             Assert.AreEqual(tryParseByDelegate, typeof(int).GetMethod(nameof(int.TryParse), new[] { typeof(string), typeof(int).MakeByRefType() }));
 #endif
 
-            Assert.That(genericCreate, Is.Not.Null);
+            Assert.That(genericAction, Is.Not.Null);
+            Assert.That(genericFunc, Is.Not.Null);
             Assert.That(genericCreateTransformer, Is.Not.Null);
             Assert.That(genericCreateTransformerInstance, Is.Not.Null);
 
-            Assert.That(genericCreate.Name, Is.EqualTo(nameof(Create)));
+            Assert.That(genericAction.Name, Is.EqualTo(nameof(GenericAction)));
+            Assert.That(genericFunc.Name, Is.EqualTo(nameof(GenericFunc)));
             Assert.That(genericCreateTransformer.Name, Is.EqualTo(nameof(CreateTransformer)));
             Assert.That(genericCreateTransformerInstance.Name, Is.EqualTo(nameof(CreateTransformerInstance)));
 
-            Assert.That(genericCreate.ReturnType, Is.EqualTo(typeof(string)));
+            Assert.That(genericAction.ReturnType, Is.EqualTo(typeof(void)));
+            Assert.That(genericFunc.ReturnType, Is.EqualTo(typeof(string)));
             Assert.That(genericCreateTransformer.ReturnType, Is.EqualTo(typeof(ITransformer<string>)));
             Assert.That(genericCreateTransformerInstance.ReturnType, Is.EqualTo(typeof(ITransformer<string>)));
         }
