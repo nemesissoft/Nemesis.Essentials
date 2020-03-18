@@ -30,17 +30,24 @@ namespace $rootnamespace$.Runtime
 
         public static string GetFriendlyName(this Type type)
         {
-            if (_typesCache.ContainsKey(type))
-                return _typesCache[type];
+            if (_typesCache.TryGetValue(type, out string friendlyName))
+                return friendlyName;
             else if (type.IsArray)
             {
                 var ranks = GetArrayRanks(type);
                 var elem = GetArrayBottomElementType(type);
-                return GetFriendlyName(elem) +
+                return elem.GetFriendlyName() +
                     string.Join("", ranks.Select(rank => $"[{new string(',', rank - 1)}]"));
             }
+            else if (type.IsByRef)
+                return $"{type.GetElementType().GetFriendlyName()}&";
+            
+            else if (type.IsPointer)
+                return $"{type.GetElementType().GetFriendlyName()}*";
+            
             else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
                 return type.GetGenericArguments()[0].GetFriendlyName() + "?";
+            
             else if (type.IsGenericType)
                 return
                     type.IsGenericTypeDefinition

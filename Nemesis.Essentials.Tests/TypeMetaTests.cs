@@ -6,6 +6,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using TCD = NUnit.Framework.TestCaseData;
+
 #if NEMESIS_BINARY_PACKAGE_TESTS
 using Nemesis.Essentials.Design;
 using Nemesis.Essentials.Runtime;
@@ -515,33 +517,48 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
         private class StringQueryHandler : IQueryHandler<StringQuery, string> { }
         #endregion
 
-        [TestCase("bool", typeof(bool))]
-        [TestCase("Dictionary<bool, string>", typeof(Dictionary<bool, string>))]
-        [TestCase("IDictionary<bool, string>", typeof(IDictionary<bool, string>))]
+        internal static IEnumerable<TCD> GetFriendlyNameData() => new[]
+        {
+            new TCD("bool", typeof(bool)),
+            new TCD("Dictionary<bool, string>", typeof(Dictionary<bool, string>)),
+            new TCD("IDictionary<bool, string>", typeof(IDictionary<bool, string>)),
+            
+            new TCD("IList<>", typeof(IList<>)),
+            new TCD("IDictionary<,>", typeof(IDictionary<,>)),
+            
+            new TCD("bool[,]", typeof(bool[,])),
+            new TCD("int", typeof(int)),
+            new TCD("string", typeof(string)),
+            new TCD("string[]", typeof(string[])),
+            new TCD("List<string[]>", typeof(List<string[]>)),
+            new TCD("void", typeof(void)),
+            new TCD("decimal", typeof(decimal)),
+            new TCD("Activator", typeof(Activator)),
+            new TCD("int[]", typeof(int[])),
+            new TCD("int[,]", typeof(int[,])),
+            new TCD("int[,][]", typeof(int[,][])),
+            new TCD("float[][,]", typeof(float[][,])),
+            new TCD("double[,][,,,,][][,][][]", typeof(double[,][,,,,][][,][][])),
+            
+            new TCD("IQueryHandler<IQuery<string>, string>", typeof(IQueryHandler<IQuery<string>, string>)),
+            new TCD("IQueryHandler<StringQuery, string>", typeof(IQueryHandler<StringQuery, string>)),
+            new TCD("IDictionary<bool, IList<string>>", typeof(IDictionary<bool, IList<string>>)),
+            new TCD("IDictionary<,>", typeof(IDictionary<,>)),
+            new TCD("IDictionary<bool?[], IList<string>>[]", typeof(IDictionary<bool?[], IList<string>>[])),
+            
+            new TCD("bool*", typeof(bool*)),
+            new TCD("sbyte*[]", typeof(sbyte*[])),
+            new TCD("int*[]*", typeof(int*[]).MakePointerType()),
 
-        [TestCase("IList<>", typeof(IList<>))]
-        [TestCase("IDictionary<,>", typeof(IDictionary<,>))]
+            new TCD("bool&", typeof(bool).MakeByRefType()),
+            new TCD("sbyte[]&", typeof(sbyte[]).MakeByRefType()),
+            new TCD("int*&", typeof(int*).MakeByRefType()),
+        };
 
-        [TestCase("bool[,]", typeof(bool[,]))]
-        [TestCase("int", typeof(int))]
-        [TestCase("string", typeof(string))]
-        [TestCase("string[]", typeof(string[]))]
-        [TestCase("List<string[]>", typeof(List<string[]>))]
-        [TestCase("void", typeof(void))]
-        [TestCase("decimal", typeof(decimal))]
-        [TestCase("Activator", typeof(Activator))]
-        [TestCase("int[]", typeof(int[]))]
-        [TestCase("int[,]", typeof(int[,]))]
-        [TestCase("int[,][]", typeof(int[,][]))]
-        [TestCase("float[][,]", typeof(float[][,]))]
-        [TestCase("double[,][,,,,][][,][][]", typeof(double[,][,,,,][][,][][]))]
-
-        [TestCase("IQueryHandler<IQuery<string>, string>", typeof(IQueryHandler<IQuery<string>, string>))]
-        [TestCase("IQueryHandler<StringQuery, string>", typeof(IQueryHandler<StringQuery, string>))]
-        [TestCase("IDictionary<bool, IList<string>>", typeof(IDictionary<bool, IList<string>>))]
-        [TestCase("IDictionary<,>", typeof(IDictionary<,>))]
-        [TestCase("IDictionary<bool?[], IList<string>>[]", typeof(IDictionary<bool?[], IList<string>>[]))]
-        public void GetFriendlyNameTests(string expectedName, Type type) => Assert.That(type.GetFriendlyName(), Is.EqualTo(expectedName));
+        
+        [TestCaseSource(nameof(GetFriendlyNameData))]
+        public void GetFriendlyNameTests(string expectedName, Type type) => 
+            Assert.That(type.GetFriendlyName(), Is.EqualTo(expectedName));
 
         #region GetDefault
 
