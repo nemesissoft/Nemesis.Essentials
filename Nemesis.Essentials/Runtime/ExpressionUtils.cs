@@ -14,6 +14,33 @@ namespace Nemesis.Essentials.Runtime
 {
     public static class ExpressionUtils
     {
+        public static TDelegate MakeDelegate<TDelegate>(Expression<TDelegate> expression, params Type[] typeArguments)
+            where TDelegate : Delegate
+        {
+            var method = Method.OfExpression(expression);
+            if (method.IsGenericMethod)
+            {
+                method = method.GetGenericMethodDefinition();
+                method = method.MakeGenericMethod(typeArguments);
+            }
+
+            var parameters = method.GetParameters()
+                .Select(p => Expression.Parameter(p.ParameterType, p.Name))
+                .ToList();
+
+            var @this = Expression.Parameter(
+                method.ReflectedType ?? throw new NotSupportedException("Method type cannot be empty"), "this");
+
+            var call = method.IsStatic
+                ? Expression.Call(method, parameters)
+                : Expression.Call(@this, method, parameters);
+
+            if (!method.IsStatic)
+                parameters.Insert(0, @this);
+
+            return Expression.Lambda<TDelegate>(call, parameters).Compile();
+        }
+
         public static Expression IfThenElseJoin<TResult>(IReadOnlyList<(Expression Condition, TResult value)> expressionList, Expression lastElse, LabelTarget exitTarget)
         {
             if (expressionList != null && expressionList.Count > 0)
