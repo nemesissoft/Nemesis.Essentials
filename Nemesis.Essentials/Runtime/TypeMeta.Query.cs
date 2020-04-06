@@ -194,6 +194,15 @@ namespace $rootnamespace$.Runtime
             type == generic ||
             type.IsGenericType && type.GetGenericTypeDefinition() == generic ||
             type.GetInterfaces().Any(t => t.IsGenericType && t.ImplementsGenericInterface(generic));
+        /* public static bool ImplementsGenericInterface(this Type type, Type genericInterface)
+            {
+                Guard.AgainstViolation(genericInterface.IsGenericTypeDefinition && genericInterface.IsInterface,
+                    "Only generic interface can be used");
+                return type.GetInterfaces()
+                    .Where(i => i.IsGenericType)
+                    .Select(i => i.GetGenericTypeDefinition())
+                    .Contains(genericInterface);
+            }*/
 
         public static IEnumerable<Type> GetGenericInterfaces(this Type type, Type generic)
         {
@@ -202,18 +211,6 @@ namespace $rootnamespace$.Runtime
 
             return type.GetInterfaces().Where(t => t.ImplementsGenericInterface(generic));
         }
-
-        /* TODO: try this one day
-             public static bool ImplementsGenericInterface(this Type type, Type genericInterface)
-            {
-                Guard.AgainstViolation(genericInterface.IsGenericTypeDefinition && genericInterface.IsInterface,
-                    "Only generic interface can be used");
-
-                return type.GetInterfaces()
-                    .Where(i => i.IsGenericType)
-                    .Select(i => i.GetGenericTypeDefinition())
-                    .Contains(genericInterface);
-            }*/
 
         public static bool IsCovariant(Type t) => 0 != (t.GenericParameterAttributes & GenericParameterAttributes.Covariant);
 
@@ -226,7 +223,8 @@ namespace $rootnamespace$.Runtime
         /// <summary>
         /// Checks whether <paramref name="memberOrType"/> has specific attribute <typeparamref name="TAttribute"/>.
         /// </summary>
-        public static bool HasAttribute<TAttribute>(this MemberInfo memberOrType) where TAttribute : Attribute => memberOrType.GetCustomAttributes<TAttribute>(true).Any();
+        public static bool HasAttribute<TAttribute>(this MemberInfo memberOrType) where TAttribute : Attribute => 
+            memberOrType.GetCustomAttributes<TAttribute>(true).Any();
 
         public static bool IsPublic(this MemberInfo mi)
         {
@@ -396,6 +394,29 @@ namespace $rootnamespace$.Runtime
                obj is long || obj is ulong ||
                obj is double || obj is float ||
                obj is decimal;
+
+        #endregion
+
+        #region ValueTuple
+
+        public static bool IsValueTuple(Type type) 
+            => type.IsValueType && type.IsGenericType && 
+#if NETSTANDARD2_0 || NETFRAMEWORK
+            type.Namespace == "System" &&
+            type.Name.StartsWith("ValueTuple`") &&
+            typeof(ValueType).IsAssignableFrom(type);
+#else
+            typeof(ITuple).IsAssignableFrom(type);
+#endif
+        
+        public static bool TryGetValueTupleElements(Type type, out Type[] elementTypes)
+        {
+            bool isValueTuple = IsValueTuple(type);
+            elementTypes = isValueTuple && !type.IsGenericTypeDefinition
+                ? type.GenericTypeArguments 
+                : null;
+            return isValueTuple;
+        }
 
         #endregion
     }

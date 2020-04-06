@@ -32,6 +32,14 @@ namespace $rootnamespace$.Runtime
         {
             if (_typesCache.TryGetValue(type, out string friendlyName))
                 return friendlyName;
+            else if (IsValueTuple(type))
+            {
+                var genArgs = type.GetGenericArguments();
+                return
+                    type.IsGenericTypeDefinition
+                        ? $"({new string(',', genArgs.Length - 1)})"
+                        : $"({string.Join(", ", genArgs.Select(GetFriendlyName).ToArray())})";
+            }
             else if (type.IsArray)
             {
                 var ranks = GetArrayRanks(type);

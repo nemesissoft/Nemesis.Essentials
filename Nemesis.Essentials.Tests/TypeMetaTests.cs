@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -234,9 +235,9 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
 
 
             Assert.That(prop.GetValue(new PropFieldClass(15, 150, 1500, "Text")), Is.EqualTo(1500m));
-            Assert.That(autoProp.GetValue(new PropFieldClass(15, 150, 1500, "Text")), Is.EqualTo("Text") );
+            Assert.That(autoProp.GetValue(new PropFieldClass(15, 150, 1500, "Text")), Is.EqualTo("Text"));
             Assert.That(staticProp.GetValue(null), Is.EqualTo("STATIC"));
-            Assert.That((int) stringLength.GetValue("123456789"), Is.EqualTo(9));
+            Assert.That((int)stringLength.GetValue("123456789"), Is.EqualTo(9));
         }
 
         [Test]
@@ -258,7 +259,7 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
             Assert.That(field.GetValue(new PropFieldClass(15, 150, 1500, "00")), Is.EqualTo(31));
             Assert.That(readOnlyField.GetValue(new PropFieldClass(15, 150, 1500, "00")), Is.EqualTo(150));
             Assert.That(staticField.GetValue(null), Is.EqualTo(16));
-            Assert.That((string) stringEmpty.GetValue(null), Is.EqualTo(""));
+            Assert.That((string)stringEmpty.GetValue(null), Is.EqualTo(""));
 
 
             var instance = new PropFieldClass(15, 15, 15, "");
@@ -522,10 +523,10 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
             new TCD("bool", typeof(bool)),
             new TCD("Dictionary<bool, string>", typeof(Dictionary<bool, string>)),
             new TCD("IDictionary<bool, string>", typeof(IDictionary<bool, string>)),
-            
+
             new TCD("IList<>", typeof(IList<>)),
             new TCD("IDictionary<,>", typeof(IDictionary<,>)),
-            
+
             new TCD("bool[,]", typeof(bool[,])),
             new TCD("int", typeof(int)),
             new TCD("string", typeof(string)),
@@ -539,13 +540,13 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
             new TCD("int[,][]", typeof(int[,][])),
             new TCD("float[][,]", typeof(float[][,])),
             new TCD("double[,][,,,,][][,][][]", typeof(double[,][,,,,][][,][][])),
-            
+
             new TCD("IQueryHandler<IQuery<string>, string>", typeof(IQueryHandler<IQuery<string>, string>)),
             new TCD("IQueryHandler<StringQuery, string>", typeof(IQueryHandler<StringQuery, string>)),
             new TCD("IDictionary<bool, IList<string>>", typeof(IDictionary<bool, IList<string>>)),
             new TCD("IDictionary<,>", typeof(IDictionary<,>)),
             new TCD("IDictionary<bool?[], IList<string>>[]", typeof(IDictionary<bool?[], IList<string>>[])),
-            
+
             new TCD("bool*", typeof(bool*)),
             new TCD("sbyte*[]", typeof(sbyte*[])),
             new TCD("int*[]*", typeof(int*[]).MakePointerType()),
@@ -553,11 +554,33 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
             new TCD("bool&", typeof(bool).MakeByRefType()),
             new TCD("sbyte[]&", typeof(sbyte[]).MakeByRefType()),
             new TCD("int*&", typeof(int*).MakeByRefType()),
+
+            new TCD("float?", typeof(float?)),
+            new TCD("FileMode?", typeof(FileMode?)),
+            // ReSharper disable once ConvertNullableToShortForm
+            new TCD("int?", typeof(Nullable<int>)),
+            new TCD("T?", typeof(Nullable<>)),
+
+
+            new TCD("(string, int, float, decimal, bool, byte, short)", typeof(ValueTuple<string, int, float, decimal, bool, byte, short>)),
+            new TCD("(string, int, float, decimal, bool, byte)", typeof(ValueTuple<string, int, float, decimal, bool, byte>)),
+            new TCD("(string, int, float, decimal, bool)", typeof(ValueTuple<string, int, float, decimal, bool>)),
+            new TCD("(string, int, float, decimal)", typeof(ValueTuple<string, int, float, decimal>)),
+            new TCD("(string, int, float)", typeof(ValueTuple<string, int, float>)),
+            new TCD("(string, int)", typeof(ValueTuple<string, int>)),
+            new TCD("(string)", typeof(ValueTuple<string>)),
+
+            new TCD("(,,,,,,)", typeof(ValueTuple<,,,,,,>)),
+            new TCD("(,,,,,)", typeof(ValueTuple<,,,,,>)),
+            new TCD("(,,,,)", typeof(ValueTuple<,,,,>)),
+            new TCD("(,,,)", typeof(ValueTuple<,,,>)),
+            new TCD("(,,)", typeof(ValueTuple<,,>)),
+            new TCD("(,)", typeof(ValueTuple<,>)),
+            new TCD("()", typeof(ValueTuple<>)),
         };
 
-        
         [TestCaseSource(nameof(GetFriendlyNameData))]
-        public void GetFriendlyNameTests(string expectedName, Type type) => 
+        public void GetFriendlyNameTests(string expectedName, Type type) =>
             Assert.That(type.GetFriendlyName(), Is.EqualTo(expectedName));
 
         #region GetDefault
@@ -625,6 +648,48 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
         {
             var actual = TypeMeta.GetGenericRealization(data.input, data.generic);
             Assert.That(actual, Is.EqualTo(data.expected));
+        }
+
+        #region Cases
+        [TestCase(typeof(ValueTuple<string, int, float, decimal, bool, byte, short>), true)]
+        [TestCase(typeof(ValueTuple<string, int, float, decimal, bool, byte>), true)]
+        [TestCase(typeof(ValueTuple<string, int, float, decimal, bool>), true)]
+        [TestCase(typeof(ValueTuple<string, int, float, decimal>), true)]
+        [TestCase(typeof(ValueTuple<string, int, float>), true)]
+        [TestCase(typeof(ValueTuple<string, int>), true)]
+        [TestCase(typeof(ValueTuple<string>), true)]
+        [TestCase(typeof(ValueTuple<,,,,,,>), true)]
+        [TestCase(typeof(ValueTuple<,,,,,>), true)]
+        [TestCase(typeof(ValueTuple<,,,,>), true)]
+        [TestCase(typeof(ValueTuple<,,,>), true)]
+        [TestCase(typeof(ValueTuple<,,>), true)]
+        [TestCase(typeof(ValueTuple<,>), true)]
+        [TestCase(typeof(ValueTuple<>), true)]
+
+        [TestCase(typeof(Tuple<string, int, float, decimal, bool, byte, short>), false)]
+        [TestCase(typeof(Tuple<string, int, float, decimal, bool, byte>), false)]
+        [TestCase(typeof(Tuple<string, int, float, decimal, bool>), false)]
+        [TestCase(typeof(Tuple<string, int, float, decimal>), false)]
+        [TestCase(typeof(Tuple<string, int, float>), false)]
+        [TestCase(typeof(Tuple<string, int>), false)]
+        [TestCase(typeof(Tuple<string>), false)]
+        [TestCase(typeof(Tuple<,,,,,,>), false)]
+        [TestCase(typeof(Tuple<,,,,,>), false)]
+        [TestCase(typeof(Tuple<,,,,>), false)]
+        [TestCase(typeof(Tuple<,,,>), false)]
+        [TestCase(typeof(Tuple<,,>), false)]
+        [TestCase(typeof(Tuple<,>), false)]
+        [TestCase(typeof(Tuple<>), false)]
+
+        [TestCase(typeof(int), false)]
+        [TestCase(typeof(float), false)]
+        [TestCase(typeof(int?), false)]
+        [TestCase(typeof(float?), false)]
+        #endregion
+        public void IsValueTupleTest(Type type, bool expectedResult)
+        {
+            var actual = TypeMeta.IsValueTuple(type);
+            Assert.That(actual, Is.EqualTo(expectedResult));
         }
     }
 }
