@@ -562,6 +562,7 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
             new TCD("T?", typeof(Nullable<>)),
 
 
+            new TCD("(string, int, float, decimal, bool, byte, (ushort, byte))", typeof(ValueTuple<string, int, float, decimal, bool, byte, ValueTuple<ushort, byte>>)),
             new TCD("(string, int, float, decimal, bool, byte, short)", typeof(ValueTuple<string, int, float, decimal, bool, byte, short>)),
             new TCD("(string, int, float, decimal, bool, byte)", typeof(ValueTuple<string, int, float, decimal, bool, byte>)),
             new TCD("(string, int, float, decimal, bool)", typeof(ValueTuple<string, int, float, decimal, bool>)),
@@ -570,6 +571,7 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
             new TCD("(string, int)", typeof(ValueTuple<string, int>)),
             new TCD("(string)", typeof(ValueTuple<string>)),
 
+            new TCD("(,,,,,,,)", typeof(ValueTuple<,,,,,,,>)),
             new TCD("(,,,,,,)", typeof(ValueTuple<,,,,,,>)),
             new TCD("(,,,,,)", typeof(ValueTuple<,,,,,>)),
             new TCD("(,,,,)", typeof(ValueTuple<,,,,>)),
