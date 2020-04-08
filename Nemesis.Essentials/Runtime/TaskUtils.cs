@@ -22,8 +22,25 @@ namespace Nemesis.Essentials.Runtime
                 throw new TimeoutException($"Timeout of {timeout}: {timeoutExceptionMessage ?? "The operation has timed out."}");
         }
 
+        public static Task WithTimeout(this Task task, long timeoutMilliseconds, string timeoutExceptionMessage = null) =>
+             task.WithTimeout(TimeSpan.FromMilliseconds(timeoutMilliseconds), timeoutExceptionMessage);
+
+        public static async Task WithTimeout(this Task task, TimeSpan timeout, string timeoutExceptionMessage = null)
+        {
+            using var timeoutCancellationTokenSource = new CancellationTokenSource();
+            var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
+            if (completedTask == task)
+            {
+                timeoutCancellationTokenSource.Cancel();
+                await task;
+            }
+            else
+                throw new TimeoutException($"Timeout of {timeout}: {timeoutExceptionMessage ?? "The operation has timed out."}");
+        }
+
         public static Task<TResult> WithTimeout<TResult>(this Task<TResult> task, long timeoutMilliseconds, string timeoutExceptionMessage = null) =>
              task.WithTimeout(TimeSpan.FromMilliseconds(timeoutMilliseconds), timeoutExceptionMessage);
+
 
         public static async Task<TResult> TimeoutAfterWithResult<TResult>(this Task<TResult> task, TimeSpan timeout, Func<TResult> timeoutResultGetter)
         {
