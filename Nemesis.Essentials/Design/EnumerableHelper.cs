@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -376,7 +377,7 @@ namespace Nemesis.Essentials.Design
             }
         }
 
-        [PureMethod, PublicAPI, NotNull]
+        [PureMethod, PublicAPI, JetBrains.Annotations.NotNull]
         public static IEnumerable<T> OrEmpty<T>([CanBeNull]this IEnumerable<T> enumerable) => enumerable ?? Enumerable.Empty<T>();
 
         [PureMethod, PublicAPI, ContractAnnotation("enumerable:null => true; enumerable:notnull=>false")]
@@ -836,6 +837,31 @@ namespace Nemesis.Essentials.Design
         #region Iterators
 
         /// <summary>
+        /// Iterate over enumeration and print it to console 
+        /// </summary>
+        /// <example><![CDATA[
+        /// Enumerable.Range(1, 10).LogLinq("all")
+        ///    .Take(8).LogLinq("Take8")
+        ///    .Where(i => i%2 == 0).LogLinq("Even")
+        ///    .OrderByDescending(i => i).LogLinq("Reversed") ]]></example>
+        [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
+        public static IEnumerable<T> LogLinq<T>(this IEnumerable<T> enumerable, string logName = null, Func<T, string> printMethod = null)
+        {
+#if DEBUG
+            logName ??= "all";
+            int count = 0;
+
+            foreach (var item in enumerable)
+                Debug.WriteLine(
+                    $"{(count == 0 ? logName : new string(' ', logName.Length))}{(count == 0 ? "┬" : "├")} {count++} ⇒ {printMethod?.Invoke(item) ?? item?.ToString() ?? "∅"}");
+            Debug.WriteLine($"{logName}:count = {count}");
+          
+#endif
+    return enumerable;
+
+        }
+
+        /// <summary>
         ///   Transforms enumerable type into reversed one.
         /// </summary>
         /// <param name="list">Enumerable that is to be extended</param>
@@ -877,7 +903,7 @@ namespace Nemesis.Essentials.Design
 #pragma warning disable IDE0063 // Use simple 'using' statement
             // ReSharper disable ConvertToUsingDeclaration
             using (var enu = enumerable.GetEnumerator())
-            // ReSharper restore ConvertToUsingDeclaration
+                // ReSharper restore ConvertToUsingDeclaration
 #pragma warning restore IDE0063 // Use simple 'using' statement
                 while (enu.MoveNext())
                 {
@@ -1037,26 +1063,6 @@ namespace Nemesis.Essentials.Design
         [PureMethod, PublicAPI]
         public static IReadOnlyDictionary<TKey, TElement> ToReadOnlyDictionary<TKey, TElement>(this IDictionary<TKey, TElement> dict) =>
             new ReadOnlyDictionary<TKey, TElement>(dict);
-
-        #endregion
-
-        #region Set
-
-        [PureMethod, PublicAPI]
-        public static ISet<T> ToSet<T>(this IEnumerable<T> source, IEqualityComparer<T> comparer)
-            => source == null ? throw new ArgumentNullException(nameof(source)) : new HashSet<T>(source, comparer);
-
-        [PureMethod, PublicAPI]
-        public static ISet<T> ToSet<T>(this IEnumerable<T> source)
-            => source == null ? throw new ArgumentNullException(nameof(source)) : (source as ISet<T> ?? new HashSet<T>(source));
-
-        [PureMethod, PublicAPI]
-        public static bool AddAll<T>(this ISet<T> set, IEnumerable<T> values)
-            => values.Aggregate(false, (result, v) => result | set.Add(v));
-
-        [PureMethod, PublicAPI]
-        public static bool RemoveAll<T>(this ISet<T> set, IEnumerable<T> values)
-            => values.Aggregate(false, (result, v) => result | set.Remove(v));
 
         #endregion
 
