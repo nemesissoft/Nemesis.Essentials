@@ -27,7 +27,7 @@ namespace Nemesis.Essentials.Maths
         public readonly decimal Value;
 
         /// <summary>
-        /// This is no allocating equivalent of decimal.GetBits()
+        /// This is no allocating equivalent of <see cref="decimal.GetBits"/>
         /// </summary>
         /// <param name="index">0..3</param>
         /// <returns>

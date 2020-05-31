@@ -76,5 +76,24 @@ namespace Nemesis.Essentials.Runtime
             return task.ContinueWith(t => action(t.Result),
                 TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnRanToCompletion);
         }
+
+
+        public static void Forget(this Task task, Action<Exception> exceptionHandler = null)
+        {
+            if (!task.IsCompleted || task.IsFaulted)
+                _ = ForgetAwaited(task, exceptionHandler);
+
+            static async Task ForgetAwaited(Task task, Action<Exception> exceptionHandler = null)
+            {
+                try
+                {
+                    await task.ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    exceptionHandler?.Invoke(e);
+                }
+            }
+        }
     }
 }
