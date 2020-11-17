@@ -157,7 +157,7 @@ namespace Nemesis.Essentials.Tests
         [TestCase(false, "LIVE", true)]
         [TestCase(false, "Live", true)]
         [TestCase(false, "Live2", false)]
-        public void ToParsingDictionary_CheckKeyExistance(bool caseSensitiveKey, string keyToCheck, bool expectedKeyPresence)
+        public void ToParsingDictionary_CheckKeyExistence(bool caseSensitiveKey, string keyToCheck, bool expectedKeyPresence)
         {
             var dict = EnumTranslator.ToParsingDictionary<StandardEnum>(caseSensitiveKey);
 
