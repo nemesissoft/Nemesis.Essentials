@@ -187,7 +187,7 @@ namespace Nemesis.Essentials.Design
             try
             {
                 using var sr = new StreamReader(stream, encoding ?? DefaultEncoding, true, -1, true);
-                string line;
+                string? line;
                 while ((line = sr.ReadLine()) != null)
                     yield return line;
             }

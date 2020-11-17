@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
+
 using JetBrains.Annotations;
 
 #nullable enable
@@ -77,31 +78,23 @@ namespace Nemesis.Essentials.Maths
         /// </summary>
         /// <param name="format">"L", "LATEX", "M", "MATH", "MATHML", "R", "RAW", "T", "TEXT"</param>
         /// <param name="formatProvider"></param>
-        public string ToString(string? format, IFormatProvider formatProvider)
-        {
-            switch (format?.ToUpperInvariant() ?? "T")
+        public string ToString(string? format, IFormatProvider? formatProvider) =>
+            (format?.ToUpperInvariant() ?? "T") switch
             {
-                case "L":
-                case "LATEX":
-                    return FormatLaTeX();
-                case "M":
-                case "MATH":
-                case "MATHML":
-                    return FormatMathML();
-                case "R":
-                case "RAW":
-                    return FormatRaw();
-                case "T":
-                case "TEXT":
-                    return FormatText(formatProvider);
-                case "H":
-                case "X":
-                case "HEX":
-                    return FormatHex(formatProvider);
-                default:
-                    return Value.ToString(format, formatProvider);
-            }
-        }
+                "L" => FormatLaTeX(),
+                "LATEX" => FormatLaTeX(),
+                "M" => FormatMathML(),
+                "MATH" => FormatMathML(),
+                "MATHML" => FormatMathML(),
+                "R" => FormatRaw(),
+                "RAW" => FormatRaw(),
+                "T" => FormatText(formatProvider),
+                "TEXT" => FormatText(formatProvider),
+                "H" => FormatHex(formatProvider),
+                "X" => FormatHex(formatProvider),
+                "HEX" => FormatHex(formatProvider),
+                _ => Value.ToString(format, formatProvider)
+            };
 
         private string FormatLaTeX()
         {
@@ -152,7 +145,7 @@ namespace Nemesis.Essentials.Maths
                 $"new decimal(0x{Low:X}, 0x{Mid:X}, 0x{High:X}, {(IsNegative ? "true" : "false")}, 0x{Scale:X})"
             );
 
-        private string FormatText(IFormatProvider formatProvider)
+        private string FormatText(IFormatProvider? formatProvider)
         {
             BigInteger numerator96Bit = (new BigInteger(UnsignedHigh) << 64) + ((ulong)UnsignedMid << 32) + UnsignedLow;
             var denominatorPower = Scale;
@@ -162,7 +155,7 @@ namespace Nemesis.Essentials.Maths
 
 
         private static readonly char[] _hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-        private string FormatHex(IFormatProvider formatProvider)
+        private string FormatHex(IFormatProvider? formatProvider)
         {
             string separator = NumberFormatInfo.GetInstance(formatProvider).NumberDecimalSeparator;
 
@@ -204,19 +197,17 @@ namespace Nemesis.Essentials.Maths
 
         public static readonly DecimalFormatter InvariantInstance = new DecimalFormatter(CultureInfo.InvariantCulture);
 
-        public object? GetFormat(Type service) =>
+        public object? GetFormat(Type? service) =>
             typeof(ICustomFormatter).IsAssignableFrom(service) || typeof(IFormatProvider).IsAssignableFrom(service)
             ? this : null;
 
-        public string Format(string? format, object arg, IFormatProvider provider)
-        {
-            if (arg is decimal number)
-                return ((DecimalMeta)number).ToString(format, _underlyingProvider);
-            else if (arg is DecimalMeta dm)
-                return dm.ToString(format, _underlyingProvider);
-            else
-                return (arg as IFormattable)?.ToString(format, provider) ?? (arg ?? "").ToString();
-        }
+        public string Format(string? format, object? arg, IFormatProvider? provider) =>
+            arg switch
+            {
+                decimal number => ((DecimalMeta) number).ToString(format, _underlyingProvider),
+                DecimalMeta dm => dm.ToString(format, _underlyingProvider),
+                _ => (arg as IFormattable)?.ToString(format, provider) ?? arg?.ToString() ?? ""
+            };
     }
 
     public static class DecimalFormatterHelper

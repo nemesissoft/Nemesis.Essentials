@@ -209,7 +209,6 @@ namespace Nemesis.Essentials.Design
         /// <param name="list">List that contains values to be switched</param>
         /// <param name="index1">The first value's index.</param>
         /// <param name="index2">The second value's index.</param>
-        [ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
         [PublicAPI]
         [CollectionAccess(CollectionAccessType.ModifyExistingContent)]
         public static void Swap<T>(IList<T> list, int index1, int index2)
@@ -225,7 +224,6 @@ namespace Nemesis.Essentials.Design
         /// <param name="list">List that contains values to be switched</param>
         /// <param name="index1">The first value's index.</param>
         /// <param name="index2">The second value's index.</param>
-        [ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
         [PublicAPI]
         [CollectionAccess(CollectionAccessType.ModifyExistingContent)]
         public static void SwapNg(IList list, int index1, int index2)
@@ -1143,7 +1141,6 @@ namespace Nemesis.Essentials.Design
             } while (left < right);
         }
 
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
         private static void SwapIfGreaterWithItems<T>(IList<T> keys, IComparer<T> comparer, int a, int b)
         {
             if (a != b && comparer.Compare(keys[a], keys[b]) > 0)

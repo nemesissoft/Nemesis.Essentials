@@ -262,12 +262,12 @@ namespace Nemesis.Essentials.Design
         public static string ToDescription<TEnum>(this TEnum @enum) where TEnum : Enum
         {
             var enumType = typeof(TEnum);
-            
+
             var map = (IDictionary<TEnum, string>)_enumMaps.GetOrAdd(enumType, t => ToMappingDictionary<TEnum>());
-            
+
             if (IsFlagEnum(enumType))
             {
-                var enumNumber = Convert.ToInt64(@enum,CultureInfo.InvariantCulture);
+                var enumNumber = Convert.ToInt64(@enum, CultureInfo.InvariantCulture);
                 return enumNumber == 0
                     ? map[@enum]
                     : string.Join(FLAG_SEPARATOR,
@@ -286,7 +286,7 @@ namespace Nemesis.Essentials.Design
         public static TEnum FromDescription<TEnum>(this string description) where TEnum : Enum
         {
             var enumType = typeof(TEnum);
-            
+
             var map = (IDictionary<string, TEnum>)_enumParsers.GetOrAdd(enumType, t => ToParsingDictionary<TEnum>());
 
             if (IsFlagEnum(enumType))
@@ -294,13 +294,13 @@ namespace Nemesis.Essentials.Design
                 string[] abbreviations = description.Split(new[] { FLAG_SEPARATOR }, StringSplitOptions.RemoveEmptyEntries);
 
                 long @enum = abbreviations.Aggregate<string, long>(0, (current, abbr) => current | Convert.ToInt64(map[abbr], CultureInfo.InvariantCulture));
-                
+
                 return (TEnum)Enum.ToObject(enumType, @enum);
             }
             else
             {
                 return !map.TryGetValue(description, out var @enum)
-                    ? throw new MissingFieldException($"Valid {@enum.GetType().Name} abbreviation is needed at this point")
+                    ? throw new MissingFieldException($"Valid {@enum?.GetType()?.Name ?? "ENUM"} abbreviation is needed at this point")
                     : @enum;
             }
         }
@@ -327,12 +327,12 @@ namespace Nemesis.Essentials.Design
         public static TEnum FromEnumName<TEnum>(this string value) where TEnum : Enum =>
             string.IsNullOrEmpty(value)
                 ? throw new ArgumentException(@"string passed to be parsed can't be null nor empty.", nameof(value))
-                : (TEnum) Enum.Parse(typeof(TEnum), value, true);
+                : (TEnum)Enum.Parse(typeof(TEnum), value, true);
 
         public static IList<TEnum> ToList<TEnum>() where TEnum : Enum => Enum.GetValues(typeof(TEnum)).Cast<TEnum>().ToList(); //if (!typeof(TEnum).IsEnum) throw new ArgumentException("T has to be descendant of Enum class.");
 
         public static IDictionary<TEnum, string> ToMappingDictionary<TEnum>()
-            where TEnum : Enum => ToMappingDictionary<TEnum, string, DescriptionAttribute>(da => da.Description);
+            where TEnum : Enum => ToMappingDictionary<TEnum, string, DescriptionAttribute>(da => da?.Description ?? "<No description>");
 
         /// <summary>
         /// Generates a dictionary that maps enum to arbitrary type
@@ -363,27 +363,28 @@ namespace Nemesis.Essentials.Design
         /// ]]>
         /// </code>
         /// </example>
-        public static IDictionary<TEnum, TResult> ToMappingDictionary<TEnum, TResult, TAttribute>(Func<TAttribute, TResult> descriptionFunc)
+        public static IDictionary<TEnum, TResult> ToMappingDictionary<TEnum, TResult, TAttribute>(Func<TAttribute?, TResult> descriptionFunc)
             where TEnum : Enum
-            where TAttribute : Attribute 
+            where TAttribute : Attribute
             =>
                 typeof(TEnum).GetFields(BindingFlags.Public | BindingFlags.Static).ToDictionary(
-                    f => (TEnum)f.GetValue(null),
+                    f => (TEnum)f.GetValue(null)!,
                     f => descriptionFunc(f.GetCustomAttribute<TAttribute>())
                 );
 
         public static IDictionary<string, TEnum> ToParsingDictionary<TEnum>(bool caseSensitiveKey = true) where TEnum : Enum
-            => ToParsingDictionary<TEnum, string, DescriptionAttribute>(da => da.Description,
+            => ToParsingDictionary<TEnum, string, DescriptionAttribute>(da => da?.Description ?? "<No description>",
                 caseSensitiveKey ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase
                 );
 
-        public static IDictionary<TResult, TEnum> ToParsingDictionary<TEnum, TResult, TAttribute>(Func<TAttribute, TResult> descriptionFunc, IEqualityComparer<TResult>? comparer = null)
+        public static IDictionary<TResult, TEnum> ToParsingDictionary<TEnum, TResult, TAttribute>(Func<TAttribute?, TResult> descriptionFunc, IEqualityComparer<TResult>? comparer = null)
               where TEnum : Enum
-              where TAttribute : Attribute 
+              where TAttribute : Attribute
+              where TResult : notnull
             =>
             typeof(TEnum).GetFields(BindingFlags.Public | BindingFlags.Static).ToDictionary(
                 f => descriptionFunc(f.GetCustomAttribute<TAttribute>()),
-                f => (TEnum)f.GetValue(null),
+                f => (TEnum)f.GetValue(null)!,
                 comparer ?? EqualityComparer<TResult>.Default
             );
 
@@ -420,7 +421,7 @@ namespace Nemesis.Essentials.Design
         /// ]]>
         /// </code>
         /// </example>
-        public static bool IsEnumValueValid<TEnum>(TEnum value, Type? enumType=null) where TEnum : Enum =>
+        public static bool IsEnumValueValid<TEnum>(TEnum value, Type? enumType = null) where TEnum : Enum =>
             enumType == null
                 ? Enum.IsDefined(value.GetType(), value)
                 : value.GetType() == enumType && Enum.IsDefined(enumType, value);
