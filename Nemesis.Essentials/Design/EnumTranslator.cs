@@ -5,12 +5,14 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using JetBrains.Annotations;
 
 #nullable enable
 
 namespace Nemesis.Essentials.Design
 {
     /// <summary> Provides a static utility object of methods and properties to interact with enumerated types.</summary>
+    [PublicAPI]
     public static class EnumTranslator
     {
         #region Flags
@@ -300,7 +302,7 @@ namespace Nemesis.Essentials.Design
             else
             {
                 return !map.TryGetValue(description, out var @enum)
-                    ? throw new MissingFieldException($"Valid {@enum?.GetType()?.Name ?? "ENUM"} abbreviation is needed at this point")
+                    ? throw new MissingFieldException($"Valid {@enum?.GetType().Name ?? "ENUM"} abbreviation is needed at this point")
                     : @enum;
             }
         }
@@ -332,7 +334,9 @@ namespace Nemesis.Essentials.Design
         public static IList<TEnum> ToList<TEnum>() where TEnum : Enum => Enum.GetValues(typeof(TEnum)).Cast<TEnum>().ToList(); //if (!typeof(TEnum).IsEnum) throw new ArgumentException("T has to be descendant of Enum class.");
 
         public static IDictionary<TEnum, string> ToMappingDictionary<TEnum>()
-            where TEnum : Enum => ToMappingDictionary<TEnum, string, DescriptionAttribute>(da => da?.Description ?? "<No description>");
+            where TEnum : Enum => ToMappingDictionary<TEnum, string, DescriptionAttribute>(da =>
+            da != null ? da.Description : throw new NotSupportedException("For automatic mapping to work - every enum member needs to be decorated with DescriptionAttribute")
+        );
 
         /// <summary>
         /// Generates a dictionary that maps enum to arbitrary type
@@ -373,7 +377,8 @@ namespace Nemesis.Essentials.Design
                 );
 
         public static IDictionary<string, TEnum> ToParsingDictionary<TEnum>(bool caseSensitiveKey = true) where TEnum : Enum
-            => ToParsingDictionary<TEnum, string, DescriptionAttribute>(da => da?.Description ?? "<No description>",
+            => ToParsingDictionary<TEnum, string, DescriptionAttribute>(da =>
+                    da != null ? da.Description : throw new NotSupportedException("For automatic mapping to work - every enum member needs to be decorated with DescriptionAttribute"),
                 caseSensitiveKey ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase
                 );
 

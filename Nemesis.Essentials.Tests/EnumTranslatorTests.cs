@@ -164,6 +164,18 @@ namespace Nemesis.Essentials.Tests
             Assert.That(dict.ContainsKey(keyToCheck), Is.EqualTo(expectedKeyPresence));
         }
 
+        [TestCase(StandardEnumWithNull.None, "XXX")]
+        [TestCase(StandardEnumWithNull.Unack, "UNACK")]
+        [TestCase(StandardEnumWithNull.Live, "LiVE")]
+        [TestCase(StandardEnumWithNull.Alive, null)]
+        public void ToMappingDictionary_CheckValues(StandardEnumWithNull keyToCheck, string expectedValue)
+        {
+            var dict = EnumTranslator.ToMappingDictionary<StandardEnumWithNull>();
+
+            Assert.That(dict, Does.ContainKey(keyToCheck));
+            Assert.That(dict[keyToCheck], Is.EqualTo(expectedValue));
+        }
+
         public enum StandardEnum
         {
             [DescAttr("XXX")]
@@ -172,6 +184,18 @@ namespace Nemesis.Essentials.Tests
             Unack = 1,
             [DescAttr("LIVE")]
             Live = 2
+        }
+        
+        public enum StandardEnumWithNull
+        {
+            [DescAttr("XXX")]
+            None = 0,
+            [DescAttr("UNACK")]
+            Unack = 1,
+            [DescAttr("LiVE")]
+            Live = 2,
+            [DescAttr(null)]
+            Alive = 3,
         }
 
         [Flags]
