@@ -66,9 +66,29 @@ namespace Nemesis.Essentials.Tests
         public void Equals_Negative((ValueCollection<string> left, ValueCollection<string> right) data)
         {
             var (left, right) = data;
-            
+
             Assert.That(left, Is.Not.EqualTo(right), "Equals assert");
         }
+
+
+        private static IEnumerable<TestCaseData> GetToStringCases() => new[]
+            {
+                (new ValueCollection<string>(), @"[]"),
+                (new ValueCollection<string>(){ null }, @"[∅]"),
+                (new ValueCollection<string>(){ "" }, @"[""""]"),
+                (new ValueCollection<string>(){ "1", "" }, @"[""1"", """"]"),
+                (new ValueCollection<string>(){ "", "2" }, @"["""", ""2""]"),
+                (new ValueCollection<string>(){ "1", "2", "3" }, @"[""1"", ""2"", ""3""]"),
+            }
+            .Select((data, i) => new TestCaseData(data.Item1, data.Item2).SetName($"ToString_{i + 1:00}"));
+        [TestCaseSource(nameof(GetToStringCases))]
+        public void ToString_ShouldYieldValidText(ValueCollection<string> collection, string expectedText)
+        {
+            var actual = collection.ToString();
+
+            Assert.That(actual, Is.EqualTo(expectedText));
+        }
+
     }
 
     internal static class ValueCollectionHelper

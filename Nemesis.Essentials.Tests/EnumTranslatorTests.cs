@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+
 using Nemesis.Essentials.Design;
+
 using NUnit.Framework;
+
 using DescAttr = System.ComponentModel.DescriptionAttribute;
 
 namespace Nemesis.Essentials.Tests
@@ -118,17 +122,18 @@ namespace Nemesis.Essentials.Tests
             Assert.AreEqual(expectedEnum, result);
         }
 
-        [TestCase("DDD", typeof(FlagEnum))]
-        [TestCase("DDD", typeof(StandardEnum))]
-        [TestCase("LIVE | DDD", typeof(FlagEnum))]
-        //[TestCase("DDD", typeof(int))]
-        public void FromDescription_NegativeTests(string text, Type enumType)
+        [TestCase("DDD", typeof(FlagEnum), typeof(KeyNotFoundException))]
+        [TestCase("DDD", typeof(StandardEnum), typeof(MissingFieldException))]
+        [TestCase("LIVE | DDD", typeof(FlagEnum), typeof(KeyNotFoundException))]        
+        public void FromDescription_NegativeTests(string text, Type enumType, Type expectedException)
         {
             var method = (
                 typeof(EnumTranslator).GetMethod(nameof(EnumTranslator.FromDescription)) ?? throw new InvalidOperationException($"Method {nameof(EnumTranslator.FromDescription)} does not exist in {nameof(EnumTranslator)}")
                 ).MakeGenericMethod(enumType);
 
-            Assert.Throws<TargetInvocationException>(() => method.Invoke(null, new object[] { text }));
+            var tie = Assert.Throws<TargetInvocationException>(() => method.Invoke(null, new object[] { text }));
+
+            Assert.That(tie.InnerException, Is.TypeOf(expectedException));
         }
 
         [TestCase("None", StandardEnum.None)]
@@ -185,7 +190,7 @@ namespace Nemesis.Essentials.Tests
             [DescAttr("LIVE")]
             Live = 2
         }
-        
+
         public enum StandardEnumWithNull
         {
             [DescAttr("XXX")]

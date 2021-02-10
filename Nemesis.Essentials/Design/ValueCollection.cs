@@ -47,11 +47,7 @@ namespace Nemesis.Essentials.Design
             ));
 
         public string ToString(string? format, IFormatProvider? formatProvider)
-        {
-            //TODO propose a meaningful format i.e. [,] or {;}
-
-            return $"[{FormatValue(this, formatProvider)}]";
-        }
+            => "[" + string.Join(", ", this.Select(e => FormatValue(e, formatProvider))) + "]";
 
         public override string? ToString() => ToString(null, CultureInfo.CurrentCulture);
 
