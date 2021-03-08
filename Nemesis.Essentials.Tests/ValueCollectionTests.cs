@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Nemesis.Essentials.Design;
@@ -73,6 +74,7 @@ namespace Nemesis.Essentials.Tests
 
         private static IEnumerable<TestCaseData> GetToStringCases() => new[]
             {
+                (new ValueCollection<string>(null), @"[]"),
                 (new ValueCollection<string>(), @"[]"),
                 (new ValueCollection<string>(){ null }, @"[∅]"),
                 (new ValueCollection<string>(){ "" }, @"[""""]"),
@@ -88,7 +90,6 @@ namespace Nemesis.Essentials.Tests
 
             Assert.That(actual, Is.EqualTo(expectedText));
         }
-
     }
 
     internal static class ValueCollectionHelper

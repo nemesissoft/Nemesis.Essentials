@@ -3,8 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net5.0;net472;net461;net48;netcoreapp3.1</TargetFrameworks>
     <DefineConstants>$(DefineConstants);NEMESIS_BINARY_PACKAGE_TESTS</DefineConstants>
-    <LangVersion>8</LangVersion>
-
+    
   </PropertyGroup>
 
   <ItemGroup>

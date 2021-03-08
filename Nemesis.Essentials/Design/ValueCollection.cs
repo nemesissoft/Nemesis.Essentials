@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 
@@ -10,12 +9,12 @@ using System.Linq;
 
 namespace Nemesis.Essentials.Design
 {
-    public sealed class ValueCollection<T> : Collection<T>, IEquatable<ValueCollection<T>>, IFormattable
+    public class ValueCollection<T> : Collection<T>, IEquatable<ValueCollection<T>>, IFormattable
     {
         private readonly IEqualityComparer<T> _equalityComparer;
 
         public ValueCollection() : this(new List<T>()) { }
-
+        
         public ValueCollection(IEqualityComparer<T>? equalityComparer = null) : this(new List<T>(), equalityComparer) { }
 
         public ValueCollection(IList<T> list, IEqualityComparer<T>? equalityComparer = null) : base(list) =>
@@ -23,8 +22,6 @@ namespace Nemesis.Essentials.Design
 
         public bool Equals(ValueCollection<T>? other)
         {
-            Debug.Assert(_equalityComparer != null, "_equalityComparer != null");
-
             if (other is null) return false;
 
             if (ReferenceEquals(this, other)) return true;
@@ -49,7 +46,7 @@ namespace Nemesis.Essentials.Design
         public string ToString(string? format, IFormatProvider? formatProvider)
             => "[" + string.Join(", ", this.Select(e => FormatValue(e, formatProvider))) + "]";
 
-        public override string? ToString() => ToString(null, CultureInfo.CurrentCulture);
+        public override string ToString() => ToString(null, CultureInfo.CurrentCulture);
 
         private static string? FormatValue(object? value, IFormatProvider? formatProvider) =>
             value switch
