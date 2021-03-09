@@ -1,22 +1,47 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
+#nullable enable
+
 namespace Nemesis.Essentials.Design
 {
-    public class ReferenceLoopProneValueCollection<T> : ValueCollection<T>
+    public class ReferenceLoopProneValueCollection<T> : ICollection<T>
     {
         private const string LoopDetectedNotification = "## SELF REFERENCING LOOP DETECTED ##";
 
-        public ReferenceLoopProneValueCollection() : base(new List<T>()) { }
+        private readonly ValueCollection<T> _decoratee;
 
-        public ReferenceLoopProneValueCollection(IEqualityComparer<T> equalityComparer = null) : base(new List<T>(), equalityComparer) { }
+        public ReferenceLoopProneValueCollection(ValueCollection<T> decoratee) => _decoratee = decoratee;
 
-        public ReferenceLoopProneValueCollection(IList<T> list, IEqualityComparer<T> equalityComparer = null) : base(list) { }
+        public ReferenceLoopProneValueCollection() : this(new ValueCollection<T>()) { }
 
-        public override string ToString() => CheckSelfReferencingLoop() ?? base.ToString();
+        public ReferenceLoopProneValueCollection(IEqualityComparer<T>? equalityComparer = null) : this(new ValueCollection<T>(equalityComparer)) { }
 
-        private static string CheckSelfReferencingLoop()
+        public ReferenceLoopProneValueCollection(IList<T> list, IEqualityComparer<T>? equalityComparer = null) : this(new ValueCollection<T>(list, equalityComparer)) { }
+
+        public IEnumerator<T> GetEnumerator() => _decoratee.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_decoratee).GetEnumerator();
+
+        public void Add(T item) => _decoratee.Add(item);
+
+        public void Clear() => _decoratee.Clear();
+
+        public bool Contains(T item) => _decoratee.Contains(item);
+
+        public void CopyTo(T[] array, int arrayIndex) => _decoratee.CopyTo(array, arrayIndex);
+
+        public bool Remove(T item) => _decoratee.Remove(item);
+
+        public int Count => _decoratee.Count;
+
+        public bool IsReadOnly => ((ICollection<T>)_decoratee).IsReadOnly;
+        
+        public override string? ToString() => CheckSelfReferencingLoop() ?? _decoratee.ToString();
+
+        private static string? CheckSelfReferencingLoop()
         {
             StackTrace stackTrace = new();
             var callerMethodHandleValue = stackTrace.GetFrame(1)?.GetMethod()?.MethodHandle.Value ?? default;
