@@ -7,8 +7,6 @@ namespace Nemesis.Essentials.Tests
     [TestFixture(TestOf = typeof(ReferenceLoopProneValueCollection<>))]
     public class ReferenceLoopProneValueCollectionTests
     {
-        private const string LoopDetectedNotification = "## SELF REFERENCING LOOP DETECTED ##";
-
         public record A
         {
             public ICollection<B> Collection = new ReferenceLoopProneValueCollection<B>();
@@ -31,7 +29,7 @@ namespace Nemesis.Essentials.Tests
             var aToString = a.ToString();
 
             //Assert
-            Assert.True(aToString.Contains(LoopDetectedNotification));
+            Assert.True(aToString.Contains(ReferenceLoopProneValueCollection<B>.LoopDetectedNotification));
         }
 
         [Test]
@@ -46,7 +44,7 @@ namespace Nemesis.Essentials.Tests
             var aToString = a.ToString();
 
             //Assert
-            Assert.False(aToString.Contains(LoopDetectedNotification));
+            Assert.False(aToString.Contains(ReferenceLoopProneValueCollection<B>.LoopDetectedNotification));
         }
     }
 }

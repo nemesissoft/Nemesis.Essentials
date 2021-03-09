@@ -9,7 +9,7 @@ namespace Nemesis.Essentials.Design
 {
     public class ReferenceLoopProneValueCollection<T> : ICollection<T>
     {
-        private const string LoopDetectedNotification = "## SELF REFERENCING LOOP DETECTED ##";
+        internal const string LoopDetectedNotification = "## SELF REFERENCING LOOP DETECTED ##";
 
         private readonly ValueCollection<T> _decoratee;
 
