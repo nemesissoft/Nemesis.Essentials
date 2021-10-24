@@ -61,7 +61,7 @@ namespace Nemesis.Essentials.Tests
 
             Assert.That(sut.IsEnd, Is.True);
         }
-        
+
         [Test]
         public void ReadInt64_ReturnsAppropriateValues()
         {
@@ -123,21 +123,25 @@ namespace Nemesis.Essentials.Tests
             using var ms = new MemoryStream();
             foreach (var b in bytes)
                 ms.WriteByte(b);
-
-            var sut = new SpanBufferReader(ms.ToArray());
+            var buffer = ms.ToArray();
+            var sut = new SpanBufferReader(buffer);
 
             Assert.That(sut.ReadUnsignedVarint(), Is.EqualTo(expectedNumber));
 
-            Assert.That(sut.IsEnd, Is.True);
-        }       
+            static string SpanToString(ReadOnlySpan<byte> span) =>
+                string.Join(", ", span.ToArray().Select(b => b.ToString("X2")));
+
+
+            Assert.That(sut.IsEnd, Is.True, $"End not reached. Remaining [{SpanToString(sut.Tail())}] out of [{SpanToString(buffer)}]");
+        }
     }
 
     public static class SpanBufferReaderExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int ReadVarint(this SpanBufferReader reader)
+        public static int ReadVarint(this ref  SpanBufferReader reader)
         {
-            var value = ReadUnsignedVarint(reader);
+            var value = ReadUnsignedVarint(ref reader);
             return (int)((value >> 1) ^ -(value & 1));
         }
 
@@ -149,7 +153,7 @@ namespace Nemesis.Essentials.Tests
         ///     Inspired by: https://github.com/apache/kafka/blob/2.5/clients/src/main/java/org/apache/kafka/common/utils/ByteUtils.java#L142
         /// </remarks>
         /// <exception cref="OverflowException">Thrown if variable-length value does not terminate after 5 bytes have been read</exception>
-        public static uint ReadUnsignedVarint(this SpanBufferReader reader)
+        public static uint ReadUnsignedVarint(this ref SpanBufferReader reader)
         {
             int value = 0;
             int i = 0;
