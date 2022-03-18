@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -25,16 +26,12 @@ namespace $rootnamespace$.Runtime
 
     public static class Event
     {
-        public static EventInfo Of<TType>(Expression<Func<TType, Delegate>> @event)
-        {
-            if (@event.Body.NodeType == ExpressionType.MemberAccess && ((MemberExpression)@event.Body).Member.MemberType == MemberTypes.Field)
-            {
-                var eventField = (FieldInfo)((MemberExpression)@event.Body).Member;
-                return eventField.DeclaringType?.GetEvent(eventField.Name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-            }
-            else
-                throw new Exception("Only member (event) expressions are valid at this point");
-        }
+        public static EventInfo? Of<TType>(Expression<Func<TType, Delegate>> @event) =>
+            @event.Body.NodeType == ExpressionType.MemberAccess && @event.Body is MemberExpression body &&
+            body.Member.MemberType == MemberTypes.Field &&
+            body.Member is FieldInfo eventField
+                ? eventField.DeclaringType?.GetEvent(eventField.Name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
+                : throw new Exception("Only member (event) expressions are valid at this point");
         /*//var clickEventHandler = TypeInfo.EventInvokerOf<TypeInfoTests>(tit => tit.Click);
         //var staticClickEventHandler = TypeInfo.Of<TypeInfoTests>(tit => StaticClick);
         public static MethodInfo EventInvokerOf<T>(Expression<Func<T, Delegate>> @event)
@@ -52,16 +49,16 @@ namespace $rootnamespace$.Runtime
 
     public static class Ctor
     {
-        public static ConstructorInfo Of<TType>(Expression<Func<TType>> constructor) =>
+        public static ConstructorInfo? Of<TType>(Expression<Func<TType>> constructor) =>
             constructor.Body is NewExpression ctor ? ctor.Constructor : throw new Exception("Only constructor expressions are valid at this point");
 
         public static Func<TType> FactoryOf<TType>(Expression<Func<TType>> constructor, params object[] ctorArguments)
         {
-            ConstructorInfo ctor = Of(constructor);
+            var ctor = Of(constructor) ?? throw new MissingMemberException("Class ctor is missing in given expression");
 
             ParameterInfo[] ctorParamsInfos;
             if ((ctorParamsInfos = ctor.GetParameters()).Length != ctorArguments.Length)
-                throw new ArgumentException($@"Length of {ctorArguments} and {constructor} parameters have to be equal.", nameof(ctorArguments));
+                throw new ArgumentException($@"Length of {nameof(ctorArguments)} and {nameof(constructor)} parameters have to be equal.", nameof(ctorArguments));
 
             var ctorArgumentsExpressions = ctorArguments.Zip(ctorParamsInfos, (o, pi) => Expression.Convert(Expression.Constant(o), pi.ParameterType)).ToList();
 
@@ -76,10 +73,10 @@ namespace $rootnamespace$.Runtime
     {
         public static PropertyInfo Of<TType, TProp>(Expression<Func<TType, TProp>> memberExpression)
         {
-            if (memberExpression.Body is MemberExpression memberAccess && memberAccess.Member is PropertyInfo property)
+            if (memberExpression.Body is MemberExpression { Member: PropertyInfo property })
                 return property;
-            else if (memberExpression.Body.NodeType == ExpressionType.Convert && memberExpression.Body is UnaryExpression convert &&
-                     convert.Operand is MemberExpression memberExpr && memberExpr.Member is PropertyInfo property2)
+            else if (memberExpression.Body.NodeType == ExpressionType.Convert &&
+                     memberExpression.Body is UnaryExpression { Operand: MemberExpression { Member: PropertyInfo property2 } })
                 return property2;
             else
                 throw new ArgumentException(@"Only member (property) expressions are valid at this point. Unable to determine property info from expression.", nameof(memberExpression));
@@ -118,21 +115,20 @@ namespace $rootnamespace$.Runtime
     public static class Field
     {
         public static FieldInfo Of<TType, TField>(Expression<Func<TType, TField>> fieldExpression) =>
-            fieldExpression.Body is MemberExpression memberAccess && memberAccess.Member is FieldInfo field ? field
-            : throw new Exception("Only member (field) expressions are valid at this point");
+            fieldExpression.Body is MemberExpression { Member: FieldInfo field }
+                ? field
+                : throw new Exception("Only member (field) expressions are valid at this point");
     }
 
     public static class Indexer
     {
         public static PropertyInfo Of<TType, TProp>(Expression<Func<TType, TProp>> indexer)
         {
-            if (indexer.Body.NodeType != ExpressionType.Call) throw new NotSupportedException("Only property getter calls are valid at this point");
-            MethodInfo getter = ((MethodCallExpression)indexer.Body).Method;
+            if (indexer.Body.NodeType != ExpressionType.Call || indexer.Body is not MethodCallExpression callExpression) throw new NotSupportedException("Only property getter calls are valid at this point");
+            var getter = callExpression.Method;
 
-            PropertyInfo indexerProp = typeof(TType).GetDefaultMembers().OfType<PropertyInfo>().FirstOrDefault(pi => pi.CanRead && pi.GetMethod == getter);
-            if (indexerProp == null) throw new InvalidOperationException($"No indexer property found with signature {getter.ReturnType.Name} {getter.Name}[{string.Join(", ", getter.GetParameters().Select(par => $"{par.ParameterType.Name} {par.Name}"))}]");
-
-            return indexerProp;
+            return typeof(TType).GetDefaultMembers().OfType<PropertyInfo>().FirstOrDefault(pi => pi.CanRead && pi.GetMethod == getter)
+                   ?? throw new InvalidOperationException($"No indexer property found with signature {getter.ReturnType.Name} {getter.Name}[{string.Join(", ", getter.GetParameters().Select(par => $"{par.ParameterType.Name} {par.Name}"))}]");
         }
     }
 }

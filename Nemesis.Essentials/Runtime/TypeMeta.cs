@@ -30,7 +30,7 @@ namespace $rootnamespace$.Runtime
 
         public static string GetFriendlyName(this Type type)
         {
-            if (_typesCache.TryGetValue(type, out string friendlyName))
+            if (_typesCache.TryGetValue(type, out var friendlyName))
                 return friendlyName;
             else if (IsValueTuple(type))
             {
@@ -49,13 +49,13 @@ namespace $rootnamespace$.Runtime
             }
             else if (type.IsByRef)
                 return $"{type.GetElementType().GetFriendlyName()}&";
-            
+
             else if (type.IsPointer)
                 return $"{type.GetElementType().GetFriendlyName()}*";
-            
+
             else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
                 return type.GetGenericArguments()[0].GetFriendlyName() + "?";
-            
+
             else if (type.IsGenericType)
                 return
                     type.IsGenericTypeDefinition
@@ -68,8 +68,8 @@ namespace $rootnamespace$.Runtime
 
         public static IEnumerable<int> GetArrayRanks(Type arrayType)
         {
-            if (arrayType == null || !arrayType.IsArray) throw new ArgumentOutOfRangeException(nameof(arrayType), $@"{nameof(arrayType)} needs to be array type");
-            while (arrayType != null && arrayType.IsArray)
+            if (arrayType is { IsArray: false }) throw new ArgumentOutOfRangeException(nameof(arrayType), $@"{nameof(arrayType)} needs to be array type");
+            while (arrayType is { IsArray: true })
             {
                 yield return arrayType.GetArrayRank();
                 arrayType = arrayType.GetElementType();
@@ -78,8 +78,8 @@ namespace $rootnamespace$.Runtime
 
         public static Type GetArrayBottomElementType(Type arrayType)
         {
-            if (arrayType == null || !arrayType.IsArray) throw new ArgumentOutOfRangeException(nameof(arrayType), $@"{nameof(arrayType)} needs to be array type");
-            while (arrayType != null && arrayType.IsArray)
+            if (arrayType is { IsArray: false }) throw new ArgumentOutOfRangeException(nameof(arrayType), $@"{nameof(arrayType)} needs to be array type");
+            while (arrayType is { IsArray: true })
                 arrayType = arrayType.GetElementType();
             return arrayType;
         }
@@ -98,12 +98,12 @@ namespace $rootnamespace$.Runtime
         {
             if (type.IsGenericTypeDefinition) throw new ArgumentException($"Open generic type '{type.Name}' cannot be constructed");
 
-            return !type.IsValueType || Nullable.GetUnderlyingType(type) is var underlyingType && underlyingType != null
+            return !type.IsValueType || Nullable.GetUnderlyingType(type) is not null
                 ? null
                 : Activator.CreateInstance(type);
         }
-     
-        private static readonly Dictionary<Type, string> _typesCache = new Dictionary<Type, string>
+
+        private static readonly Dictionary<Type, string> _typesCache = new()
         {
             {typeof(int), "int"},
             {typeof(uint), "uint"},

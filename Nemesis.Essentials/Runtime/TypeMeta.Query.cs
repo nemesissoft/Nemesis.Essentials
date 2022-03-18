@@ -266,7 +266,7 @@ namespace $rootnamespace$.Runtime
                    getMethod != null && getMethod.IsCompilerGenerated();
         }
 
-        private static readonly Regex _backingFieldRegex = new Regex(@"^\<(?<propertyName>\w+)\>k__BackingField$", RegexOptions.Compiled | RegexOptions.Singleline);
+        private static readonly Regex _backingFieldRegex = new(@"^\<(?<propertyName>\w+)\>k__BackingField$", RegexOptions.Compiled | RegexOptions.Singleline);
 
         /// <summary>
         /// Returns <see cref="FieldInfo"/> of backing field for given auto-property.
