@@ -9,7 +9,7 @@
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<IncludeSourceRevisionInInformationalVersion>true</IncludeSourceRevisionInInformationalVersion>
 		<PackageReleaseNotes>
-			RELEASE_NOTES_PLACEHOLDER<!--starts with "RELEASE_NOTES_PLACEHOLDER" == this will be patched by AppVeyor-->
+			RELEASE_NOTES_PLACEHOLDER<!--starts with "RELEASE_NOTES_PLACEHOLDER" == this will be patched by build system-->
 		</PackageReleaseNotes>
 
 	</PropertyGroup>
@@ -18,7 +18,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 
-	<!--Legacy on-->
+	<!--Legacy mode on-->
 	<ItemGroup>
 		<PackageReference Include="System.Memory" Version="4.5.4" 
 						  Condition=" '$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'net461' OR '$(TargetFramework)' == 'net47' " />
@@ -26,6 +26,8 @@
 		<PackageReference Include="System.ValueTuple" Version="4.5.0" 
 						  Condition="$(TargetFramework) == 'net461'" />
 	</ItemGroup>
+	<!--Legacy mode off-->
+
 
 	<ItemGroup>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">

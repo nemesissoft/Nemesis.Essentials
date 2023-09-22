@@ -260,7 +260,7 @@ namespace Nemesis.Essentials.Design
 
         public const string FLAG_SEPARATOR = " | ";
 
-        private static readonly ConcurrentDictionary<Type, object> _enumMaps = new ConcurrentDictionary<Type, object>();
+        private static readonly ConcurrentDictionary<Type, object> _enumMaps = new();
         public static string ToDescription<TEnum>(this TEnum @enum) where TEnum : Enum
         {
             var enumType = typeof(TEnum);
@@ -284,7 +284,7 @@ namespace Nemesis.Essentials.Design
             }
         }
 
-        private static readonly ConcurrentDictionary<Type, object> _enumParsers = new ConcurrentDictionary<Type, object>();
+        private static readonly ConcurrentDictionary<Type, object> _enumParsers = new();
         public static TEnum FromDescription<TEnum>(this string description) where TEnum : Enum
         {
             var enumType = typeof(TEnum);

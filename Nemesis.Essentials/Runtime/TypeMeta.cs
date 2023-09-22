@@ -1,6 +1,9 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 #if NEMESIS_BINARY_PACKAGE
 namespace Nemesis.Essentials.Runtime
@@ -20,11 +23,28 @@ namespace $rootnamespace$.Runtime
         /// </summary>
         public static IEnumerable<Type> GetHierarchy(this Type type)
         {
-            Type currentType = type;
+            Type? currentType = type;
             while (currentType != typeof(object) && currentType != null)
             {
                 yield return currentType;
                 currentType = currentType.BaseType;
+            }
+        }
+
+        public static IEnumerable<Type> GetTypeRealizations(Type baseType) =>
+            AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(GetLoadableTypes)
+                .Where(t =>
+                    t is { IsAbstract: false, IsGenericTypeDefinition: false } &&
+                    baseType.IsAssignableFrom(t)
+                );
+
+        private static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
+        {
+            try { return assembly.GetTypes(); }
+            catch (ReflectionTypeLoadException e)
+            {
+                return e.Types.Where(t => t is not null)!;
             }
         }
 
@@ -48,10 +68,10 @@ namespace $rootnamespace$.Runtime
                     string.Join("", ranks.Select(rank => $"[{new string(',', rank - 1)}]"));
             }
             else if (type.IsByRef)
-                return $"{type.GetElementType().GetFriendlyName()}&";
+                return $"{type.GetElementType()!.GetFriendlyName()}&";
 
             else if (type.IsPointer)
-                return $"{type.GetElementType().GetFriendlyName()}*";
+                return $"{type.GetElementType()!.GetFriendlyName()}*";
 
             else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
                 return type.GetGenericArguments()[0].GetFriendlyName() + "?";
@@ -69,23 +89,28 @@ namespace $rootnamespace$.Runtime
         public static IEnumerable<int> GetArrayRanks(Type arrayType)
         {
             if (arrayType is { IsArray: false }) throw new ArgumentOutOfRangeException(nameof(arrayType), $@"{nameof(arrayType)} needs to be array type");
-            while (arrayType is { IsArray: true })
+
+            Type? t = arrayType;
+            while (t is { IsArray: true })
             {
-                yield return arrayType.GetArrayRank();
-                arrayType = arrayType.GetElementType();
+                yield return t.GetArrayRank();
+                t = t.GetElementType();
             }
         }
 
         public static Type GetArrayBottomElementType(Type arrayType)
         {
             if (arrayType is { IsArray: false }) throw new ArgumentOutOfRangeException(nameof(arrayType), $@"{nameof(arrayType)} needs to be array type");
-            while (arrayType is { IsArray: true })
-                arrayType = arrayType.GetElementType();
-            return arrayType;
+
+            Type? t = arrayType;
+
+            while (t is { IsArray: true })
+                t = t.GetElementType();
+            return t!;
         }
 
         //public static Func<T> GetDefaultValue<T>() => () => default(T);
-        public static object GetDefault(Type type)
+        public static object? GetDefault(Type type)
         {
             if (type.IsGenericTypeDefinition) throw new ArgumentException($"Open generic type '{type.Name}' cannot be constructed");
 
@@ -94,7 +119,7 @@ namespace $rootnamespace$.Runtime
                 : (type.IsValueType ? Activator.CreateInstance(type) : null);
         }
 
-        public static object GetSystemDefault(Type type)
+        public static object? GetSystemDefault(Type type)
         {
             if (type.IsGenericTypeDefinition) throw new ArgumentException($"Open generic type '{type.Name}' cannot be constructed");
 

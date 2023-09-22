@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +29,7 @@ namespace $rootnamespace$.Runtime
         public static bool IsNullable(this Type type) =>
             type.IsValueType && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
 
-        public static bool IsNullable(this Type type, out Type underlyingType)
+        public static bool IsNullable(this Type type, out Type? underlyingType)
         {
             if (type.IsValueType &&
                 type.IsGenericType &&
@@ -77,7 +79,7 @@ namespace $rootnamespace$.Runtime
         /// (typeof(Dictionary<int, string>), typeof(IReadOnlyDictionary<,>)) => typeof(IReadOnlyDictionary<int, string>)
         /// ]]>
         /// </example>
-        public static Type GetGenericRealization(Type type, Type genericTypeDefinition)
+        public static Type? GetGenericRealization(Type type, Type genericTypeDefinition)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
             if (genericTypeDefinition == null) throw new ArgumentNullException(nameof(genericTypeDefinition));
@@ -90,7 +92,7 @@ namespace $rootnamespace$.Runtime
                 : null;
         }
 
-        public static bool TryGetGenericRealization(Type type, Type genericTypeDefinition, out Type genericRealization)
+        public static bool TryGetGenericRealization(Type type, Type genericTypeDefinition, out Type? genericRealization)
         {
             if (type == null || genericTypeDefinition == null || !genericTypeDefinition.IsGenericTypeDefinition)
             {
@@ -161,24 +163,26 @@ namespace $rootnamespace$.Runtime
         /// <param name="generic">Generic base type</param>
         private static bool DerivesFromGenericClass(this Type type, Type generic)
         {
-            if (type == generic || generic.IsAssignableFrom(type) || type.IsSubclassOf(generic)) return true;
+            Type? t = type;
+
+            if (t == generic || generic.IsAssignableFrom(t) || t.IsSubclassOf(generic)) return true;
             if (!generic.IsGenericType) return false;
 
             if (generic.IsGenericTypeDefinition)
             {
-                while (type != null)
+                while (t != null)
                 {
-                    if (type.IsGenericType && type.GetGenericTypeDefinition() == generic) return true;
-                    type = type.BaseType;
+                    if (t.IsGenericType && t.GetGenericTypeDefinition() == generic) return true;
+                    t = t.BaseType;
                 }
                 return false;
             }
             else
             {
-                while (type != null)
+                while (t != null)
                 {
-                    if (type == generic) return true;
-                    type = type.BaseType;
+                    if (t == generic) return true;
+                    t = t.BaseType;
                 }
                 return false;
             }
@@ -194,11 +198,11 @@ namespace $rootnamespace$.Runtime
             type == generic ||
             type.IsGenericType && type.GetGenericTypeDefinition() == generic ||
             type.GetInterfaces().Any(t => t.IsGenericType && t.ImplementsGenericInterface(generic));
-        /* public static bool ImplementsGenericInterface(this Type type, Type genericInterface)
+        /* public static bool ImplementsGenericInterface(this Type t, Type genericInterface)
             {
                 Guard.AgainstViolation(genericInterface.IsGenericTypeDefinition && genericInterface.IsInterface,
                     "Only generic interface can be used");
-                return type.GetInterfaces()
+                return t.GetInterfaces()
                     .Where(i => i.IsGenericType)
                     .Select(i => i.GetGenericTypeDefinition())
                     .Contains(genericInterface);
@@ -223,7 +227,7 @@ namespace $rootnamespace$.Runtime
         /// <summary>
         /// Checks whether <paramref name="memberOrType"/> has specific attribute <typeparamref name="TAttribute"/>.
         /// </summary>
-        public static bool HasAttribute<TAttribute>(this MemberInfo memberOrType) where TAttribute : Attribute => 
+        public static bool HasAttribute<TAttribute>(this MemberInfo memberOrType) where TAttribute : Attribute =>
             memberOrType.GetCustomAttributes<TAttribute>(true).Any();
 
         public static bool IsPublic(this MemberInfo mi)
@@ -260,8 +264,8 @@ namespace $rootnamespace$.Runtime
         /// </summary>
         public static bool IsAutoProperty(this PropertyInfo property)
         {
-            MethodInfo setMethod = property.GetSetMethod(true);
-            MethodInfo getMethod = property.GetGetMethod(true);
+            var setMethod = property.GetSetMethod(true);
+            var getMethod = property.GetGetMethod(true);
             return setMethod != null && setMethod.IsCompilerGenerated() &&
                    getMethod != null && getMethod.IsCompilerGenerated();
         }
@@ -269,14 +273,12 @@ namespace $rootnamespace$.Runtime
         private static readonly Regex _backingFieldRegex = new(@"^\<(?<propertyName>\w+)\>k__BackingField$", RegexOptions.Compiled | RegexOptions.Singleline);
 
         /// <summary>
-        /// Returns <see cref="FieldInfo"/> of backing field for given auto-property.
+        /// Returns <see cref="FieldInfo"/> of backing field for given auto-property or <c>null</c> if property is not implemented automatically.
         /// </summary>
-        public static FieldInfo GetBackingField(this PropertyInfo property)
+        public static FieldInfo? GetBackingField(this PropertyInfo property)
         {
-            FieldInfo result = (property.DeclaringType ?? throw new ArgumentNullException(nameof(property), $@"{nameof(property)}.DeclaringType is null"))
+            var result = (property.DeclaringType ?? throw new ArgumentNullException(nameof(property), $@"{nameof(property)}.DeclaringType is null"))
                 .GetField($"<{property.Name}>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
-            if (result == null) throw new ArgumentException($"No backing field found for property {property.Name} in {property.DeclaringType.FullName}");
-
             return result;
         }
 
@@ -289,7 +291,7 @@ namespace $rootnamespace$.Runtime
         /// Tries to find auto-property that causes generation of <paramref name="field"/>, or returns <c>false</c>
         /// if <paramref name="field"/> is not auto-property backing field.
         /// </summary>
-        public static bool TryGetDeclaringProperty(this FieldInfo field, out PropertyInfo declaringProperty)
+        public static bool TryGetDeclaringProperty(this FieldInfo field, out PropertyInfo? declaringProperty)
         {
             const BindingFlags DECLARED_INSTANCE_MEMBER = BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
             if (!field.IsCompilerGenerated())
@@ -313,7 +315,7 @@ namespace $rootnamespace$.Runtime
         /// Tries to find auto-event that causes generation of <paramref name="field"/>, or returns <c>false</c>
         /// if <paramref name="field"/> is not auto-event backing field.
         /// </summary>
-        public static bool TryGetDeclaringEvent(this FieldInfo field, out EventInfo declaringEvent)
+        public static bool TryGetDeclaringEvent(this FieldInfo field, out EventInfo? declaringEvent)
         {
             const BindingFlags DECLARED_INSTANCE_MEMBER = BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
             if (!field.IsPrivate)
@@ -399,8 +401,8 @@ namespace $rootnamespace$.Runtime
 
         #region ValueTuple
 
-        public static bool IsValueTuple(Type type) 
-            => type.IsValueType && type.IsGenericType && 
+        public static bool IsValueTuple(Type type)
+            => type.IsValueType && type.IsGenericType &&
 #if NETSTANDARD2_0 || NETFRAMEWORK
             type.Namespace == "System" &&
             type.Name.StartsWith("ValueTuple`") &&
@@ -408,12 +410,12 @@ namespace $rootnamespace$.Runtime
 #else
             typeof(ITuple).IsAssignableFrom(type);
 #endif
-        
-        public static bool TryGetValueTupleElements(Type type, out Type[] elementTypes)
+
+        public static bool TryGetValueTupleElements(Type type, out Type[]? elementTypes)
         {
             bool isValueTuple = IsValueTuple(type);
             elementTypes = isValueTuple && !type.IsGenericTypeDefinition
-                ? type.GenericTypeArguments 
+                ? type.GenericTypeArguments
                 : null;
             return isValueTuple;
         }
