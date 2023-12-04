@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Numerics;
 using System.Reflection;
-using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Xml.Linq;
 using JetBrains.Annotations;
@@ -211,12 +205,8 @@ namespace Nemesis.Essentials.Design
         /// <param name="index2">The second value's index.</param>
         [PublicAPI]
         [CollectionAccess(CollectionAccessType.ModifyExistingContent)]
-        public static void Swap<T>(IList<T> list, int index1, int index2)
-        {
-            T temp = list[index2];
-            list[index2] = list[index1];
-            list[index1] = temp;
-        }
+        public static void Swap<T>(IList<T> list, int index1, int index2) =>
+            (list[index1], list[index2]) = (list[index2], list[index1]);
 
         /// <summary>
         /// Swaps two values within the list. Non-generic version
@@ -226,12 +216,8 @@ namespace Nemesis.Essentials.Design
         /// <param name="index2">The second value's index.</param>
         [PublicAPI]
         [CollectionAccess(CollectionAccessType.ModifyExistingContent)]
-        public static void SwapNg(IList list, int index1, int index2)
-        {
-            object temp = list[index2];
-            list[index2] = list[index1];
-            list[index1] = temp;
-        }
+        public static void SwapNg(IList list, int index1, int index2) =>
+            (list[index1], list[index2]) = (list[index2], list[index1]);
 
         [PureMethod, PublicAPI]
         [CollectionAccess(CollectionAccessType.Read)]
@@ -376,7 +362,7 @@ namespace Nemesis.Essentials.Design
         }
 
         [PureMethod, PublicAPI, JetBrains.Annotations.NotNull]
-        public static IEnumerable<T> OrEmpty<T>([CanBeNull]this IEnumerable<T> enumerable) => enumerable ?? Enumerable.Empty<T>();
+        public static IEnumerable<T> OrEmpty<T>([CanBeNull] this IEnumerable<T> enumerable) => enumerable ?? Enumerable.Empty<T>();
 
         [PureMethod, PublicAPI, ContractAnnotation("enumerable:null => true; enumerable:notnull=>false")]
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> enumerable) => enumerable == null || !enumerable.Any();
@@ -812,12 +798,11 @@ namespace Nemesis.Essentials.Design
         /// string[] myQueryResults = waitForQueryData();
         /// ]]>
         /// </code>
-        /// </example>
-        [PureMethod, PublicAPI]
+        /// </example>        
         public static Func<TResult> Async<T, TResult>(this IEnumerable<T> enumerable,
           Func<IEnumerable<T>, TResult> asyncSelector)
         {
-            Debug.Assert(!(enumerable is ICollection),
+            Debug.Assert(enumerable is not ICollection,
               "Async does not work on arrays/lists/collections, only on true IEnumerable/IQueryable.");
 
             // Create delegate to exec async
@@ -842,7 +827,6 @@ namespace Nemesis.Essentials.Design
         ///    .Take(8).LogLinq("Take8")
         ///    .Where(i => i%2 == 0).LogLinq("Even")
         ///    .OrderByDescending(i => i).LogLinq("Reversed") ]]></example>
-        [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
         public static IEnumerable<T> LogLinq<T>(this IEnumerable<T> enumerable, string logName = null, Func<T, string> printMethod = null)
         {
 #if DEBUG
@@ -853,9 +837,9 @@ namespace Nemesis.Essentials.Design
                 Debug.WriteLine(
                     $"{(count == 0 ? logName : new string(' ', logName.Length))}{(count == 0 ? "┬" : "├")} {count++} ⇒ {printMethod?.Invoke(item) ?? item?.ToString() ?? "∅"}");
             Debug.WriteLine($"{logName}:count = {count}");
-          
+
 #endif
-    return enumerable;
+            return enumerable;
 
         }
 
@@ -893,24 +877,20 @@ namespace Nemesis.Essentials.Design
         /// <param name="enumerable">Enumerable that is to be extended</param>
         /// <param name="skip">Number of items to skip on each iteration</param>
         /// <returns>Wrapped enumerable with some elements skipped</returns>
-        [PureMethod, PublicAPI]
         public static IEnumerable<T> AsSkippingEnumerable<T>(this IEnumerable<T> enumerable, int skip)
         {
             if (skip < 0) throw new ArgumentOutOfRangeException(nameof(skip), @"skip value must be greater than zero.");
 
-#pragma warning disable IDE0063 // Use simple 'using' statement
-            // ReSharper disable ConvertToUsingDeclaration
-            using (var enu = enumerable.GetEnumerator())
-                // ReSharper restore ConvertToUsingDeclaration
-#pragma warning restore IDE0063 // Use simple 'using' statement
-                while (enu.MoveNext())
-                {
-                    yield return enu.Current;
+            using var enu = enumerable.GetEnumerator();
 
-                    for (var i = skip; i > 0; i--)
-                        if (!enu.MoveNext())
-                            break;
-                }
+            while (enu.MoveNext())
+            {
+                yield return enu.Current;
+
+                for (var i = skip; i > 0; i--)
+                    if (!enu.MoveNext())
+                        break;
+            }
         }
 
         [PureMethod, PublicAPI]
@@ -1040,7 +1020,7 @@ namespace Nemesis.Essentials.Design
 
         [PureMethod, PublicAPI]
         public static SortedDictionary<TKey, TElement> ToSortedDictionary<TKey, TElement>(this IDictionary<TKey, TElement> dict, IComparer<TKey> comparer = null)
-            => new SortedDictionary<TKey, TElement>(dict, comparer ?? Comparer<TKey>.Default);
+            => new(dict, comparer ?? Comparer<TKey>.Default);
 
         #endregion
 
@@ -1121,9 +1101,7 @@ namespace Nemesis.Essentials.Design
 
                     if (a < b)
                     {
-                        var local2 = keys[a];
-                        keys[a] = keys[b];
-                        keys[b] = local2;
+                        (keys[b], keys[a]) = (keys[a], keys[b]);
                     }
                     a++;
                     b--;
@@ -1145,9 +1123,7 @@ namespace Nemesis.Essentials.Design
         {
             if (a != b && comparer.Compare(keys[a], keys[b]) > 0)
             {
-                var local = keys[a];
-                keys[a] = keys[b];
-                keys[b] = local;
+                (keys[b], keys[a]) = (keys[a], keys[b]);
             }
         }
 

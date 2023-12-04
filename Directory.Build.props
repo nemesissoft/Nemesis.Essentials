@@ -1,35 +1,37 @@
 ﻿<Project>
-  <PropertyGroup>
-    <Version>1.0.0</Version><!--This will get replaced by AppVeyor-->
-    <LangVersion>11.0</LangVersion>
+	<PropertyGroup>
+		<Version>1.0.0</Version>
+		<!--This will get replaced by AppVeyor-->
+		<LangVersion>12.0</LangVersion>
+		<ImplicitUsings>true</ImplicitUsings>
 
-    <Authors>Michał Bryłka, Leszek Kowalski</Authors>
-    <PackageLicenseExpression>MIT OR Apache-2.0</PackageLicenseExpression>
-    <PackageTags>Essential Essentials AsciiTableFormatter Comparers TextConverter TaskUtils ExpressionUtils TypeMeta methodof fieldof propertyof</PackageTags>
-    <Copyright>Copyright (c) Michał Bryłka. Icon by Good Stuff No Nonsense (http://www.iconarchive.com/artist/goodstuff-no-nonsense.html)</Copyright>
-    <Description>Contains all essential utils that should be build into .NET but somehow are not.</Description>
-    
-    <PackageIcon>alien-2.png</PackageIcon>
+		<Authors>Michał Bryłka, Leszek Kowalski</Authors>
+		<PackageLicenseExpression>MIT OR Apache-2.0</PackageLicenseExpression>
+		<PackageTags>Essential Essentials AsciiTableFormatter Comparers TextConverter TaskUtils ExpressionUtils TypeMeta methodof fieldof propertyof</PackageTags>
+		<Copyright>Copyright (c) Michał Bryłka. Icon by Good Stuff No Nonsense (http://www.iconarchive.com/artist/goodstuff-no-nonsense.html)</Copyright>
+		<Description>Contains all essential utils that should be build into .NET but somehow are not.</Description>
 
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <PackageProjectUrl>https://github.com/nemesissoft/Nemesis.Essentials</PackageProjectUrl>
+		<PackageIcon>alien-2.png</PackageIcon>
 
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    
-    <NoWarn>NU5105</NoWarn>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<PackageProjectUrl>https://github.com/nemesissoft/Nemesis.Essentials</PackageProjectUrl>
 
-    <SignAssembly>true</SignAssembly>
-    <DelaySign>false</DelaySign>
-    <PublicSign>true</PublicSign>
-    <AssemblyOriginatorKeyFile>..\Nemesis.Essentials.Public.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19367-01" PrivateAssets="All" />
-  </ItemGroup>
+		<NoWarn>NU5105</NoWarn>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
-  <ItemGroup>
-    <None Include="..\images\alien-2.png" Pack="true" PackagePath="\"/>
-  </ItemGroup>
+		<SignAssembly>true</SignAssembly>
+		<DelaySign>false</DelaySign>
+		<PublicSign>true</PublicSign>
+		<AssemblyOriginatorKeyFile>..\Nemesis.Essentials.Public.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19367-01" PrivateAssets="All" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\images\alien-2.png" Pack="true" PackagePath="\"/>
+	</ItemGroup>
 </Project>

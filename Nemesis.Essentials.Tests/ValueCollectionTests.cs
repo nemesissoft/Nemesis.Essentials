@@ -1,104 +1,71 @@
-﻿using NUnit.Framework;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+﻿#nullable enable
 using Nemesis.Essentials.Design;
 
-namespace Nemesis.Essentials.Tests
+namespace Nemesis.Essentials.Tests;
+
+[TestFixture(TestOf = typeof(ValueCollection<>))]
+public class ValueCollectionTests
 {
-    [TestFixture(TestOf = typeof(ValueCollection<>))]
-    public class ValueCollectionTests
+    private static ValueCollection<string> Empty() => new();
+    private static ValueCollection<string> From(params string[] elements) => new(elements.ToList());
+
+    private static IEnumerable<TCD> GetPositiveCases() => new[]
     {
-        private static ValueCollection<string> Empty() => new ValueCollection<string>();
-        private static ValueCollection<string> From(params string[] elements) => new ValueCollection<string>(elements.ToList());
-        [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
-        private static string Format(IEnumerable<string> list) =>
-            list == null ? "NULL" :
-                (
-                    !list.Any() ? "∅" :
-                        string.Join("|", list.Select(FormatElement))
-                );
+        (Empty(), Empty()),
+        (Empty().AddFluently("1"),  Empty().AddFluently("1")),
+        (Empty().AddFluently("1", "2"),  Empty().AddFluently("1").AddFluently("2")),
+        (Empty().AddFluently("1", "2").AddFluently("3"),  Empty().AddFluently("1").AddFluently("2").AddFluently(3.ToString())),
+        (From("1", "2", "3"), From("1", "2", "3")),
+        (From("1", "2", "3", "4"), From("1", "2", "3").AddFluently("4")),
+    }.Select((data, i) => new TCD(data.Item1, data.Item2).SetName($"Pos_{i + 1}"));
 
-        private static string FormatElement(string element) =>
-            element == null ? "NULL_ELEMENT" : (element.Length == 0 ? "EMPTY_ELEMENT" : element);
-
-        private static IEnumerable<TestCaseData> GetPositiveCases() => new[]
-        {
-            (null, null),
-            (Empty(), Empty()),
-            (Empty().AddFluently("1"),  Empty().AddFluently("1")),
-            (Empty().AddFluently("1", "2"),  Empty().AddFluently("1").AddFluently("2")),
-            (Empty().AddFluently("1", "2").AddFluently("3"),  Empty().AddFluently("1").AddFluently("2").AddFluently(3.ToString())),
-            (From("1", "2", "3"), From("1", "2", "3")),
-            (From("1", "2", "3", "4"), From("1", "2", "3").AddFluently("4")),
-        }.DuplicateWithElementReversal()
-            .Select((elem, i) => new TestCaseData(elem).SetName($"{i + 1:00}. {Format(elem.Item1)} == {Format(elem.Item2)}"));
-
-        [TestCaseSource(nameof(GetPositiveCases))]
-        public void Equals_Positive((ValueCollection<string> left, ValueCollection<string> right) data)
-        {
-            var (left, right) = data;
-            if (ReferenceEquals(left, right) && left != null && right != null)
-                Assert.Fail("Reference equality should be checked using trivial path");
-
-
-            Assert.That(
-                left?.GetHashCode() ?? int.MinValue, Is.EqualTo(
-                    right?.GetHashCode() ?? int.MinValue
-                ), "GetHashCode");
-
-            Assert.That(left, Is.EqualTo(right), "Equals assert");
-        }
-
-
-        private static IEnumerable<TestCaseData> GetNegativeCases() => new[]
-            {
-                (Empty(), null),
-                (Empty().AddFluently("1"), null),
-                (From("1", "2", "3", "4"), From("1", "2", "3")),
-                (From("1", "2", "3", ""), From("1", "2", "3")),
-                (From("1", "2", "3", "4", "5"), From("1", "2", "3").AddFluently("4")),
-                (From("1", "2", "3", "4", "5", "6"), From("1", "2", "3").AddFluently("4")),
-            }.DuplicateWithElementReversal()
-            .Select((elem, i) => new TestCaseData(elem).SetName($"{i + 1:00}. {Format(elem.Item1)} != {Format(elem.Item2)}"));
-
-        [TestCaseSource(nameof(GetNegativeCases))]
-        public void Equals_Negative((ValueCollection<string> left, ValueCollection<string> right) data)
-        {
-            var (left, right) = data;
-
-            Assert.That(left, Is.Not.EqualTo(right), "Equals assert");
-        }
-
-
-        private static IEnumerable<TestCaseData> GetToStringCases() => new[]
-            {
-                (new ValueCollection<string>(null), @"[]"),
-                (new ValueCollection<string>(), @"[]"),
-                (new ValueCollection<string>(){ null }, @"[∅]"),
-                (new ValueCollection<string>(){ "" }, @"[""""]"),
-                (new ValueCollection<string>(){ "1", "" }, @"[""1"", """"]"),
-                (new ValueCollection<string>(){ "", "2" }, @"["""", ""2""]"),
-                (new ValueCollection<string>(){ "1", "2", "3" }, @"[""1"", ""2"", ""3""]"),
-            }
-            .Select((data, i) => new TestCaseData(data.Item1, data.Item2).SetName($"ToString_{i + 1:00}"));
-        [TestCaseSource(nameof(GetToStringCases))]
-        public void ToString_ShouldYieldValidText(ValueCollection<string> collection, string expectedText)
-        {
-            var actual = collection.ToString();
-
-            Assert.That(actual, Is.EqualTo(expectedText));
-        }
-    }
-
-    internal static class ValueCollectionHelper
+    [TestCaseSource(nameof(GetPositiveCases))]
+    public void Equals_Positive(ValueCollection<string> left, ValueCollection<string> right) => Assert.Multiple(() =>
     {
-        internal static ValueCollection<T> AddFluently<T>(this ValueCollection<T> list, params T[] elements)
+        Assert.That(left, Is.Not.SameAs(right));
+        Assert.That(left.GetHashCode(), Is.EqualTo(right.GetHashCode()));
+        Assert.That(left, Is.EqualTo(right));
+        Assert.That(right, Is.EqualTo(left));
+    });
+
+    private static IEnumerable<TCD> GetNegativeCases() => new[]
+    {
+        (Empty(), null),
+        (Empty().AddFluently("1"), null),
+        (From("1", "2", "3", "4"), From("1", "2", "3")),
+        (From("1", "2", "3", ""), From("1", "2", "3")),
+        (From("1", "2", "3", "4", "5"), From("1", "2", "3").AddFluently("4")),
+        (From("1", "2", "3", "4", "5", "6"), From("1", "2", "3").AddFluently("4")),
+    }.Select((data, i) => new TCD(data.Item1, data.Item2).SetName($"Neg_{i + 1}"));
+
+    [TestCaseSource(nameof(GetNegativeCases))]
+    public void Equals_Negative(ValueCollection<string> left, ValueCollection<string> right) => Assert.Multiple(() =>
+    {
+        Assert.That(left, Is.Not.EqualTo(right));
+        Assert.That(right, Is.Not.EqualTo(left));
+    });
+
+    private static IEnumerable<TCD> GetToStringCases() => new (ValueCollection<string?>, string)[]
         {
-            foreach (var element in elements)
-                list.Add(element);
-            return list;
-        }
+            (new (null), @"[]"),
+            ([], @"[]"),
+            ([null], @"[∅]"),
+            ([""], @"[""""]"),
+            (["1", ""], @"[""1"", """"]"),
+            (["", "2"], @"["""", ""2""]"),
+            (["1", "2", "3"], @"[""1"", ""2"", ""3""]"),
+        }.Select((data, i) => new TCD(data.Item1, data.Item2).SetName($"ToString_{i + 1}"));
+    [TestCaseSource(nameof(GetToStringCases))]
+    public void ToString_ShouldYieldValidText(ValueCollection<string?> collection, string expectedText) =>
+        Assert.That(collection.ToString(), Is.EqualTo(expectedText));
+}
+
+file static class ValueCollectionHelper
+{
+    public static ValueCollection<T> AddFluently<T>(this ValueCollection<T> list, params T[] elements)
+    {
+        foreach (var element in elements)
+            list.Add(element);
+        return list;
     }
 }

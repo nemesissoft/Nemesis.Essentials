@@ -62,12 +62,10 @@ namespace Nemesis.Essentials.Runtime
                 return lastElse;
         }
 
-        [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
         public static Expression AndAlsoJoin(IEnumerable<Expression> expressionList) => expressionList != null && expressionList.Any() ?
                 expressionList.Aggregate<Expression, Expression>(null, (current, element) => current == null ? element : Expression.AndAlso(current, element))
                 : Expression.Constant(false);
 
-        [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
         public static Expression OrElseJoin(IEnumerable<Expression> expressionList) => expressionList != null && expressionList.Any() ?
                 expressionList.Aggregate<Expression, Expression>(null, (current, element) => current == null ? element : Expression.OrElse(current, element))
                 : Expression.Constant(false);
@@ -216,9 +214,7 @@ namespace Nemesis.Essentials.Runtime
 
             if (endsWith && startWith)
                 exp = Expression.Call(member, containsMethod, constant);
-#pragma warning disable IDE0045 // Convert to conditional expression
             else if (startWith)
-#pragma warning restore IDE0045 // Convert to conditional expression
                 exp = Expression.Call(member, endsWithMethod, constant);
             else exp = endsWith ? Expression.Call(member, startsWithMethod, constant) : (Expression)Expression.Equal(member, constant);
 

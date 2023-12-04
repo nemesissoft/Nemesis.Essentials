@@ -1,50 +1,47 @@
-﻿using System.Collections.Generic;
-using Nemesis.Essentials.Design;
-using NUnit.Framework;
+﻿using Nemesis.Essentials.Design;
 
-namespace Nemesis.Essentials.Tests
+namespace Nemesis.Essentials.Tests;
+
+[TestFixture(TestOf = typeof(ReferenceLoopProneValueCollection<>))]
+public class ReferenceLoopProneValueCollectionTests
 {
-    [TestFixture(TestOf = typeof(ReferenceLoopProneValueCollection<>))]
-    public class ReferenceLoopProneValueCollectionTests
+    public record A
     {
-        public record A
-        {
-            public ICollection<B> Collection = new ReferenceLoopProneValueCollection<B>();
-        }
+        public ICollection<B> Collection = new ReferenceLoopProneValueCollection<B>();
+    }
 
-        public record B (A A)
-        {
-            public A A { get; } = A;
-        }
+    public record B(A A)
+    {
+        public A A { get; } = A;
+    }
 
-        [Test]
-        public void LoopDetected()
-        {
-            //Arrange
-            var a = new A();
-            var b = new B(a);
-            a.Collection.Add(b);
+    [Test]
+    public void LoopDetected()
+    {
+        //Arrange
+        var a = new A();
+        var b = new B(a);
+        a.Collection.Add(b);
 
-            //Act
-            var aToString = a.ToString();
+        //Act
+        var aToString = a.ToString();
 
-            //Assert
-            Assert.True(aToString.Contains(ReferenceLoopProneValueCollection<B>.LoopDetectedNotification));
-        }
+        //Assert
+        Assert.That(aToString, Does.Contain(ReferenceLoopProneValueCollection<B>.LoopDetectedNotification));
+    }
 
-        [Test]
-        public void LoopNotDetected()
-        {
-            //Arrange
-            var a = new A();
-            var b = new B(null);
-            a.Collection.Add(b);
+    [Test]
+    public void LoopNotDetected()
+    {
+        //Arrange
+        var a = new A();
+        var b = new B(null);
+        a.Collection.Add(b);
 
-            //Act
-            var aToString = a.ToString();
+        //Act
+        var aToString = a.ToString();
 
-            //Assert
-            Assert.False(aToString.Contains(ReferenceLoopProneValueCollection<B>.LoopDetectedNotification));
-        }
+        //Assert
+        Assert.That(aToString, Does.Not.Contain(ReferenceLoopProneValueCollection<B>.LoopDetectedNotification));
     }
 }

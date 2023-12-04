@@ -1,5 +1,4 @@
-﻿// ReSharper disable UnusedMember.Global
-#if NEMESIS_BINARY_PACKAGE
+﻿#if NEMESIS_BINARY_PACKAGE
 namespace Nemesis.Essentials.Design
 #else
 namespace $rootnamespace$.Design

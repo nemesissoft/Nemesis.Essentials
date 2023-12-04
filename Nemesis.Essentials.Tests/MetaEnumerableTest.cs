@@ -1,134 +1,84 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Nemesis.Essentials.Design;
+﻿using Nemesis.Essentials.Design;
 
-namespace Nemesis.Essentials.Tests
+namespace Nemesis.Essentials.Tests;
+
+[TestFixture]
+public class MetaEnumerableTest
 {
-    [TestFixture]
-    public class MetaEnumerableTest
+    [Test]
+    public void NullEnumerableThrowsException() => Assert.Throws<ArgumentNullException>(() => new MetaEnumerable<string>(null));
+
+    [Test]
+    public void EmptyEnumerable()
     {
-        [Test]
-        public void NullEnumerableThrowsException() => Assert.Throws<ArgumentNullException>(() => new MetaEnumerable<string>(null));
+        var emptyList = new List<string>();
 
-        [Test]
-        public void EmptyEnumerable()
+        var subject = new MetaEnumerable<string>(emptyList);
+        using IEnumerator<MetaEnumerable<string>.Entry> iterator = subject.GetEnumerator();
+        Assert.That(iterator.MoveNext(), Is.False);
+    }
+
+    [Test]
+    public void SingleEntryEnumerable()
+    {
+        var list = new List<string> { "x" };
+        TestSingleEntry(new MetaEnumerable<string>(list));
+    }
+
+
+    [Test]
+    public void SingleEntryEnumerableViaExtension()
+    {
+        var list = new List<string> { "x" };
+
+        TestSingleEntry(list.AsMetaEnumerable());
+    }
+
+    [Test]
+    public void SingleEntryEnumerableViaCreate()
+    {
+        var list = new List<string> { "x" };
+
+        TestSingleEntry(MetaEnumerable.Create(list));
+    }
+
+    private static void TestSingleEntry(MetaEnumerable<string> subject)
+    {
+        using IEnumerator<MetaEnumerable<string>.Entry> iterator = subject.GetEnumerator();
+        Assert.Multiple(() =>
         {
-            var emptyList = new List<string>();
+            Assert.That(iterator.MoveNext(), Is.True);
+            Assert.That(iterator.Current.IsFirst, Is.True);
+            Assert.That(iterator.Current.IsLast, Is.True);
+            Assert.That(iterator.Current.Value, Is.EqualTo("x"));
+            Assert.That(iterator.Current.Index, Is.EqualTo(0));
+            Assert.That(iterator.MoveNext(), Is.False);
+        });
+    }
 
-            var subject = new MetaEnumerable<string>(emptyList);
-            using (IEnumerator<MetaEnumerable<string>.Entry> iterator = subject.GetEnumerator())
-            {
-                Assert.IsFalse(iterator.MoveNext());
-            }
+    private static IEnumerable<TCD> GetTestsData_ForEnumerables() => new (List<string>, MetaEnumerable<string>.Entry[])[]
+    {
+        (["x"], [new(true, true, "x", 0)]),
+        (["x", "y"], [new(true, false, "x", 0), new(false, true, "y", 1)]),
+        (["x", "y", "z"], [new(true, false, "x", 0), new(false, false, "y", 1), new(false, true, "z", 2)])
+    }.Select((elem, i) => new TCD(elem.Item1, elem.Item2).SetName($"Enum_{i + 1}"));
+
+    [TestCaseSource(nameof(GetTestsData_ForEnumerables))]
+    public void MultipleEntryEnumerable(List<string> list, MetaEnumerable<string>.Entry[] expectedEntries)
+    {
+        using var iterator = new MetaEnumerable<string>(list).GetEnumerator();
+        var actual = new MetaEnumerable<string>.Entry[list.Count];
+
+        for (int i = 0; i < actual.Length; i++)
+        {
+            Assert.That(iterator.MoveNext(), Is.True);
+            actual[i] = iterator.Current;
         }
 
-        [Test]
-        public void SingleEntryEnumerable()
+        Assert.Multiple(() =>
         {
-            var list = new List<string> { "x" };
-            TestSingleEntry(new MetaEnumerable<string>(list));
-        }
-
-
-        [Test]
-        public void SingleEntryEnumerableViaExtension()
-        {
-            var list = new List<string> { "x" };
-
-            TestSingleEntry(list.AsMetaEnumerable());
-        }
-
-        [Test]
-        public void SingleEntryEnumerableViaCreate()
-        {
-            var list = new List<string> { "x" };
-
-            TestSingleEntry(MetaEnumerable.Create(list));
-        }
-
-        private static void TestSingleEntry(MetaEnumerable<string> subject)
-        {
-            using (IEnumerator<MetaEnumerable<string>.Entry> iterator = subject.GetEnumerator())
-            {
-                Assert.IsTrue(iterator.MoveNext());
-                Assert.IsTrue(iterator.Current.IsFirst);
-                Assert.IsTrue(iterator.Current.IsLast);
-                Assert.AreEqual("x", iterator.Current.Value);
-                Assert.AreEqual(0, iterator.Current.Index);
-                Assert.IsFalse(iterator.MoveNext());
-            }
-        }
-
-        [Test]
-        public void SingleEntryUntypedEnumerable()
-        {
-            var list = new List<string> { "x" };
-            IEnumerable subject = new MetaEnumerable<string>(list);
-
-            int index = 0;
-            foreach (MetaEnumerable<string>.Entry item in subject)
-            { // only expecting 1
-                Assert.AreEqual(0, index++);
-                Assert.AreEqual("x", item.Value);
-                Assert.IsTrue(item.IsFirst);
-                Assert.IsTrue(item.IsLast);
-                Assert.AreEqual(0, item.Index);
-            }
-            Assert.AreEqual(1, index);
-        }
-
-        [Test]
-        public void DoubleEntryEnumerable()
-        {
-            var list = new List<string> { "x", "y" };
-
-            var subject = new MetaEnumerable<string>(list);
-            using (IEnumerator<MetaEnumerable<string>.Entry> iterator = subject.GetEnumerator())
-            {
-                Assert.IsTrue(iterator.MoveNext());
-                Assert.IsTrue(iterator.Current.IsFirst);
-                Assert.IsFalse(iterator.Current.IsLast);
-                Assert.AreEqual("x", iterator.Current.Value);
-                Assert.AreEqual(0, iterator.Current.Index);
-
-                Assert.IsTrue(iterator.MoveNext());
-                Assert.IsFalse(iterator.Current.IsFirst);
-                Assert.IsTrue(iterator.Current.IsLast);
-                Assert.AreEqual("y", iterator.Current.Value);
-                Assert.AreEqual(1, iterator.Current.Index);
-                Assert.IsFalse(iterator.MoveNext());
-            }
-        }
-
-        [Test]
-        public void TripleEntryEnumerable()
-        {
-            var list = new List<string> { "x", "y", "z" };
-
-            var subject = new MetaEnumerable<string>(list);
-            using (IEnumerator<MetaEnumerable<string>.Entry> iterator = subject.GetEnumerator())
-            {
-                Assert.IsTrue(iterator.MoveNext());
-                Assert.IsTrue(iterator.Current.IsFirst);
-                Assert.IsFalse(iterator.Current.IsLast);
-                Assert.AreEqual("x", iterator.Current.Value);
-                Assert.AreEqual(0, iterator.Current.Index);
-
-                Assert.IsTrue(iterator.MoveNext());
-                Assert.IsFalse(iterator.Current.IsFirst);
-                Assert.IsFalse(iterator.Current.IsLast);
-                Assert.AreEqual("y", iterator.Current.Value);
-                Assert.AreEqual(1, iterator.Current.Index);
-
-                Assert.IsTrue(iterator.MoveNext());
-                Assert.IsFalse(iterator.Current.IsFirst);
-                Assert.IsTrue(iterator.Current.IsLast);
-                Assert.AreEqual("z", iterator.Current.Value);
-                Assert.AreEqual(2, iterator.Current.Index);
-                Assert.IsFalse(iterator.MoveNext());
-            }
-        }
+            Assert.That(actual, Is.EqualTo(expectedEntries));
+            Assert.That(iterator.MoveNext(), Is.False);
+        });
     }
 }

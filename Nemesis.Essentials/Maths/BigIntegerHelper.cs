@@ -1,7 +1,4 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
-using System.Linq;
+﻿using System.Diagnostics.Contracts;
 using System.Numerics;
 
 namespace Nemesis.Essentials.Maths
@@ -9,7 +6,6 @@ namespace Nemesis.Essentials.Maths
     //TODO: generate Next and Next min max if not existing in Random extensions
     //TODO: check SecureRandom, -Primality tests from Nemesis, Generate not only positive numbers
     //http://stackoverflow.com/questions/17357760/how-can-i-generate-a-random-biginteger-within-a-certain-range
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public static class BigIntegerHelper
     {
         #region Fields and properties

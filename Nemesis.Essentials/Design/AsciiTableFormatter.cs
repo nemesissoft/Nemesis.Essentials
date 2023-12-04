@@ -239,7 +239,6 @@ namespace Nemesis.Essentials.Design
         }
 
         [PublicAPI]
-        [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
         public void ToAsciiCharactersTable<T>(IEnumerable<T> elements, StringWriter sw)
         {
             const BindingFlags FLAGS = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
