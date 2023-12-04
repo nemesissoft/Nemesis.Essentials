@@ -70,7 +70,7 @@ namespace Nemesis.Essentials.Maths
 
 
         public static implicit operator decimal(DecimalMeta dm) => dm.Value;
-        public static implicit operator DecimalMeta(decimal d) => new DecimalMeta(d);
+        public static implicit operator DecimalMeta(decimal d) => new(d);
 
 
         /// <summary>
@@ -154,7 +154,7 @@ namespace Nemesis.Essentials.Maths
         }
 
 
-        private static readonly char[] _hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+        private static readonly char[] _hexDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
         private string FormatHex(IFormatProvider? formatProvider)
         {
             string separator = NumberFormatInfo.GetInstance(formatProvider).NumberDecimalSeparator;
@@ -195,7 +195,7 @@ namespace Nemesis.Essentials.Maths
 
         public DecimalFormatter(IFormatProvider underlyingProvider) => _underlyingProvider = underlyingProvider;
 
-        public static readonly DecimalFormatter InvariantInstance = new DecimalFormatter(CultureInfo.InvariantCulture);
+        public static readonly DecimalFormatter InvariantInstance = new(CultureInfo.InvariantCulture);
 
         public object? GetFormat(Type? service) =>
             typeof(ICustomFormatter).IsAssignableFrom(service) || typeof(IFormatProvider).IsAssignableFrom(service)

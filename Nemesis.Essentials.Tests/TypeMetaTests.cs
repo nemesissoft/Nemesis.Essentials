@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 #if NEMESIS_BINARY_PACKAGE_TESTS
-using Nemesis.Essentials.Design;
 using Nemesis.Essentials.Runtime;
 
 namespace Nemesis.Essentials.Tests;
@@ -14,82 +13,46 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime
 [TestFixture(TestOf = typeof(TypeMeta))]
 public class TypeMetaTests
 {
-    private static void GenericAction<TElement>() { }
-    private static TElement GenericFunc<TElement>() => default;
-
-    interface ITransformer<TElement> { }
-    private static ITransformer<TElement> CreateTransformer<TElement>() => default;
-
-    private ITransformer<TElement> CreateTransformerInstance<TElement>() => default;
-
     [Test]
-    public void MethodOfTestNegative()
+    public void MethodOf_ResultDiffersForDelegatesAndMethods()
     {
-        MethodInfo toUpperShort = Method.Of("".ToUpperInvariant);
-        MethodInfo toUpperLong = Method.Of<Func<string, string>>(s => s.ToUpperInvariant());
+        var toUpper = Method.Of("".ToUpperInvariant);
+        var toUpperDelegate = Method.Of<Func<string, string>>(s => s.ToUpperInvariant());
 
-        Assert.That(toUpperShort, Is.Not.EqualTo(toUpperLong));
+        Assert.That(toUpper, Is.Not.EqualTo(toUpperDelegate));
     }
 
-    [Test]
-    public void MethodOfTest()
+    private static IEnumerable<TCD> GetMethodsTestData() => new (MethodInfo actual, MethodInfo expected)[]
     {
-        MethodInfo toUpperShort = Method.Of("".ToUpperInvariant);
-        MethodInfo toUpperExpected = typeof(string).GetMethod(nameof(string.ToUpperInvariant))
-                                     ?? throw new MissingMethodException(typeof(string).FullName, nameof(string.ToUpperInvariant));
+        (Method.Of("".ToUpperInvariant), From<string>("ToUpperInvariant")),
 
-        MethodInfo trimByExpression = Method.OfExpression<Func<string, string>>(s => s.Trim());
-        MethodInfo trimByDelegate = Method.Of<Func<string>>("".Trim);// no problem with ambiguous match
+        (Method.OfExpression<Func<string, string>>(s => s.Trim()), From<string>("Trim")),
+        (Method.Of<Func<string>>("".Trim), From<string>("Trim")), // no problem with ambiguous match
+        (Method.OfExpression<Func<string, string>>(s => s.Trim()), Method.Of<Func<string>>("".Trim)),
 
-        MethodInfo trimByExpressionChars = Method.OfExpression<Func<string, char[], string>>((s, c) => s.Trim(c));
-        MethodInfo trimByDelegateChars = Method.Of<Func<char[], string>>("".Trim);
+        (Method.OfExpression<Func<string, char[], string>>((s, c) => s.Trim(c)), From<string>("Trim", typeof(char[]))),
+        (Method.Of<Func<char[], string>>("".Trim), From<string>("Trim", typeof(char[]))),
+        (Method.OfExpression<Func<string, char[], string>>((s, c) => s.Trim(c)), Method.Of<Func<char[], string>>("".Trim)),
 
-        MethodInfo parseByDelegate = Method.Of<Func<string, int>>(int.Parse);
+        (Method.Of<Func<string, int>>(int.Parse), From<int>("Parse", typeof(string))),
+
 #if NEMESIS_BINARY_PACKAGE_TESTS
-        MethodInfo tryParseByDelegate = Method.Of<Func2Out<string, int, bool>>(int.TryParse);//no magic with by ref
-                                                                                             //var tryParseMethods = typeof(int).GetMethods().Where(m => m.Name == nameof(int.TryParse)).ToList();
+        (Method.Of<Design.Func2Out<string, int, bool>>(int.TryParse), From<int>("TryParse", typeof(string), typeof(int).MakeByRefType())),//no magic with by ref                                              
 #endif
 
-        MethodInfo genericAction = Method.Of(GenericAction<int>).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
-        MethodInfo genericFunc = Method.Of(GenericFunc<int>).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
-        MethodInfo genericCreateTransformer = Method.Of(CreateTransformer<int>).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
+        //generics
+        (Method.Of(T.GenericAction<int>), From<T>("GenericAction").MakeGenericMethod(typeof(int))),
+        (Method.Of(T.GenericFunc<float>), From<T>("GenericFunc").MakeGenericMethod(typeof(float))),
+        (Method.Of(T.CreateTransformer<double>), From<T>("CreateTransformer").MakeGenericMethod(typeof(double))),
+        (Method.OfExpression<Func<T, T.ITransformer<byte>>>(_=> _.CreateTransformerInstance<byte>()), From<T>("CreateTransformerInstance").MakeGenericMethod(typeof(byte))),
+    }.Select((t, i) => new TCD(t.actual, t.expected).SetName($"Met_{i + 1:00}"));
 
-        MethodInfo genericCreateTransformerInstance = Method.OfExpression<Func<TypeMetaTests, ITransformer<int>>>(
-                test => test.CreateTransformerInstance<int>()
-                ).GetGenericMethodDefinition().MakeGenericMethod(typeof(string));
+    private static MethodInfo From<T>(string name, params Type[] @params) =>
+        typeof(T).GetMethod(name, @params.Length == 0 ? Type.EmptyTypes : @params);
 
-
-        Assert.That(toUpperExpected, Is.EqualTo(toUpperShort));
-
-        Assert.That(trimByExpression, Is.EqualTo(trimByDelegate));
-        Assert.That(trimByExpressionChars, Is.EqualTo(trimByDelegateChars));
-
-        Assert.That(trimByDelegate.Name, Is.EqualTo(trimByDelegateChars.Name));
-        Assert.That(trimByDelegate, Is.Not.EqualTo(trimByDelegateChars));
-
-        Assert.That(trimByExpression, Is.EqualTo(typeof(string).GetMethod(nameof(string.Trim), Type.EmptyTypes)));
-        Assert.That(parseByDelegate, Is.EqualTo(typeof(int).GetMethod(nameof(int.Parse), new[] { typeof(string) })));
-#if NEMESIS_BINARY_PACKAGE_TESTS
-        Assert.That(tryParseByDelegate, Is.EqualTo(typeof(int).GetMethod(nameof(int.TryParse), new[] { typeof(string), typeof(int).MakeByRefType() })));
-        Assert.Multiple(() =>
-        {
-#endif
-
-            Assert.That(genericAction, Is.Not.Null);
-            Assert.That(genericFunc, Is.Not.Null);
-            Assert.That(genericCreateTransformer, Is.Not.Null);
-            Assert.That(genericCreateTransformerInstance, Is.Not.Null);
-        });
-        Assert.That(genericAction.Name, Is.EqualTo(nameof(GenericAction)));
-        Assert.That(genericFunc.Name, Is.EqualTo(nameof(GenericFunc)));
-        Assert.That(genericCreateTransformer.Name, Is.EqualTo(nameof(CreateTransformer)));
-        Assert.That(genericCreateTransformerInstance.Name, Is.EqualTo(nameof(CreateTransformerInstance)));
-
-        Assert.That(genericAction.ReturnType, Is.EqualTo(typeof(void)));
-        Assert.That(genericFunc.ReturnType, Is.EqualTo(typeof(string)));
-        Assert.That(genericCreateTransformer.ReturnType, Is.EqualTo(typeof(ITransformer<string>)));
-        Assert.That(genericCreateTransformerInstance.ReturnType, Is.EqualTo(typeof(ITransformer<string>)));
-    }
+    [TestCaseSource(nameof(GetMethodsTestData))]
+    public void MethodOf_Positive(MethodInfo actual, MethodInfo expected) =>
+        Assert.That(actual, Is.EqualTo(expected));
 
     [Test]
     public void EventOfTest()
@@ -104,13 +67,9 @@ public class TypeMetaTests
     }
 
     public static event EventHandler StaticClick;
-    // ReSharper disable once UnusedMember.Local
-    // ReSharper disable once UnusedMember.Global
     protected static void OnStaticClick() => StaticClick?.Invoke(null, null);
 
     public event EventHandler Click;
-    // ReSharper disable once UnusedMember.Local
-    // ReSharper disable once UnusedMember.Global
     protected void OnClick() => Click?.Invoke(this, null);
 
     [Test]
@@ -279,57 +238,37 @@ public class TypeMetaTests
 
     }
 
-    private class PropFieldClass
+    private class PropFieldClass(int normalField, float readOnlyField, decimal prop, string autoProp)
     {
-        public int NormalField;
-        public readonly float ReadOnlyField;
+        public int NormalField = normalField + (int)StaticField;
+        public readonly float ReadOnlyField = readOnlyField;
         public static float StaticField = 16;
 
 #pragma warning disable IDE0032 // Use auto property
-        private decimal _prop;
+        private decimal _prop = prop;
 #pragma warning restore IDE0032 // Use auto property
 
-        public string AutoProp { get; set; }
+        public string AutoProp { get; set; } = autoProp;
 
         public decimal Prop
         {
-            // ReSharper disable ArrangeAccessorOwnerBody
             get => _prop;
             set => _prop = value;
-            // ReSharper restore ArrangeAccessorOwnerBody
         }
 
         [IndexerName("Indeksik")]
-        // ReSharper disable ArrangeAccessorOwnerBody
         public int this[byte b]
         {
             get => new[] { 10, 20, 30 }[b];
-            // ReSharper disable ValueParameterNotUsed
-            // ReSharper disable UnusedMember.Local
             set { }
-            // ReSharper restore UnusedMember.Local
-            // ReSharper restore ValueParameterNotUsed
         }
-        // ReSharper restore ArrangeAccessorOwnerBody
+
 
         [IndexerName("Indeksik")]
-        // ReSharper disable ArrangeAccessorOwnerBody
-        // ReSharper disable UnusedMember.Local
-        // ReSharper disable ValueParameterNotUsed
         public string this[string s, int i] { get => new[] { 100, 200, 300 }[i] + s; set { } }
-        // ReSharper restore ValueParameterNotUsed
-        // ReSharper restore UnusedMember.Local
-        // ReSharper restore ArrangeAccessorOwnerBody
+
 
         public static string StaticProp { get; set; } = "STATIC";
-
-        public PropFieldClass(int normalField, float readOnlyField, decimal prop, string autoProp)
-        {
-            NormalField = normalField + (int)StaticField;
-            ReadOnlyField = readOnlyField;
-            _prop = prop;
-            AutoProp = autoProp;
-        }
     }
 
     #region ImplementsGenericInterface and DerivesFromGenericClass
@@ -403,7 +342,7 @@ public class TypeMetaTests
         var data = new (Type type, Type generic, bool expectedResult)[]
         {
             //open class
-		        (typeof(int?), typeof(Nullable<>), true),
+		    (typeof(int?), typeof(Nullable<>), true),
             (typeof(IntKeyedSortedDictionary<>), typeof(SortedDictionary<,>), true),
             (typeof(OracleConnector), typeof(DataConnector<,>), true),
             (typeof(SemiOracleConnector<>), typeof(DataConnector<,>), true),
@@ -666,9 +605,19 @@ public class TypeMetaTests
     [TestCase(typeof(int?), false)]
     [TestCase(typeof(float?), false)]
     #endregion
-    public void IsValueTupleTest(Type type, bool expectedResult)
-    {
-        var actual = TypeMeta.IsValueTuple(type);
-        Assert.That(actual, Is.EqualTo(expectedResult));
-    }
+    public void IsValueTupleTest(Type type, bool expectedResult) =>
+        Assert.That(TypeMeta.IsValueTuple(type), Is.EqualTo(expectedResult));
+}
+
+file class T
+{
+    public static void GenericAction<TElement>() { }
+    public static TElement GenericFunc<TElement>() => default;
+
+    public interface ITransformer<TElement> { }
+    public static ITransformer<TElement> CreateTransformer<TElement>() => default;
+
+#pragma warning disable CA1822 // Mark members as static
+    public ITransformer<TElement> CreateTransformerInstance<TElement>() => default;
+#pragma warning restore CA1822 // Mark members as static
 }

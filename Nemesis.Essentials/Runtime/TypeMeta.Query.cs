@@ -1,9 +1,5 @@
 ﻿#nullable enable
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -262,13 +258,11 @@ namespace $rootnamespace$.Runtime
         /// <summary>
         /// Checks whether <paramref name="property"/> is auto-implemented property.
         /// </summary>
-        public static bool IsAutoProperty(this PropertyInfo property)
-        {
-            var setMethod = property.GetSetMethod(true);
-            var getMethod = property.GetGetMethod(true);
-            return setMethod != null && setMethod.IsCompilerGenerated() &&
-                   getMethod != null && getMethod.IsCompilerGenerated();
-        }
+        public static bool IsAutoProperty(this PropertyInfo property) =>
+            property.GetSetMethod(true) is { } setMethod &&
+            property.GetGetMethod(true) is { } getMethod &&
+            setMethod.IsCompilerGenerated() &&
+            getMethod.IsCompilerGenerated();
 
         private static readonly Regex _backingFieldRegex = new(@"^\<(?<propertyName>\w+)\>k__BackingField$", RegexOptions.Compiled | RegexOptions.Singleline);
 
@@ -277,7 +271,7 @@ namespace $rootnamespace$.Runtime
         /// </summary>
         public static FieldInfo? GetBackingField(this PropertyInfo property)
         {
-            var result = (property.DeclaringType ?? throw new ArgumentNullException(nameof(property), $@"{nameof(property)}.DeclaringType is null"))
+            var result = (property.DeclaringType ?? throw new ArgumentNullException($@"{nameof(property)}.DeclaringType is null"))
                 .GetField($"<{property.Name}>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
             return result;
         }
@@ -285,13 +279,15 @@ namespace $rootnamespace$.Runtime
         /// <summary>
         /// Checks whether <paramref name="field"/> is a backing field for some auto-implemented property.
         /// </summary>
-        public static bool IsBackingField(this FieldInfo field) => field.IsCompilerGenerated() && _backingFieldRegex.IsMatch(field.Name);
+        public static bool IsBackingField(this FieldInfo field) =>
+            field.IsCompilerGenerated() && _backingFieldRegex.IsMatch(field.Name);
+
 
         /// <summary>
         /// Tries to find auto-property that causes generation of <paramref name="field"/>, or returns <c>false</c>
         /// if <paramref name="field"/> is not auto-property backing field.
         /// </summary>
-        public static bool TryGetDeclaringProperty(this FieldInfo field, out PropertyInfo? declaringProperty)
+        public static bool TryGetAutoProperty(this FieldInfo field, out PropertyInfo? declaringProperty)
         {
             const BindingFlags DECLARED_INSTANCE_MEMBER = BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
             if (!field.IsCompilerGenerated())
@@ -306,7 +302,7 @@ namespace $rootnamespace$.Runtime
                 return false;
             }
 
-            declaringProperty = (field.DeclaringType ?? throw new ArgumentNullException(nameof(field), $@"{nameof(field)}.DeclaringType is null"))
+            declaringProperty = (field.DeclaringType ?? throw new ArgumentNullException($@"{nameof(field)}.DeclaringType is null"))
                 .GetProperty(match.Groups["propertyName"].Value, DECLARED_INSTANCE_MEMBER);
             return declaringProperty != null;
         }
@@ -323,7 +319,7 @@ namespace $rootnamespace$.Runtime
                 declaringEvent = null;
                 return false;
             }
-            declaringEvent = (field.DeclaringType ?? throw new ArgumentNullException(nameof(field), $@"{nameof(field)}.DeclaringType is null"))
+            declaringEvent = (field.DeclaringType ?? throw new ArgumentNullException($@"{nameof(field)}.DeclaringType is null"))
                 .GetEvent(field.Name, DECLARED_INSTANCE_MEMBER);
             return declaringEvent != null;
         }

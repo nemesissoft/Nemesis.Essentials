@@ -10,7 +10,7 @@ namespace Nemesis.Essentials.Maths
     {
         #region Fields and properties
         private static readonly int[] _primesBelow2000 =
-        {
+        [
             2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
             101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199,
             211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293,
@@ -31,7 +31,7 @@ namespace Nemesis.Essentials.Maths
             1709, 1721, 1723, 1733, 1741, 1747, 1753, 1759, 1777, 1783, 1787, 1789,
             1801, 1811, 1823, 1831, 1847, 1861, 1867, 1871, 1873, 1877, 1879, 1889,
             1901, 1907, 1913, 1931, 1933, 1949, 1951, 1973, 1979, 1987, 1993, 1997, 1999
-        };
+        ];
         #endregion
 
         #region Maths
@@ -214,9 +214,9 @@ namespace Nemesis.Essentials.Maths
         /// <exception cref="ArithmeticException">Thrown when the inverse does not exist. (i.e. gcd(this, modulus) != 1)</exception>
         public static BigInteger ModInverse(this BigInteger bi, BigInteger modulus)
         {
-            BigInteger[] p = { 0, 1 };
+            BigInteger[] p = [0, 1];
             BigInteger[] q = new BigInteger[2];    // quotients
-            BigInteger[] r = { 0, 0 };             // remainders
+            BigInteger[] r = [0, 0];             // remainders
 
             int step = 0;
 

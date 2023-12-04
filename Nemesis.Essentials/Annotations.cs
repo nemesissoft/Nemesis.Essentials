@@ -1,4 +1,5 @@
-﻿/* MIT License
+﻿#pragma warning disable IDE0290 // Use primary constructor
+/* MIT License
 
 Copyright (c) 2016 JetBrains http://www.jetbrains.com
 
@@ -20,8 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. */
 #nullable disable
-using System;
-
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
@@ -317,10 +316,10 @@ namespace JetBrains.Annotations
     internal sealed class UsedImplicitlyAttribute : Attribute
     {
         public UsedImplicitlyAttribute()
-          : this(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.Default) { }
+          : this(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.Itself) { }
 
         public UsedImplicitlyAttribute(ImplicitUseKindFlags useKindFlags)
-          : this(useKindFlags, ImplicitUseTargetFlags.Default) { }
+          : this(useKindFlags, ImplicitUseTargetFlags.Itself) { }
 
         public UsedImplicitlyAttribute(ImplicitUseTargetFlags targetFlags)
           : this(ImplicitUseKindFlags.Default, targetFlags) { }
@@ -344,10 +343,10 @@ namespace JetBrains.Annotations
     internal sealed class MeansImplicitUseAttribute : Attribute
     {
         public MeansImplicitUseAttribute()
-          : this(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.Default) { }
+          : this(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.Itself) { }
 
         public MeansImplicitUseAttribute(ImplicitUseKindFlags useKindFlags)
-          : this(useKindFlags, ImplicitUseTargetFlags.Default) { }
+          : this(useKindFlags, ImplicitUseTargetFlags.Itself) { }
 
         public MeansImplicitUseAttribute(ImplicitUseTargetFlags targetFlags)
           : this(ImplicitUseKindFlags.Default, targetFlags) { }
@@ -387,7 +386,6 @@ namespace JetBrains.Annotations
     [Flags]
     internal enum ImplicitUseTargetFlags
     {
-        Default = Itself,
         Itself = 1,
         /// <summary>Members of entity marked with attribute are considered used.</summary>
         Members = 2,
@@ -399,6 +397,7 @@ namespace JetBrains.Annotations
     /// This attribute is intended to mark publicly available API
     /// which should not be removed and so is treated as used.
     /// </summary>
+    [AttributeUsage(AttributeTargets.All)]
     [MeansImplicitUse(ImplicitUseTargetFlags.WithMembers)]
     internal sealed class PublicAPIAttribute : Attribute
     {
@@ -988,3 +987,5 @@ namespace JetBrains.Annotations
     internal sealed class RazorWriteMethodParameterAttribute : Attribute { }
 }
 #nullable restore
+
+#pragma warning restore IDE0290 // Use primary constructor

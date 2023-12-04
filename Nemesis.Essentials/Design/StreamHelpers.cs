@@ -333,7 +333,7 @@ public static class StreamHelpers
     {
         try
         {
-            Encoding[] unicodeEncodings = { Encoding.BigEndianUnicode, Encoding.Unicode, Encoding.UTF8 };
+            Encoding[] unicodeEncodings = [Encoding.BigEndianUnicode, Encoding.Unicode, Encoding.UTF8];
 
             foreach (var encoding in unicodeEncodings)
             {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security;
 using JetBrains.Annotations;
@@ -27,9 +23,9 @@ namespace Nemesis.Essentials.Design
         /// <param name="comparer">Comparer for comparing each pair of items from the sequences. Pass null to use default comparer</param>
         private EnumerableComparer(IComparer<T> comparer = null) => _comparer = comparer ?? Comparer<T>.Default;
 
-        public static readonly EnumerableComparer<T> DefaultInstance = new EnumerableComparer<T>();
+        public static readonly EnumerableComparer<T> DefaultInstance = new();
 
-        public static EnumerableComparer<T> CreateInstance(IComparer<T> comparer) => new EnumerableComparer<T>(comparer);
+        public static EnumerableComparer<T> CreateInstance(IComparer<T> comparer) => new(comparer);
 
         /// <summary>
         /// Compares two sequences and returns a value indicating whether one is less than, equal to, or greater than the other.
@@ -76,10 +72,10 @@ namespace Nemesis.Essentials.Design
         private EnumerableEqualityComparer(IEqualityComparer<TElement> equalityComparer = null) =>
             _equalityComparer = equalityComparer ?? EqualityComparer<TElement>.Default;
 
-        public static readonly EnumerableEqualityComparer<TElement> DefaultInstance = new EnumerableEqualityComparer<TElement>();
+        public static readonly EnumerableEqualityComparer<TElement> DefaultInstance = new();
 
         public static EnumerableEqualityComparer<TElement> CreateInstance(IEqualityComparer<TElement> equalityComparer) =>
-            new EnumerableEqualityComparer<TElement>(equalityComparer);
+            new(equalityComparer);
 
 
         public bool Equals(IEnumerable<TElement> left, IEnumerable<TElement> right)
@@ -269,7 +265,7 @@ namespace Nemesis.Essentials.Design
     {
         private NaturalStringComparer() { }
 
-        public static readonly NaturalStringComparer Default = new NaturalStringComparer();
+        public static readonly NaturalStringComparer Default = new();
 
         public int Compare(string x, string y) => SafeNativeMethods.StrCmpLogicalW(x, y);
     }
@@ -323,7 +319,7 @@ namespace Nemesis.Essentials.Design
             return GetInstance(rand.Next(), rand.Next(), rand.Next());
         }
 
-        public static RandomComparer<T> GetInstance(int a, int b, int c) => new RandomComparer<T>(a, b, c);
+        public static RandomComparer<T> GetInstance(int a, int b, int c) => new(a, b, c);
 
         private RandomComparer(int a, int b, int c)
         {

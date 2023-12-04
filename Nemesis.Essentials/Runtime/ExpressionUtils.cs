@@ -287,12 +287,12 @@ namespace Nemesis.Essentials.Runtime
             return (Type)
                 (makeNewCustomDelegateMethod ?? throw new MissingMethodException($"Method {TYPE_NAME}{METHOD_NAME} does not exist"))
                 .Invoke(null,
-                new object[] { parameters.Concat(new[] { returnType }).ToArray() });
+                [parameters.Concat(new[] { returnType }).ToArray()]);
         }
 
         public static object PrettyPrint(this Expression part, TextWriter writer, int indent = 0)
         {
-            string indentString = new string(' ', indent * 2);
+            string indentString = new(' ', indent * 2);
 
             writer.Write(indentString);
             writer.Write(Regex.Replace(part.ToString(), @"value\([^)]+\)\.", ""));
@@ -311,7 +311,7 @@ namespace Nemesis.Essentials.Runtime
                 .GetProperties()
                 .Where(p => typeof(Expression).IsAssignableFrom(p.PropertyType))
                 .Select(p => (Expression)p.GetValue(part, null))
-                .Where(x => x != null && !(x is ConstantExpression))
+                .Where(x => x != null && x is not ConstantExpression)
                 .ToList();
 
             if (nestedExpressions.Any())
@@ -336,7 +336,7 @@ namespace Nemesis.Essentials.Runtime
             => typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
             ?.GetValue(exp) as string;
 
-        private static readonly ConcurrentDictionary<Type, TypeConverter> _typeConverters = new ConcurrentDictionary<Type, TypeConverter>();
+        private static readonly ConcurrentDictionary<Type, TypeConverter> _typeConverters = new();
         public static object ConvertFromInvariantString(string invariantString, Type destinationType)
             => _typeConverters.GetOrAdd(destinationType, TypeDescriptor.GetConverter).ConvertFromInvariantString(invariantString);
     }

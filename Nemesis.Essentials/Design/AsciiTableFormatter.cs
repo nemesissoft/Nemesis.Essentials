@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Data;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -15,73 +9,29 @@ using Nemesis.Essentials.Runtime;
 
 namespace Nemesis.Essentials.Design
 {
-    //TODO change string to chars 
-    public sealed class AsciiArtTableStyle
+    public sealed record AsciiArtTableStyle(
+         char HeaderLeftCorner, char HeaderRightCorner,
+
+         char HeaderHorizontalBorder, char HeaderVerticalBorder, char HeaderUpperJunction,
+         char HeaderLowerJunction, char HeaderLeftJunction, char HeaderRightJunction,
+         char HeaderVerticalSeparator,
+
+         char ItemVerticalBorder, char ItemVerticalSeparator, bool AppendRowSeparator,
+         char ItemHorizontalSeparator, char ItemLeftJunction, char ItemMiddleJunction,
+         char ItemRightJunction,
+
+         char FooterHorizontalSeparator, char FooterLeftCorner, char FooterMiddleJunction,
+         char FooterRightCorner)
     {
-        public readonly string HeaderLeftCorner;
-        public readonly string HeaderRightCorner;
 
-        public readonly string HeaderHorizontalBorder;
-        public readonly string HeaderVerticalBorder;
-        public readonly string HeaderUpperJunction;
-        public readonly string HeaderLowerJunction;
-        public readonly string HeaderLeftJunction;
-        public readonly string HeaderRightJunction;
-        public readonly string HeaderVerticalSeparator;
+        public static readonly AsciiArtTableStyle Standard = new('╔', '╗', '═', '║', '╤', '╪', '╠', '╣',
+            '│', '║', '│', true, '─', '╟', '┼', '╢', '═', '╚', '╧', '╝');
 
-        public readonly string ItemVerticalBorder;
-        public readonly string ItemVerticalSeparator;
-        public readonly bool AppendRowSeparator;
-        public readonly string ItemHorizontalSeparator;
-        public readonly string ItemLeftJunction;
-        public readonly string ItemMiddleJunction;
-        public readonly string ItemRightJunction;
+        public static readonly AsciiArtTableStyle Simple = new('+', '+', '\0', '|', '+', '+', '+', '+',
+            '|', '|', '|', true, '-', '+', '+', '+', '\0', '+', '+', '+');
 
-        public readonly string FooterHorizontalSeparator;
-        public readonly string FooterLeftCorner;
-        public readonly string FooterMiddleJunction;
-        public readonly string FooterRightCorner;
-
-        public AsciiArtTableStyle(string headerLeftCorner, string headerRightCorner, string headerHorizontalBorder,
-            string headerVerticalBorder, string headerUpperJunction, string headerLowerJunction, string headerLeftJunction,
-            string headerRightJunction, string headerVerticalSeparator, string itemVerticalBorder,
-            string itemVerticalSeparator, bool appendRowSeparator, string itemHorizontalSeparator, string itemLeftJunction,
-            string itemMiddleJunction, string itemRightJunction, string footerHorizontalSeparator, string footerLeftCorner,
-            string footerMiddleJunction, string footerRightCorner)
-        {
-            HeaderLeftCorner = headerLeftCorner;
-            HeaderRightCorner = headerRightCorner;
-            HeaderHorizontalBorder = headerHorizontalBorder;
-            HeaderVerticalBorder = headerVerticalBorder;
-            HeaderUpperJunction = headerUpperJunction;
-            HeaderLowerJunction = headerLowerJunction;
-            HeaderLeftJunction = headerLeftJunction;
-            HeaderRightJunction = headerRightJunction;
-            HeaderVerticalSeparator = headerVerticalSeparator;
-            ItemVerticalBorder = itemVerticalBorder;
-            ItemVerticalSeparator = itemVerticalSeparator;
-            AppendRowSeparator = appendRowSeparator;
-            ItemHorizontalSeparator = itemHorizontalSeparator;
-            ItemLeftJunction = itemLeftJunction;
-            ItemMiddleJunction = itemMiddleJunction;
-            ItemRightJunction = itemRightJunction;
-            FooterHorizontalSeparator = footerHorizontalSeparator;
-            FooterLeftCorner = footerLeftCorner;
-            FooterMiddleJunction = footerMiddleJunction;
-            FooterRightCorner = footerRightCorner;
-        }
-
-        [PublicAPI]
-        public static readonly AsciiArtTableStyle Standard = new AsciiArtTableStyle("╔", "╗", "═", "║", "╤", "╪", "╠", "╣",
-        "│", "║", "│", true, "─", "╟", "┼", "╢", "═", "╚", "╧", "╝");
-
-        [PublicAPI]
-        public static readonly AsciiArtTableStyle Simple = new AsciiArtTableStyle("+", "+", "", "|", "+", "+", "+", "+",
-        "|", "|", "|", true, "-", "+", "+", "+", "", "+", "+", "+");
-
-        [PublicAPI]
-        public static readonly AsciiArtTableStyle Markup = new AsciiArtTableStyle("=", "=", "=", "", "=", "=", "=", "=",
-        "", "", "", true, "-", "-", "-", "-", "-", "-", "-", "-");
+        public static readonly AsciiArtTableStyle Markup = new('=', '=', '=', '\0', '=', '=', '=', '=',
+            '\0', '\0', '\0', true, '-', '-', '-', '-', '-', '-', '-', '-');
     }
 
     public interface IMemberSelector { bool ShouldSelect(MemberInfo mi); }
@@ -92,13 +42,13 @@ namespace Nemesis.Essentials.Design
     }
     public sealed class AllPublicMembersSelector : IMemberSelector
     {
-        private readonly MemberTypes[] _validMemberTypes = { MemberTypes.Property, MemberTypes.Field, MemberTypes.Method };
+        private readonly MemberTypes[] _validMemberTypes = [MemberTypes.Property, MemberTypes.Field, MemberTypes.Method];
         public bool ShouldSelect(MemberInfo mi) =>
             _validMemberTypes.Contains(mi.MemberType) &&
             mi.DeclaringType != typeof(object) &&
             mi.IsPublic() &&
             (
-                !(mi is MethodBase mb) || !new[] { "get_", "set_" }.Any(prefix => mb.Name.StartsWith(prefix))
+                mi is not MethodBase mb || !new[] { "get_", "set_" }.Any(prefix => mb.Name.StartsWith(prefix))
             );
     }
 
@@ -114,22 +64,14 @@ namespace Nemesis.Essentials.Design
         private static string ToSentenceCase(string str) => Regex.Replace(str, "[a-z][A-Z]", m => $"{m.Value[0]} {char.ToLower(m.Value[1])}");
     }
     [PublicAPI]
-    public sealed class DictionaryTransformer : IMemberNameTransformer
+    public sealed class DictionaryTransformer(IDictionary<string, string> dict) : IMemberNameTransformer
     {
-        private readonly IDictionary<string, string> _dict;
-
-        public DictionaryTransformer(IDictionary<string, string> dict) => _dict = dict;
-
-        public string TransformName(MemberInfo mi) => _dict.TryGetValue(mi.Name, out var value) ? value : mi.Name;
+        public string TransformName(MemberInfo mi) => dict.TryGetValue(mi.Name, out var value) ? value : mi.Name;
     }
     [PublicAPI]
-    public sealed class FuncTransformer : IMemberNameTransformer
+    public sealed class FuncTransformer(Func<MemberInfo, string> func) : IMemberNameTransformer
     {
-        private readonly Func<MemberInfo, string> _func;
-
-        public FuncTransformer(Func<MemberInfo, string> func) => _func = func;
-
-        public string TransformName(MemberInfo mi) => _func(mi);
+        public string TransformName(MemberInfo mi) => func(mi);
     }
     [PublicAPI]
     public sealed class DescriptionAttributeTransformer : IMemberNameTransformer
@@ -206,29 +148,18 @@ namespace Nemesis.Essentials.Design
     /// ║ Naruto Uzumaki │                Japan                 │ 20  ║
     /// ╚════════════════╧══════════════════════════════════════╧═════╝
     /// </example>
-    public sealed class AsciiArtTableFormatter
+    public sealed class AsciiArtTableFormatter(
+        AsciiArtTableStyle style = null,
+        IMemberNameTransformer memberNameTransformer = null,
+        IMemberSelector memberSelector = null,
+        AsciiArtTableFormatter.HeaderStyle headerStyle = AsciiArtTableFormatter.HeaderStyle.PropertyNames)
     {
-        public enum HeaderStyle : byte
-        {
-            PropertyNames = 0,
-            None = 1,
-            Spreadsheet = 2
-        }
+        public enum HeaderStyle : byte { PropertyNames = 0, None = 1, Spreadsheet = 2 }
 
-
-        private readonly AsciiArtTableStyle _style;
-        private readonly IMemberSelector _memberSelector;
-        private readonly IMemberNameTransformer _memberNameTransformer;
-        private readonly HeaderStyle _headerStyle;
-
-        public AsciiArtTableFormatter(AsciiArtTableStyle style = null,
-            IMemberNameTransformer memberNameTransformer = null, IMemberSelector memberSelector = null, HeaderStyle headerStyle = HeaderStyle.PropertyNames)
-        {
-            _headerStyle = headerStyle;
-            _style = style ?? AsciiArtTableStyle.Standard;
-            _memberSelector = memberSelector ?? new AllPublicFieldsAndPropertiesSelector();
-            _memberNameTransformer = memberNameTransformer ?? new OneToOneTransformer();
-        }
+        private readonly AsciiArtTableStyle _style = style ?? AsciiArtTableStyle.Standard;
+        private readonly IMemberSelector _memberSelector = memberSelector ?? new AllPublicFieldsAndPropertiesSelector();
+        private readonly IMemberNameTransformer _memberNameTransformer = memberNameTransformer ?? new OneToOneTransformer();
+        private readonly HeaderStyle _headerStyle = headerStyle;
 
         [Pure, PublicAPI]
         public string ToAsciiCharactersTable<T>(IEnumerable<T> elements)
@@ -243,7 +174,7 @@ namespace Nemesis.Essentials.Design
         {
             const BindingFlags FLAGS = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
-            MemberInfo[] members = typeof(T).GetMembers(FLAGS).Where(m => _memberSelector.ShouldSelect(m)).OrderByDescending(mi => (int)mi.MemberType).ToArray();
+            MemberInfo[] members = [.. typeof(T).GetMembers(FLAGS).Where(m => _memberSelector.ShouldSelect(m)).OrderByDescending(mi => (int)mi.MemberType)];
 
             if (members.Length == 0)
                 members = elements?.FirstOrDefault()?.GetType().GetMembers(FLAGS)
@@ -379,7 +310,7 @@ namespace Nemesis.Essentials.Design
                     for (int j = 0; j < maxWidths.Length; j++)
                     {
                         sb.Append(' ', maxWidths[j]);
-                        if (j < maxWidths.Length - 1) sb.Append(".");
+                        if (j < maxWidths.Length - 1) sb.Append('.');
                     }
                 }
                 else
@@ -434,7 +365,7 @@ namespace Nemesis.Essentials.Design
                 sb.Append(whitespace);
         }
 
-        private string GetExcelColumnName(int columnNumber)
+        private static string GetExcelColumnName(int columnNumber)
         {
             int dividend = columnNumber;
             string columnName = "";
@@ -468,17 +399,25 @@ namespace Nemesis.Essentials.Design
                 MaxWidth = NumberOfLines == 0 ? 0 : Lines.Max(line => line?.Length ?? 0);
             }
 
-            public static implicit operator MultilineString(string text) => new MultilineString(text);
+            public static implicit operator MultilineString(string text) => new(text);
 
-            private static readonly Regex _normalizeNewLinesPattern = new Regex(@"\r\n|\n\r|\n|\r", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            private static readonly Regex _normalizeNewLinesPattern = new(@"\r\n|\n\r|\n|\r", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             private static string NormalizeNewLines(string text) => _normalizeNewLinesPattern.Replace(text, Environment.NewLine);
 
-            private static IReadOnlyList<string> SplitLines(string text) => text?.Split(new[] { Environment.NewLine }, StringSplitOptions.None) ?? new string[0];
+            private static IReadOnlyList<string> SplitLines(string text) => text?.Split(new[] { Environment.NewLine }, StringSplitOptions.None) ?? [];
 
             public override string ToString() => $"[{MaxWidth}] {string.Join(" >> ", Lines)}";
         }
     }
 }
+
+#if !NET
+namespace System.Runtime.CompilerServices
+{
+    [ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Never)]
+    internal static class IsExternalInit { }
+}
+#endif
 
 
 /*  Header header = null;

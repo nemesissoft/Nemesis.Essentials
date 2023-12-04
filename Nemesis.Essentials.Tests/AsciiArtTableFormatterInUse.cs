@@ -17,7 +17,7 @@ class AsciiArtTableFormatterInUse
         new ("Linus Torvalds", "Finland", 49,"#$_94_sys=+Gh\u263B"),
     }.AsReadOnly();
 
-    private class Person(string name, string address, int age, string plainTextPassword)
+    class Person(string name, string address, int age, string plainTextPassword)
     {
         public string Name { get; } = name;
         public string Address { get; } = address;

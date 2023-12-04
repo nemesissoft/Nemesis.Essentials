@@ -102,7 +102,7 @@ namespace Nemesis.Essentials.Design
 
         #region Regex
 
-        private static readonly Regex _invalidRegexCharsReplacer = new Regex(@"
+        private static readonly Regex _invalidRegexCharsReplacer = new(@"
 (?<EscapeableChar>
 \.   |
 \^   |
@@ -127,7 +127,7 @@ namespace Nemesis.Essentials.Design
            => _invalidRegexCharsReplacer.Replace(pattern, @"\${EscapeableChar}");
 
 
-        private static readonly Regex _identifierRegex = new Regex(@"(?<=^| )(?!\d)\w+|(?<= )(?!\d)\w+(?= |$)", RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+        private static readonly Regex _identifierRegex = new(@"(?<=^| )(?!\d)\w+|(?<= )(?!\d)\w+(?= |$)", RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
         /// <summary>
         /// Tries to make valid C# identifier by removing forbidden characters and optionally stropping keywords. <see cref="http://en.wikipedia.org/wiki/Stropping_(syntax)"/>
@@ -146,7 +146,7 @@ namespace Nemesis.Essentials.Design
             return _csharpKeywords.Contains(identifierCandidate) ? $"@{identifierCandidate}" : identifierCandidate;
         }
 
-        private static readonly SortedSet<string> _csharpKeywords = new SortedSet<string>(new[]
+        private static readonly SortedSet<string> _csharpKeywords = new(new[]
             {
                 "abstract", "event", "new", "struct", "as", "explicit", "null", "switch", "base", "extern", "this", "false", "operator", "throw", "break", "finally", "out", "true",
                 "fixed", "override", "try", "case", "params", "typeof", "catch", "for", "private", "foreach", "protected", "checked", "goto", "public", "unchecked", "class", "if",
