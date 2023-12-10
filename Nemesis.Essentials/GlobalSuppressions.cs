@@ -6,3 +6,5 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Style", "IDE0057:Use range operator", Justification = "Multiple targets", Scope = "namespaceanddescendants", Target = "~N:Nemesis.Essentials")]
+[assembly: SuppressMessage("GeneratedRegex", "SYSLIB1045:Convert to 'GeneratedRegexAttribute'.", Justification = "Multiple targets", Scope = "namespaceanddescendants", Target = "~N:Nemesis.Essentials")]
+[assembly: SuppressMessage("Style", "IDE0056:Use index operator", Justification = "Multiple targets", Scope = "namespaceanddescendants", Target = "~N:Nemesis.Essentials")]

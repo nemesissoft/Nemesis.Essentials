@@ -109,15 +109,10 @@ namespace Nemesis.Essentials.Design
     /// A comparer that wraps the IComparable interface to reproduce the inverted comparison result.
     /// </summary>
     /// <remarks>Uses decorator design pattern. See <see cref="http://en.wikipedia.org/wiki/Decorator_pattern"/></remarks>
-    public sealed class InvertedComparer<T> : IComparer<T>
+    /// <param name="comparer">The comparer to reverse. Pass null to use default comparer for <typeparamref name="T"/></param>
+    public sealed class InvertedComparer<T>(IComparer<T> comparer = null) : IComparer<T>
     {
-        internal readonly IComparer<T> Comparer;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InvertedComparer{T}"/> class.
-        /// </summary>
-        /// <param name="comparer">The comparer to reverse. Pass null to use default comparer for <typeparamref name="T"/></param>
-        public InvertedComparer(IComparer<T> comparer = null) => Comparer = comparer ?? Comparer<T>.Default;
+        internal readonly IComparer<T> Comparer = comparer ?? Comparer<T>.Default;
 
         public int Compare(T x, T y) => Comparer.Compare(y, x);
     }
@@ -125,14 +120,9 @@ namespace Nemesis.Essentials.Design
     /// <summary>
     /// Comparer to daisy-chain two existing comparers and apply in sequence (i.e. sort by x then y)
     /// </summary>
-    public class LinkedComparer<T> : IComparer<T>
+    public class LinkedComparer<T>(IComparer<T> primary, IComparer<T> secondary) : IComparer<T>
     {
-        private readonly IComparer<T> _primary, _secondary;
-        public LinkedComparer(IComparer<T> primary, IComparer<T> secondary)
-        {
-            _primary = primary ?? throw new ArgumentNullException(nameof(primary));
-            _secondary = secondary ?? throw new ArgumentNullException(nameof(secondary));
-        }
+        private readonly IComparer<T> _primary = primary ?? throw new ArgumentNullException(nameof(primary)), _secondary = secondary ?? throw new ArgumentNullException(nameof(secondary));
 
         int IComparer<T>.Compare(T x, T y)
         {
@@ -286,11 +276,9 @@ namespace Nemesis.Essentials.Design
         public static explicit operator FunctorComparer<T>(Comparison<T> comparison) => comparison != null ? new FunctorComparer<T>(comparison) : null;
     }*/
 
-    public class FunctorEqualityComparer<T> : IEqualityComparer<T>
+    public class FunctorEqualityComparer<T>(Func<T, T, bool> comparer) : IEqualityComparer<T>
     {
-        private readonly Func<T, T, bool> _comparer;
-
-        public FunctorEqualityComparer(Func<T, T, bool> comparer) => _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
+        private readonly Func<T, T, bool> _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
 
         public bool Equals(T x, T y) => _comparer(x, y);
 

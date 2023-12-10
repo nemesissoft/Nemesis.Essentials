@@ -1,8 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Nemesis.Essentials.Design;
 
-namespace Tests;
+namespace Nemesis.Essentials.Tests;
 
 [TestFixture]
 public class SpanBinaryReaderTests
@@ -44,13 +43,10 @@ public class SpanBinaryReaderTests
         var sut = new SpanBinaryReader(new byte[] { 1, 2, 3, 4, 5 }, 2);
         //                                                ^
 
-#if NET            
-        Span<byte> temp = stackalloc byte[bufferSize];
-        var buffer = MemoryMarshal.CreateSpan(ref MemoryMarshal.GetReference(temp), temp.Length);
-#else
-        Span<byte> buffer = new byte[bufferSize];
-#endif
+        //Span<byte> temp = stackalloc byte[bufferSize];
+        //var buffer = MemoryMarshal.CreateSpan(ref MemoryMarshal.GetReference(temp), temp.Length);
 
+        Span<byte> buffer = new byte[bufferSize];
 
         var count = sut.ReadTo(buffer);
         var actualText = string.Join("|", buffer.ToArray());
@@ -78,15 +74,13 @@ public class SpanBinaryReaderTests
     }
 
     [Test]
-    public void ReadExactly_ShouldThrowWhenNotEnoughBytes()
-    {
+    public void ReadExactly_ShouldThrowWhenNotEnoughBytes() =>
         Assert.That(() =>
         {
             var sut = new SpanBinaryReader(new byte[] { 1, 2, 3, 4, 5 }, 2);
 
             sut.ReadExactly(4);
         }, Throws.InstanceOf<ArgumentOutOfRangeException>().And.Message.StartWith("Not enough data to read 4 bytes from underlying buffer"));
-    }
 
     [Test]
     public void IsEnd_ReturnsTrueWhenEndIsReached()
@@ -141,30 +135,38 @@ public class SpanBinaryReaderTests
     }
 
     [Test]
-    public void ReadBoolean_ReturnsAppropriateValues() => ReadNumberHelper(i => i % 2 == 0, (ref SpanBinaryReader r) => r.ReadBoolean());
+    public void ReadBoolean_ReturnsAppropriateValues() =>
+        ReadNumberHelper(i => i % 2 == 0, (ref SpanBinaryReader r) => r.ReadBoolean());
 
     [Test]
-    public void ReadByte_ReturnsAppropriateValues() => ReadNumberHelper(i => (byte)(i * 11), (ref SpanBinaryReader r) => (byte)r.ReadByte());
+    public void ReadByte_ReturnsAppropriateValues() =>
+        ReadNumberHelper(i => (byte)(i * 11), (ref SpanBinaryReader r) => (byte)r.ReadByte());
 
     [Test]
-    public void ReadInt16_ReturnsAppropriateValues() => ReadNumberHelper(i => (short)(i * 111), (ref SpanBinaryReader r) => r.ReadInt16());
+    public void ReadInt16_ReturnsAppropriateValues() =>
+        ReadNumberHelper(i => (short)(i * 111), (ref SpanBinaryReader r) => r.ReadInt16());
 
     [Test]
-    public void ReadInt32_ReturnsAppropriateValues() => ReadNumberHelper(i => i * 11111, (ref SpanBinaryReader r) => r.ReadInt32());
+    public void ReadInt32_ReturnsAppropriateValues() =>
+        ReadNumberHelper(i => i * 11111, (ref SpanBinaryReader r) => r.ReadInt32());
 
     [Test]
-    public void ReadInt64_ReturnsAppropriateValues() => ReadNumberHelper(i => i * 1111111111111L, (ref SpanBinaryReader r) => r.ReadInt64());
+    public void ReadInt64_ReturnsAppropriateValues() =>
+        ReadNumberHelper(i => i * 1111111111111L, (ref SpanBinaryReader r) => r.ReadInt64());
 
 #if NET
     [Test]
-    public void ReadSingle_ReturnsAppropriateValues() => ReadNumberHelper(i => i * 3.14f, (ref SpanBinaryReader r) => r.ReadSingle());
+    public void ReadSingle_ReturnsAppropriateValues() =>
+        ReadNumberHelper(i => i * 3.14f, (ref SpanBinaryReader r) => r.ReadSingle());
 
     [Test]
-    public void ReadDouble_ReturnsAppropriateValues() => ReadNumberHelper(i => i * 3.14, (ref SpanBinaryReader r) => r.ReadDouble());
+    public void ReadDouble_ReturnsAppropriateValues() =>
+        ReadNumberHelper(i => i * 3.14, (ref SpanBinaryReader r) => r.ReadDouble());
 #endif
 
     [Test]
-    public void ReadDecimal_ReturnsAppropriateValues() => ReadNumberHelper(i => (decimal)Math.Pow(-100, i) * i * 3.14m + 0.123456789m, (ref SpanBinaryReader r) => r.ReadDecimal());
+    public void ReadDecimal_ReturnsAppropriateValues() =>
+        ReadNumberHelper(i => (decimal)Math.Pow(-100, i) * i * 3.14m + 0.123456789m, (ref SpanBinaryReader r) => r.ReadDecimal());
 
 
 

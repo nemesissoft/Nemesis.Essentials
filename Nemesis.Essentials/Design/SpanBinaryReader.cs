@@ -1,40 +1,28 @@
-using System;
 using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 
 namespace Nemesis.Essentials.Design;
 
 /// <summary>Lightweight reader wrapper for <see cref="ReadOnlySpan{T}"/> that follows <see cref="System.IO.BinaryReader"/> logic</summary>
-public ref struct SpanBinaryReader
+/// <remarks>
+/// Initialize <see cref="SpanBinaryReader"/>
+/// </remarks>
+/// <param name="buffer">Memory buffer to be used</param>
+/// <param name="position">Starting position</param>
+public ref struct SpanBinaryReader(ReadOnlySpan<byte> buffer, int position = 0)
 {
-    private readonly ReadOnlySpan<byte> _buffer;
-    private int _position;
+    private readonly ReadOnlySpan<byte> _buffer = buffer;
 
-    /// <summary>
-    /// Current position
-    /// </summary>
-    public int Position => _position;
+    /// <summary>Current position</summary>
+    public int Position { get; private set; } = position;
 
-    /// <summary>
-    /// Length of underlying buffer
-    /// </summary>
-    public int Length => _buffer.Length;
-
-    /// <summary>
-    /// Initialize <see cref="SpanBinaryReader"/>
-    /// </summary>
-    /// <param name="buffer">Memory buffer to be used</param>
-    /// <param name="position">Starting position</param>
-    public SpanBinaryReader(ReadOnlySpan<byte> buffer, int position = 0)
-    {
-        _buffer = buffer;
-        _position = position;
-    }
+    /// <summary>Length of underlying buffer</summary>
+    public readonly int Length => _buffer.Length;
 
     /// <summary>
     /// Reset current position to default (0)
     /// </summary>
-    public void Reset() => _position = 0;
+    public void Reset() => Position = 0;
 
     /// <summary>
     /// Advance (or retreat) current position by given amount 
@@ -42,24 +30,24 @@ public ref struct SpanBinaryReader
     /// <param name="offset">Offset to advance position by or retreat by in case of negative numbers</param>
     public void Seek(int offset)
     {
-        var newPosition = _position + offset;
+        var newPosition = Position + offset;
         if (newPosition < 0)
             throw new ArgumentOutOfRangeException(nameof(offset), offset, $"After advancing by {nameof(offset)} parameter, position should point to non-negative number");
 
-        _position = newPosition;
+        Position = newPosition;
     }
 
     /// <summary>
     /// Determines if end of buffer was reached 
     /// </summary>
-    public bool IsEnd => _position >= _buffer.Length;
+    public readonly bool IsEnd => Position >= _buffer.Length;
 
     /// <summary>
     /// Reads 1 byte from underlying stream
     /// </summary>
     /// <returns>Byte read or -1 if EOB is reached</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int ReadByte() => _position >= _buffer.Length ? -1 : _buffer[_position++];
+    public int ReadByte() => Position >= _buffer.Length ? -1 : _buffer[Position++];
 
     /// <summary>
     /// Reads one little endian 16 bits integer from underlying stream
@@ -120,15 +108,15 @@ public ref struct SpanBinaryReader
     /// <param name="buffer">A region of memory. When this method returns, the contents of this region are replaced by the bytes read from the current source.</param>
     /// <returns>The total number of bytes read into the buffer. This can be less than the number of bytes allocated in the buffer if that many bytes are not currently available, or zero (0) if the end of the stream has been reached.</returns>        
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int ReadTo(Span<byte> buffer)
+    public int ReadTo(scoped Span<byte> buffer)
     {
         int n = Math.Min(Length - Position, buffer.Length);
         if (n <= 0)
             return 0;
 
-        _buffer.Slice(_position, n).CopyTo(buffer);
+        _buffer.Slice(Position, n).CopyTo(buffer);
 
-        _position += n;
+        Position += n;
         return n;
     }
 
@@ -144,12 +132,11 @@ public ref struct SpanBinaryReader
         if (numBytes < 0) throw new ArgumentOutOfRangeException(nameof(numBytes), $"'{numBytes}' should be non negative");
 
         int n = Math.Min(Length - Position, numBytes);
-        if (n <= 0)
-            return ReadOnlySpan<byte>.Empty;
+        if (n <= 0) return [];
 
-        var result = _buffer.Slice(_position, n);
+        var result = _buffer.Slice(Position, n);
 
-        _position += n;
+        Position += n;
 
         return result;
     }
@@ -166,18 +153,18 @@ public ref struct SpanBinaryReader
     {
         if (numBytes < 1) throw new ArgumentOutOfRangeException(nameof(numBytes), $"'{numBytes}' should be at least 1");
 
-        int newPosition = _position + numBytes;
+        int newPosition = Position + numBytes;
 
         if (newPosition > _buffer.Length)
             throw new ArgumentOutOfRangeException(nameof(numBytes), $"Not enough data to read {numBytes} bytes from underlying buffer");
 
-        var span = _buffer.Slice(_position, numBytes);
-        _position = newPosition;
+        var span = _buffer.Slice(Position, numBytes);
+        Position = newPosition;
         return span;
     }
 
     /// <summary>
     /// Returns remaining bytes from underlying buffer
     /// </summary>
-    public ReadOnlySpan<byte> Remaining() => _buffer.Slice(_position, _buffer.Length - _position);
+    public readonly ReadOnlySpan<byte> Remaining() => _buffer.Slice(Position, _buffer.Length - Position);
 }

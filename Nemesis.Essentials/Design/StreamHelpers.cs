@@ -108,7 +108,7 @@ public static class StreamHelpers
     /// <param name="token">The cancellation token. </param>
     /// <param name="progress">The progress. </param>
     /// <returns>The read byte array. </returns>
-    public static Task<byte[]> ReadToEndAsync(this Stream stream, CancellationToken token = default, IProgress<long>? progress = null)
+    public static Task<byte[]> ReadToEndAsync(this Stream stream, IProgress<long>? progress = null, CancellationToken token = default)
     {
         var source = new TaskCompletionSource<byte[]>();
         Task.Factory.StartNew(() =>
