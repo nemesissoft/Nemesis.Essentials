@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Linq.Expressions;
+using System.Reflection;
 
 #if NEMESIS_BINARY_PACKAGE_TESTS
 using Nemesis.Essentials.Runtime;
@@ -12,7 +13,7 @@ namespace Nemesis.Essentials.Sources.Tests.Runtime;
 public class MethodOfTests
 {
     [Test]
-    public void MethodOf_ReturnSameFunction_ForDifferentCallModes()
+    public void Of_ReturnSameFunction_ForDifferentCallModes()
     {
         var toUpper1 = Method.Of("".ToUpperInvariant);
 
@@ -30,7 +31,7 @@ public class MethodOfTests
     }
 
     [Test]
-    public void MethodOf_ReturnDifferentResult_ForDelegateAndMethod()
+    public void Of_ReturnDifferentResult_ForDelegateAndMethod()
     {
         var toUpper = Method.Of("".ToUpperInvariant);
 
@@ -65,12 +66,73 @@ public class MethodOfTests
         (Method.OfExpression<Func<T, T.ITransformer<byte>>>(_=> _.CreateTransformerInstance<byte>()), From<T>("CreateTransformerInstance").MakeGenericMethod(typeof(byte))),
     }.Select((t, i) => new TCD(t.actual, t.expected).SetName($"Met_{i + 1:00}"));
 
-    private static MethodInfo From<T>(string name, params Type[] @params) =>
-        typeof(T).GetMethod(name, @params.Length == 0 ? Type.EmptyTypes : @params);
 
     [TestCaseSource(nameof(GetMethods))]
-    public void MethodOf_Positive(MethodInfo actual, MethodInfo expected) =>
+    public void Of_Positive(MethodInfo actual, MethodInfo expected) =>
         Assert.That(actual, Is.EqualTo(expected));
+
+    [Test]
+    public void Of_ValidDelegate_ReturnsMethodInfo()
+    {
+        Func<string> sampleDelegate = new object().ToString;
+
+        var methodInfo = Method.Of(sampleDelegate);
+        Assert.Multiple(() =>
+        {
+            Assert.That(methodInfo.Name, Is.EqualTo("ToString"));
+            Assert.That(methodInfo, Is.EqualTo(From<object>("ToString")));
+        });
+    }
+
+    [Test]
+    public void Of_ReturnsDifferentMethodInfo_ForOverridenMethod()
+    {
+        Func<string> objDelegate = new object().ToString;
+        Func<string> strDelegate = "".ToString;
+
+        var objInfo = Method.Of(objDelegate);
+        var strInfo = Method.Of(strDelegate);
+        Assert.Multiple(() =>
+        {
+            Assert.That(objInfo, Is.EqualTo(From<object>("ToString")));
+            Assert.That(strInfo, Is.EqualTo(From<string>("ToString")));
+
+            Assert.That(strInfo, Is.Not.EqualTo(objInfo));
+        });
+    }
+
+    [Test]
+    public void OfExpression_ValidExpression_ReturnsMethodInfo()
+    {
+        Expression<Func<int, string>> expression = x => x.ToString();
+
+        MethodInfo methodInfo = Method.OfExpression(expression);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(methodInfo.Name, Is.EqualTo("ToString"));
+            Assert.That(methodInfo, Is.EqualTo(From<int>("ToString")));
+        });
+    }
+
+    [Test]
+    public void OfExpression_InvalidExpressionType_ThrowsException()
+    {
+        Expression<Func<int>> invalidExpression = () => 2;
+
+        Assert.Throws<NotSupportedException>(() => Method.OfExpression(invalidExpression));
+    }
+
+    [Test]
+    public void OfExpression_InvalidExpressionContent_ThrowsException()
+    {
+        Expression<Func<int, int>> invalidExpression = x => x + 1;
+
+        Assert.Throws<NotSupportedException>(() => Method.OfExpression(invalidExpression));
+    }
+
+    private static MethodInfo From<T>(string name, params Type[] @params) =>
+       typeof(T).GetMethod(name, @params.Length == 0 ? Type.EmptyTypes : @params);
 }
 
 file class T

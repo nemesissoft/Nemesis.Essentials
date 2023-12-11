@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Linq.Expressions;
+using System.Reflection;
 #if NEMESIS_BINARY_PACKAGE_TESTS
 using Nemesis.Essentials.Runtime;
 
@@ -36,6 +37,64 @@ public class PropertyOfTests
             Assert.That(actual, Is.EqualTo(expected));
             Assert.That(actual.GetValue(instance), Is.EqualTo(expectedValue));
         });
+
+
+    [Test]
+    public void Of_ValidPropertyExpression_ReturnsPropertyInfo()
+    {
+        Expression<Func<PropClass, string>> validExpression = x => x.AutoProp;
+
+        PropertyInfo propertyInfo = Property.Of(validExpression);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(propertyInfo.Name, Is.EqualTo("AutoProp"));
+            Assert.That(propertyInfo, Is.EqualTo(From<PropClass>("AutoProp")));
+        });
+    }
+
+    [Test]
+    public void Of_ValidPropertyExpressionWithConvert_ReturnsPropertyInfo()
+    {
+        Expression<Func<PropClass, object>> validExpression = x => x.AutoProp;
+
+        PropertyInfo propertyInfo = Property.Of(validExpression);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(propertyInfo.Name, Is.EqualTo("AutoProp"));
+            Assert.That(propertyInfo, Is.EqualTo(From<PropClass>("AutoProp")));
+        });
+    }
+
+    [Test]
+    public void Of_InvalidExpressionType_ThrowsArgumentException()
+    {
+        Expression<Func<PropClass, string>> invalidExpression = x => "";
+
+        Assert.That(() => Property.Of(invalidExpression), Throws.ArgumentException
+            .And.Message.Contains("Only member (property) expressions are valid at this point. Unable to determine property info from expression"));
+    }
+
+    [Test]
+    public void Of_InvalidExpressionContent_ThrowsArgumentException()
+    {
+        Expression<Func<PropClass, int>> invalidExpression = x => x.GetHashCode();
+
+        Assert.That(() => Property.Of(invalidExpression), Throws.ArgumentException
+            .And.Message.Contains("Only member (property) expressions are valid at this point. Unable to determine property info from expression"));
+    }
+
+    [Test]
+    public void Of_InvalidExpressionWithConvert_ThrowsArgumentException()
+    {
+        Expression<Func<PropClass, object>> invalidExpression = x => x.GetHashCode();
+
+        Assert.That(() => Property.Of(invalidExpression), Throws.ArgumentException
+            .And.Message.Contains("Only member (property) expressions are valid at this point. Unable to determine property info from expression"));
+    }
+
+
 
     private static PropertyInfo From(string name) =>
         typeof(PropClass).GetProperty(name);
