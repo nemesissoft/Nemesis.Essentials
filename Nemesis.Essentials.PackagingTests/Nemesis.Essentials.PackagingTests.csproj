@@ -1,20 +1,40 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net472;net461;net48;netcoreapp2.2</TargetFrameworks>
-    <DefineConstants>$(DefineConstants);NEMESIS_BINARY_PACKAGE_TESTS</DefineConstants>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net7.0;net6.0;net462;net48</TargetFrameworks>
+		<DefineConstants>$(DefineConstants);NEMESIS_BINARY_PACKAGE_TESTS</DefineConstants>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
-    <PackageReference Include="NUnit" Version="3.11.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
-    <PackageReference Include="System.ValueTuple" Version ="4.5.0" />
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+		<PackageReference Include="NUnit" Version="4.0.1" />
+		<PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+		<PackageReference Include="NUnit.Analyzers" Version="3.6.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+		</PackageReference>
 
-    <PackageReference Include="Nemesis.Essentials" Version="1.0.12" />
-  </ItemGroup>
+		<PackageReference Include="System.ValueTuple" Version ="4.5.0" />
 
-  <ItemGroup>
-    <Compile Include="../Nemesis.Essentials.Tests/TypeMetaTests.cs" />
-  </ItemGroup>
+		<PackageReference Include="Nemesis.Essentials" Version="1.2.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="../Nemesis.Essentials.Tests/Runtime/ConstructorOfTests.cs" />
+		<Compile Include="../Nemesis.Essentials.Tests/Runtime/EventOfTests.cs" />
+		<Compile Include="../Nemesis.Essentials.Tests/Runtime/FieldOfTests.cs" />
+		<Compile Include="../Nemesis.Essentials.Tests/Runtime/IndexerOfTests.cs" />
+		<Compile Include="../Nemesis.Essentials.Tests/Runtime/MethodOfTests.cs" />
+		<Compile Include="../Nemesis.Essentials.Tests/Runtime/PropertyOfTests.cs" />
+		<Compile Include="../Nemesis.Essentials.Tests/Runtime/TypeMetaTests.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="System.Collections" />
+		<Using Include="System.Globalization" />
+
+		<Using Include="NUnit.Framework" />
+		<Using Include="NUnit.Framework.TestCaseData" Alias="TCD" />
+		<Using Include="System.Net" />
+	</ItemGroup>
 </Project>

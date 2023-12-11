@@ -3,7 +3,7 @@ using Nemesis.Essentials.Runtime;
 
 namespace Nemesis.Essentials.Tests.Runtime;
 #else
-namespace Nemesis.Essentials.Sources.Tests.Runtime
+namespace Nemesis.Essentials.Sources.Tests.Runtime;
 #endif
 
 [TestFixture]

@@ -1,18 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net472;net461;net48;netcoreapp2.2</TargetFrameworks>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net7.0;net6.0;net462;net48</TargetFrameworks>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
-    <PackageReference Include="NUnit" Version="3.11.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
-    <PackageReference Include="System.ValueTuple" Version ="4.5.0" />
-  </ItemGroup>
+	<ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Nemesis.Essentials.Sources.Tests\Nemesis.Essentials.Sources.Tests.csproj" />
-  </ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+		<PackageReference Include="NUnit" Version="4.0.1" />
+		<PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+		<PackageReference Include="NUnit.Analyzers" Version="3.6.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+		</PackageReference>
+
+		<PackageReference Include="System.ValueTuple" Version ="4.5.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Nemesis.Essentials.Sources.Tests\Nemesis.Essentials.Sources.Tests.csproj" />
+	</ItemGroup>
 
 </Project>

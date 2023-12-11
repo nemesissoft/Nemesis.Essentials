@@ -1,10 +1,10 @@
-﻿#if NEMESIS_BINARY_PACKAGE_TESTS
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
+#if NEMESIS_BINARY_PACKAGE_TESTS
 using Nemesis.Essentials.Runtime;
 
 namespace Nemesis.Essentials.Tests.Runtime;
 #else
-namespace Nemesis.Essentials.Sources.Tests.Runtime
+namespace Nemesis.Essentials.Sources.Tests.Runtime;
 #endif
 
 [TestFixture]

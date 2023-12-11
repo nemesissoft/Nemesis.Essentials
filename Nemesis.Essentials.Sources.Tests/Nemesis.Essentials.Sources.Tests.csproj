@@ -1,37 +1,58 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net472;net461;net48;netcoreapp2.2</TargetFrameworks>
-    <CustomRestoreDirectory>.\obj\Packages_temp</CustomRestoreDirectory>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net7.0;net6.0;net462;net48</TargetFrameworks>
+		<CustomRestoreDirectory>.\obj\Packages_temp</CustomRestoreDirectory>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <RestoreNoCache>true</RestoreNoCache>
-    <RestoreAdditionalProjectSources>
-      ..\Nemesis.Essentials.Sources\bin\$(Configuration)
-    </RestoreAdditionalProjectSources>
-    <RestorePackagesPath>$(CustomRestoreDirectory)</RestorePackagesPath>
-  </PropertyGroup>
+	<PropertyGroup>
+		<RestoreNoCache>true</RestoreNoCache>
+		<RestoreAdditionalProjectSources>
+			..\Nemesis.Essentials.Sources\bin\$(Configuration)
+		</RestoreAdditionalProjectSources>
+		<RestorePackagesPath>$(CustomRestoreDirectory)</RestorePackagesPath>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
-    <PackageReference Include="NUnit" Version="3.11.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+		<PackageReference Include="NUnit" Version="4.0.1" />
+		<PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+		<PackageReference Include="NUnit.Analyzers" Version="3.6.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+		</PackageReference>
+		
+		<PackageReference Include="System.ValueTuple" Version="4.5.0" />
 
-    <PackageReference Include="Nemesis.Essentials.TypeMeta.Sources" Version="$(Version)" /><!--This tries to reference currently build version of the package. -->
-  </ItemGroup>
+		<PackageReference Include="Nemesis.Essentials.TypeMeta.Sources" Version="$(Version)" />
+		<!--This tries to reference currently build version of the package. -->
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Remove="Microsoft.SourceLink.GitHub" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Remove="Microsoft.SourceLink.GitHub" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="../Nemesis.Essentials.Tests/TypeMetaTests.cs" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="../Nemesis.Essentials.Tests/Runtime/ConstructorOfTests.cs" />
+		<Compile Include="../Nemesis.Essentials.Tests/Runtime/EventOfTests.cs" />
+		<Compile Include="../Nemesis.Essentials.Tests/Runtime/FieldOfTests.cs" />
+		<Compile Include="../Nemesis.Essentials.Tests/Runtime/IndexerOfTests.cs" />
+		<Compile Include="../Nemesis.Essentials.Tests/Runtime/MethodOfTests.cs" />
+		<Compile Include="../Nemesis.Essentials.Tests/Runtime/PropertyOfTests.cs" />
+		<Compile Include="../Nemesis.Essentials.Tests/Runtime/TypeMetaTests.cs" />
+	</ItemGroup>
 
-  <Target Name="CleanCustomRestoreDirectory" BeforeTargets="Rebuild;Restore" Condition="$(CustomRestoreDirectory) != ''">
-    <RemoveDir Directories="$(CustomRestoreDirectory)" />
-    <MakeDir Directories="$(CustomRestoreDirectory)" />
-  </Target>
+	<ItemGroup>
+		<Using Include="System.Collections" />
+		<Using Include="System.Globalization" />
+
+		<Using Include="NUnit.Framework" />
+		<Using Include="NUnit.Framework.TestCaseData" Alias="TCD" />
+		<Using Include="System.Net" />
+	</ItemGroup>
+
+	<Target Name="CleanCustomRestoreDirectory" BeforeTargets="Rebuild;Restore" Condition="$(CustomRestoreDirectory) != ''">
+		<RemoveDir Directories="$(CustomRestoreDirectory)" />
+		<MakeDir Directories="$(CustomRestoreDirectory)" />
+	</Target>
 </Project>
