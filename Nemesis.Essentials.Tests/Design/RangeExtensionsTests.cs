@@ -2,7 +2,7 @@
 
 using Nemesis.Essentials.Design;
 
-namespace Nemesis.Essentials.Tests;
+namespace Nemesis.Essentials.Tests.Design;
 
 [TestFixture]
 public class RangeExtensionsTests

@@ -1,4 +1,7 @@
-﻿#if NEMESIS_BINARY_PACKAGE
+﻿#if !NET6_0_OR_GREATER 
+//.NET 6 / C# 10 introduces generated delegates for any syntax 
+
+#if NEMESIS_BINARY_PACKAGE
 namespace Nemesis.Essentials.Design
 #else
 namespace $rootnamespace$.Design
@@ -293,3 +296,5 @@ namespace $rootnamespace$.Design
         delegate TResult Func123Out<T1, T2, T3, out TResult>(out T1 arg1, out T2 arg2, out T3 arg3);
     #endregion
 }
+
+#endif
