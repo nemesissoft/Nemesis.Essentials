@@ -1,9 +1,9 @@
 ﻿#nullable enable
 using Nemesis.Essentials.Design;
 
-namespace Nemesis.Essentials.Tests;
+namespace Nemesis.Essentials.Tests.Design;
 
-[TestFixture(TestOf = typeof(ValueCollection<>))]
+[TestFixture]
 public class ValueCollectionTests
 {
     private static ValueCollection<string> Empty() => new();
