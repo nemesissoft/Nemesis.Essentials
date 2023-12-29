@@ -33,6 +33,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Include="../Nemesis.Essentials.Tests/Utils/TestHelper.cs" />
+
 		<Compile Include="../Nemesis.Essentials.Tests/Runtime/ConstructorOfTests.cs" />
 		<Compile Include="../Nemesis.Essentials.Tests/Runtime/EventOfTests.cs" />
 		<Compile Include="../Nemesis.Essentials.Tests/Runtime/FieldOfTests.cs" />
