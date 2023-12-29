@@ -209,11 +209,15 @@ public static class ComparerExtensions
 /// which significantly improves performance and adheres to the framework design guidelines for P/Invoke. 
 /// </remarks>
 [SuppressUnmanagedCodeSecurity]
-internal static class SafeNativeMethods
+internal static partial class SafeNativeMethods
 {
-    // ReSharper disable once StringLiteralTypo
+#if NET7_0_OR_GREATER
+    [LibraryImport("shlwapi.dll", StringMarshalling = StringMarshalling.Utf16)]
+    public static partial int StrCmpLogicalW(string psz1, string psz2);
+#else
     [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
     public static extern int StrCmpLogicalW(string psz1, string psz2);
+#endif
 }
 
 /// <summary>

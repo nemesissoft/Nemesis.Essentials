@@ -143,7 +143,5 @@ file class T
     public interface ITransformer<TElement> { }
     public static ITransformer<TElement> CreateTransformer<TElement>() => default;
 
-#pragma warning disable CA1822 // Mark members as static
     public ITransformer<TElement> CreateTransformerInstance<TElement>() => default;
-#pragma warning restore CA1822 // Mark members as static
 }

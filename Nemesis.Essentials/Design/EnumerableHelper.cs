@@ -15,25 +15,25 @@ public static class EnumerableHelper
     #region Dictionary Extensions
 
     [PublicAPI]
-    public static void AddToMultiDictionary<TKeyType, TCollectionType, TMultiElement>(this IDictionary<TKeyType, TCollectionType> multiDict,
+    public static void AddToMultiDictionary<TKeyType, TCollectionType, TMultiElement>(this IDictionary<TKeyType, TCollectionType> dict,
         TKeyType key, TMultiElement element)
         where TCollectionType : ICollection<TMultiElement>, new()
     {
-        if (multiDict.ContainsKey(key))
-            multiDict[key].Add(element);
+        if (dict.TryGetValue(key, out var coll))
+            coll.Add(element);
         else
-            multiDict[key] = new TCollectionType { element };
+            dict[key] = new TCollectionType { element };
     }
 
     [PublicAPI]
-    public static void AddToMultiDictionary<TKeyType, TCollectionType, TMultiElement>(this IDictionary<TKeyType, TCollectionType> multiDict,
+    public static void AddToMultiDictionary<TKeyType, TCollectionType, TMultiElement>(this IDictionary<TKeyType, TCollectionType> dict,
         TKeyType key, params TMultiElement[] elements)
         where TCollectionType : ICollection<TMultiElement>, new()
     {
-        if (!multiDict.ContainsKey(key))
-            multiDict[key] = new TCollectionType();
-
-        TCollectionType coll = multiDict[key];
+        if (!dict.TryGetValue(key, out var coll))
+        {
+            coll = dict[key] = new TCollectionType();
+        }
 
         foreach (var element in elements)
             coll.Add(element);

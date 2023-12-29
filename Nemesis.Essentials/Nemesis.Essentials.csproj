@@ -11,6 +11,7 @@
 		<PackageReleaseNotes>
 			RELEASE_NOTES_PLACEHOLDER<!--starts with "RELEASE_NOTES_PLACEHOLDER" == this will be patched by build system-->
 		</PackageReleaseNotes>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
 	</PropertyGroup>
 
@@ -24,8 +25,7 @@
 	</ItemGroup>
 	<!--Legacy mode on-->
 	<ItemGroup>
-		<PackageReference Include="System.Memory" Version="4.5.4" 
-						  Condition=" '$(TargetFramework)' == 'netstandard2.0' " />
+		<PackageReference Include="System.Memory" Version="4.5.4" Condition=" '$(TargetFramework)' == 'netstandard2.0' " />
 
 	</ItemGroup>
 	<!--Legacy mode off-->

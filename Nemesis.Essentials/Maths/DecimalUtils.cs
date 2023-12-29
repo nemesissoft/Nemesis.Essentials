@@ -187,12 +187,9 @@ public readonly struct DecimalMeta : IFormattable
     }
 }
 
-public class DecimalFormatter : IFormatProvider, ICustomFormatter
+public class DecimalFormatter(IFormatProvider underlyingProvider) : IFormatProvider, ICustomFormatter
 {
-    private readonly IFormatProvider _underlyingProvider;
-
-    public DecimalFormatter(IFormatProvider underlyingProvider) => _underlyingProvider = underlyingProvider;
-
+    private readonly IFormatProvider _underlyingProvider = underlyingProvider;
     public static readonly DecimalFormatter InvariantInstance = new(CultureInfo.InvariantCulture);
 
     public object? GetFormat(Type? service) =>

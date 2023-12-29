@@ -1,7 +1,7 @@
-﻿using System.Text.RegularExpressions;
+﻿using Nemesis.Essentials.Tests.Utils;
+
 #if NEMESIS_BINARY_PACKAGE_TESTS
 using Nemesis.Essentials.Runtime;
-
 namespace Nemesis.Essentials.Tests.Runtime;
 #else
 namespace Nemesis.Essentials.Sources.Tests.Runtime;
@@ -96,7 +96,7 @@ public class TypeMetaTests
             (typeof(DataConnector<SqlConnection, SqlCommand>), typeof(DataConnector<SqlConnection, OracleCommand>), false)
         }.Select((t, i) => new TCD(t.type, t.generic)
          .Returns(t.expectedResult)
-         .SetName($"DerImpl{i + 1:00}_{_sanitize.Replace(t.type.Name, "_")}"));
+         .SetName($"DerImpl{i + 1:00}_{t.type.Name.SanitizeTestName()}"));
 
     [TestCaseSource(nameof(DerivesOrImplementsGeneric_Data))]
     public bool ImplementsGenericInterface(Type type, Type generic) =>
@@ -214,11 +214,8 @@ public class TypeMetaTests
         ("(,)", typeof(ValueTuple<,>)),
         ("()", typeof(ValueTuple<>)),
     }.Select((t, i) => new TCD(t.type, t.expectedName)
-     .SetName($"Friendly{i + 1:00}_{_sanitize.Replace(t.expectedName, "_")}"));
+     .SetName($"Friendly{i + 1:00}_{t.expectedName.SanitizeTestName()}"));
 
-#pragma warning disable SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
-    private static readonly Regex _sanitize = new(@"\W", RegexOptions.Compiled);
-#pragma warning restore SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
 
     [TestCaseSource(nameof(GetFriendlyNameData))]
     public void GetFriendlyNameTests(Type type, string expectedName) =>
