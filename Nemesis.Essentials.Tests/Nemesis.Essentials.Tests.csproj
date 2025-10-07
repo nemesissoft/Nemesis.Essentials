@@ -1,7 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net7.0;net6.0;net472;net462;net48</TargetFrameworks>
+		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+		<TargetFrameworks Condition="'$(CI)' != 'true'">$(TargetFrameworks);net481;net462</TargetFrameworks>
+
 		<DefineConstants>$(DefineConstants);NEMESIS_BINARY_PACKAGE_TESTS</DefineConstants>
 
 	</PropertyGroup>

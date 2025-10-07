@@ -36,7 +36,7 @@ public static class TextExtensions
             ||
             CharUnicodeInfo.GetUnicodeCategory(c) is UnicodeCategory cat
             &&
-            (cat == UnicodeCategory.Control || cat == UnicodeCategory.OtherNotAssigned || cat == UnicodeCategory.ParagraphSeparator || cat == UnicodeCategory.Surrogate);
+            (cat is UnicodeCategory.Control or UnicodeCategory.OtherNotAssigned or UnicodeCategory.ParagraphSeparator or UnicodeCategory.Surrogate);
 
         return text.Aggregate(
             new StringBuilder(),

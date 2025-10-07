@@ -1,8 +1,8 @@
 ﻿<Project>
 	<PropertyGroup>
 		<Version>1.0.0</Version>
-		<!--This will get replaced by AppVeyor-->
-		<LangVersion>12.0</LangVersion>
+		<!--version will get replaced by CI-->
+		<LangVersion>13.0</LangVersion>
 		<ImplicitUsings>true</ImplicitUsings>
 
 		<Authors>Michał Bryłka, Leszek Kowalski</Authors>
