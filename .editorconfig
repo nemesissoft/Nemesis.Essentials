@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# S4456: Parameter validation in yielding methods should be wrapped
+dotnet_diagnostic.S4456.severity = none

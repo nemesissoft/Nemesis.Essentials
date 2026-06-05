@@ -4,37 +4,33 @@
 
 namespace Nemesis.Essentials.Design;
 
-public class ReferenceLoopProneValueCollection<T>(ValueCollection<T> decoratee) : ICollection<T>
+public class ReferenceLoopProneValueCollection<T>(ValueCollection<T>? decorated = null) : ICollection<T>
 {
     internal const string LoopDetectedNotification = "## SELF REFERENCING LOOP DETECTED ##";
 
-    private readonly ValueCollection<T> _decoratee = decoratee;
-
-    public ReferenceLoopProneValueCollection() : this([]) { }
-
-    public ReferenceLoopProneValueCollection(IEqualityComparer<T>? equalityComparer = null) : this(new ValueCollection<T>(equalityComparer)) { }
+    private readonly ValueCollection<T> _decorated = decorated ?? [];
 
     public ReferenceLoopProneValueCollection(IList<T> list, IEqualityComparer<T>? equalityComparer = null) : this(new ValueCollection<T>(list, equalityComparer)) { }
 
-    public IEnumerator<T> GetEnumerator() => _decoratee.GetEnumerator();
+    public IEnumerator<T> GetEnumerator() => _decorated.GetEnumerator();
 
-    IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_decoratee).GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_decorated).GetEnumerator();
 
-    public void Add(T item) => _decoratee.Add(item);
+    public void Add(T item) => _decorated.Add(item);
 
-    public void Clear() => _decoratee.Clear();
+    public void Clear() => _decorated.Clear();
 
-    public bool Contains(T item) => _decoratee.Contains(item);
+    public bool Contains(T item) => _decorated.Contains(item);
 
-    public void CopyTo(T[] array, int arrayIndex) => _decoratee.CopyTo(array, arrayIndex);
+    public void CopyTo(T[] array, int arrayIndex) => _decorated.CopyTo(array, arrayIndex);
 
-    public bool Remove(T item) => _decoratee.Remove(item);
+    public bool Remove(T item) => _decorated.Remove(item);
 
-    public int Count => _decoratee.Count;
+    public int Count => _decorated.Count;
 
-    public bool IsReadOnly => ((ICollection<T>)_decoratee).IsReadOnly;
+    public bool IsReadOnly => ((ICollection<T>)_decorated).IsReadOnly;
 
-    public override string? ToString() => CheckSelfReferencingLoop() ?? _decoratee.ToString();
+    public override string? ToString() => CheckSelfReferencingLoop() ?? _decorated.ToString();
 
     private static string? CheckSelfReferencingLoop()
     {

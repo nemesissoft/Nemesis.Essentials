@@ -350,7 +350,7 @@ public static class StreamHelpers
                     return encoding;
             }
         }
-        catch (IOException) { }
+        catch (IOException) { return Encoding.Default; }
 
         return Encoding.Default;
     }

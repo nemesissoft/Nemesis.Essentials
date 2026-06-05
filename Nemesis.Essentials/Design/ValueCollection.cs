@@ -4,14 +4,10 @@
 
 namespace Nemesis.Essentials.Design;
 
-public class ValueCollection<T>(IList<T> list, IEqualityComparer<T>? equalityComparer = null)
-    : Collection<T>(list), IEquatable<ValueCollection<T>>, IFormattable
+public sealed class ValueCollection<T>(IList<T>? list = null, IEqualityComparer<T>? equalityComparer = null)
+    : Collection<T>(list ?? []), IEquatable<ValueCollection<T>>, IFormattable
 {
     private readonly IEqualityComparer<T> _equalityComparer = equalityComparer ?? EqualityComparer<T>.Default;
-
-    public ValueCollection() : this(new List<T>()) { }
-
-    public ValueCollection(IEqualityComparer<T>? equalityComparer = null) : this(new List<T>(), equalityComparer) { }
 
     public bool Equals(ValueCollection<T>? other)
     {
