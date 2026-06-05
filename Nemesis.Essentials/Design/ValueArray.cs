@@ -13,7 +13,7 @@ public readonly struct ValueArray<T>(T[]? array, IEqualityComparer<T>? equalityC
     public bool Equals(ValueArray<T> other) => AsSpan().SequenceEqual(other.AsSpan(), _equalityComparer);
 
     /// <sinheritdoc/>
-    public override bool Equals(object? obj) => obj is ValueArray<T> array && Equals(array);
+    public override bool Equals(object? obj) => obj is ValueArray<T> va && Equals(va);
 
     /// <sinheritdoc/>
     public override int GetHashCode()

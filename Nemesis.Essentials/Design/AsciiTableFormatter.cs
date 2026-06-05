@@ -209,30 +209,6 @@ namespace Nemesis.Essentials.Design
             ToAsciiCharactersTable(content, sw);
         }
 
-        private static string GetTextFromInstanceMember<T>(MemberInfo member, T elem)
-        {
-            object value;
-            try
-            {
-                value = member switch
-                {
-                    null => null,
-                    PropertyInfo pi => pi.GetValue(elem),
-                    FieldInfo fi => fi.GetValue(elem),
-                    MethodBase mb => mb.Invoke(elem,
-                            mb.GetParameters().Select(param => Activator.CreateInstance(param.ParameterType))
-                                .ToArray()),
-                    _ => null,
-                };
-            }
-            catch (Exception e)
-            {
-                value = $"{e.GetType().FullName}: {e.Message}";
-            }
-
-            return (value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? value?.ToString() ?? "Ø";
-        }
-
         [Pure, PublicAPI]
         public string ToAsciiCharactersTable(string[,] content)
         {
@@ -350,6 +326,30 @@ namespace Nemesis.Essentials.Design
             sb.Append(_style.FooterRightCorner);
         }
 
+        private static string GetTextFromInstanceMember<T>(MemberInfo member, T elem)
+        {
+            object value;
+            try
+            {
+                value = member switch
+                {
+                    null => null,
+                    PropertyInfo pi => pi.GetValue(elem),
+                    FieldInfo fi => fi.GetValue(elem),
+                    MethodBase mb => mb.Invoke(elem,
+                            mb.GetParameters().Select(param => Activator.CreateInstance(param.ParameterType))
+                                .ToArray()),
+                    _ => null,
+                };
+            }
+            catch (Exception e)
+            {
+                value = $"{e.GetType().FullName}: {e.Message}";
+            }
+
+            return (value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? value?.ToString() ?? "Ø";
+        }
+
         private static void RenderText(StringBuilder sb, string text, int maxWidth, string whitespace = " ")
         {
             int textLength = text?.Length ?? 0;
@@ -385,8 +385,7 @@ namespace Nemesis.Essentials.Design
         [Pure, PublicAPI]
         public static string ToAsciiCharactersTableWithPascalSentence<T>(IEnumerable<T> elements) => new AsciiArtTableFormatter(memberNameTransformer: new PascalCaseSplitter()).ToAsciiCharactersTable(elements);
 
-        //TODO: support for multi lines
-        private class MultilineString
+        private sealed class MultilineString
         {
             private IReadOnlyList<string> Lines { get; }
             private int MaxWidth { get; }
@@ -419,96 +418,3 @@ namespace System.Runtime.CompilerServices
 }
 #endif
 
-
-/*  Header header = null;
-        if (_headerStyle == HeaderStyle.PropertyNames)
-            header = new Header(Enumerable.Range(0, members.Length)
-                .Select(i => (MultilineString)_memberNameTransformer.TransformName(members[i])).ToList());
-        else if (_headerStyle == HeaderStyle.Spreadsheet)
-            header = new Header(Enumerable.Range(0, members.Length + 1)
-                .Select(i => (MultilineString)(i == 0 ? "" : GetExcelColumnName(i))).ToList());
-
-
-sealed class Table
-    {
-        private Header Header { get; }
-        private IReadOnlyList<DataRow> DataRows { get; }
-        private IReadOnlyList<int> MaxWidths { get; }
-
-        public Table(Header header, IReadOnlyList<DataRow> dataRows)
-        {
-            var numberOfColumns = new List<int>();
-            if (header != null)
-                numberOfColumns.Add(header.ColumnCount);
-            if (dataRows != null)
-                numberOfColumns.AddRange(dataRows.Select(dr => dr.ColumnCount));
-
-            if (numberOfColumns.Count > 0 && numberOfColumns.Any(no => no != numberOfColumns.First()))
-                throw new ArgumentException(@"Header and all rows need to have equal number of columns", nameof(dataRows));
-
-            Header = header;
-            DataRows = dataRows;
-
-
-            var maxWidths = Enumerable.Repeat(0, numberOfColumns.FirstOrDefault()).ToList();
-            if (header != null)
-                for (int i = 0; i < header.ColumnCount; i++)
-                {
-                    var maxWidth = header.Cells[i]?.MaxWidth ?? 0;
-                    if (maxWidths[i] < maxWidth) maxWidths[i] = maxWidth;
-                }
-
-            if (dataRows != null)
-                foreach (var row in dataRows)
-                    for (int i = 0; i < row.ColumnCount; i++)
-                    {
-                        var maxWidth = row.Cells[i]?.MaxWidth ?? 0;
-                        if (maxWidths[i] < maxWidth) maxWidths[i] = maxWidth;
-                    }
-
-
-
-            const byte margins = 1;
-            MaxWidths = maxWidths.Select(i => i + 2 * margins).ToArray();
-        }
-    }
-
-    class Row
-    {
-        internal IReadOnlyList<MultilineString> Cells { get; }
-        internal int ColumnCount => Cells?.Count ?? 0;
-
-        public Row(IReadOnlyList<MultilineString> cells) => Cells = cells;
-    }
-
-    sealed class Header : Row
-    {
-        public Header(IReadOnlyList<MultilineString> cells) : base(cells) { }
-    }
-    sealed class DataRow : Row
-    {
-        public DataRow(IReadOnlyList<MultilineString> cells) : base(cells) { }
-    }
-
-    sealed class MultilineString
-    {
-        internal IReadOnlyList<string> Lines { get; }
-        internal int MaxWidth { get; }
-        internal int NumberOfLines => Lines?.Count ?? 0;
-
-        public MultilineString(string text)
-        {
-            text = text == null ? null : NormalizeNewLines(text);
-            Lines = SplitLines(text);
-            MaxWidth = NumberOfLines == 0 ? 0 : Lines.Max(line => line?.Length ?? 0);
-        }
-
-        public static implicit operator MultilineString(string text) => new MultilineString(text);
-
-        private static readonly Regex _normalizeNewLinesPattern = new Regex(@"\r\n|\n\r|\n|\r", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-        private static string NormalizeNewLines(string text) => _normalizeNewLinesPattern.Replace(text, Environment.NewLine);
-
-        private static IReadOnlyList<string> SplitLines(string text) => text?.Split(new[] { Environment.NewLine }, StringSplitOptions.None) ?? new string[0];
-
-        public override string ToString() => $"[{MaxWidth}] {string.Join(" >> ", Lines)}";
-    }*/

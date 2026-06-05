@@ -1,9 +1,6 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Numerics;
-using System.Reflection;
 using System.Text;
-using System.Xml.Linq;
 using JetBrains.Annotations;
 using Nemesis.Essentials.Runtime;
 using PureMethod = System.Diagnostics.Contracts.PureAttribute;
@@ -15,8 +12,7 @@ public static class EnumerableHelper
     #region Dictionary Extensions
 
     [PublicAPI]
-    public static void AddToMultiDictionary<TKeyType, TCollectionType, TMultiElement>(this IDictionary<TKeyType, TCollectionType> dict,
-        TKeyType key, TMultiElement element)
+    public static void AddToMultiDictionary<TKeyType, TCollectionType, TMultiElement>(this IDictionary<TKeyType, TCollectionType> dict, TKeyType key, TMultiElement element)
         where TCollectionType : ICollection<TMultiElement>, new()
     {
         if (dict.TryGetValue(key, out var coll))
@@ -26,26 +22,24 @@ public static class EnumerableHelper
     }
 
     [PublicAPI]
-    public static void AddToMultiDictionary<TKeyType, TCollectionType, TMultiElement>(this IDictionary<TKeyType, TCollectionType> dict,
-        TKeyType key, params TMultiElement[] elements)
+    public static void AddToMultiDictionary<TKeyType, TCollectionType, TMultiElement>(this IDictionary<TKeyType, TCollectionType> dict, TKeyType key, params TMultiElement[] elements)
         where TCollectionType : ICollection<TMultiElement>, new()
     {
         if (!dict.TryGetValue(key, out var coll))
-        {
             coll = dict[key] = new TCollectionType();
-        }
+
 
         foreach (var element in elements)
             coll.Add(element);
     }
 
     [PureMethod, PublicAPI]
-    public static IDictionary<TKeyType, List<TMultiElement>> CreateMultiDictionary<TKeyType, TMultiElement>()
-        => CreateMultiDictionary<TKeyType, List<TMultiElement>, TMultiElement>();
+    public static IDictionary<TKeyType, HashSet<TMultiElement>> CreateMultiDictionaryUniqueElements<TKeyType, TMultiElement>()
+       => CreateMultiDictionary<TKeyType, HashSet<TMultiElement>, TMultiElement>();
 
     [PureMethod, PublicAPI]
-    public static IDictionary<TKeyType, HashSet<TMultiElement>> CreateMultiDictionaryUniqueElements<TKeyType, TMultiElement>()
-        => CreateMultiDictionary<TKeyType, HashSet<TMultiElement>, TMultiElement>();
+    public static IDictionary<TKeyType, List<TMultiElement>> CreateMultiDictionary<TKeyType, TMultiElement>()
+        => CreateMultiDictionary<TKeyType, List<TMultiElement>, TMultiElement>();
 
     [PureMethod, PublicAPI]
     public static IDictionary<TKeyType, TCollectionType> CreateMultiDictionary<TKeyType, TCollectionType, TMultiElement>()
@@ -83,37 +77,9 @@ public static class EnumerableHelper
         return sb.ToString();
     }
 
-    [PureMethod, PublicAPI]
-    public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueProvider)
-        => dictionary.TryGetValue(key, out var ret) ? ret : (dictionary[key] = valueProvider());
-
-    [PureMethod, PublicAPI]
-    public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue missingValue)
-        => dictionary.TryGetValue(key, out var ret) ? ret : (dictionary[key] = missingValue);
-
     #endregion
 
     #region Generate variuos sequences
-
-    [PureMethod, PublicAPI] public static IEnumerable<T> CreateSequence<T>(Func<int, int, T> elementIndexTransformer, int start = 0, int count = 100) => Enumerable.Range(start, count).Select(elementIndexTransformer);
-    [PureMethod, PublicAPI] public static IEnumerable<T> CreateSequence<T>(Func<int, T> elementTransformer, int start = 0, int count = 100) => Enumerable.Range(start, count).Select(elementTransformer);
-    [PureMethod, PublicAPI]
-    public static IEnumerable<T> CreateSequence<T>(Func<T> generator, int count)
-    {
-        for (var i = 0; i < count; i++)
-            yield return generator();
-    }
-
-    [PureMethod, PublicAPI]
-    public static TValue[] CreateArray<TValue>(int count, Func<int, TValue> generator)
-    {
-        if (generator == null) throw new ArgumentNullException(nameof(generator));
-
-        var array = new TValue[count];
-        for (var i = 0; i < array.Length; i++)
-            array[i] = generator(i);
-        return array;
-    }
 
     /// <summary>
     ///   Generates a sequence inductively. The first element in the sequence is given as a first argument and the next
@@ -186,38 +152,9 @@ public static class EnumerableHelper
         }
     }
 
-    /// <summary> Adds <paramref name="item"/> to the tail of <paramref name="source"/> and returns new <see cref="IEnumerable{T}"/>. </summary>
-    [PureMethod, PublicAPI] public static IEnumerable<T> Append<T>(this IEnumerable<T> source, T item) => source.Concat(new[] { item });
-
-    /// <summary> Adds <paramref name="item"/> to the head of <paramref name="source"/> and returns new <see cref="IEnumerable{T}"/>. </summary>
-    [PureMethod, PublicAPI] public static IEnumerable<T> Prepend<T>(this IEnumerable<T> source, T item) => new[] { item }.Concat(source);
-
     #endregion
 
     #region Misc
-
-    /// <summary>
-    /// Swaps two values within the list.
-    /// </summary>
-    /// <typeparam name="T">Type of values</typeparam>
-    /// <param name="list">List that contains values to be switched</param>
-    /// <param name="index1">The first value's index.</param>
-    /// <param name="index2">The second value's index.</param>
-    [PublicAPI]
-    [CollectionAccess(CollectionAccessType.ModifyExistingContent)]
-    public static void Swap<T>(IList<T> list, int index1, int index2) =>
-        (list[index1], list[index2]) = (list[index2], list[index1]);
-
-    /// <summary>
-    /// Swaps two values within the list. Non-generic version
-    /// </summary>
-    /// <param name="list">List that contains values to be switched</param>
-    /// <param name="index1">The first value's index.</param>
-    /// <param name="index2">The second value's index.</param>
-    [PublicAPI]
-    [CollectionAccess(CollectionAccessType.ModifyExistingContent)]
-    public static void SwapNg(IList list, int index1, int index2) =>
-        (list[index1], list[index2]) = (list[index2], list[index1]);
 
     [PureMethod, PublicAPI]
     [CollectionAccess(CollectionAccessType.Read)]
@@ -235,22 +172,6 @@ public static class EnumerableHelper
         return source.Any(elementsHash.Contains);
     }
 
-    [PureMethod, PublicAPI]
-    public static IEnumerable<TElement> DistinctBy<TElement, TKey>(this IEnumerable<TElement> source, Func<TElement, TKey> keySelector, IEqualityComparer<TKey> comparer = null)
-    {
-        if (source == null) throw new ArgumentNullException(nameof(source));
-        if (keySelector == null) throw new ArgumentNullException(nameof(keySelector));
-
-        var set = new HashSet<TKey>(comparer ?? EqualityComparer<TKey>.Default);
-
-        foreach (var item in source)
-        {
-            var key = keySelector(item);
-
-            if (set.Add(key))
-                yield return item;
-        }
-    }
 
     /// <summary>
     ///   Count number of iterations, but stop after specified maximal number. Useful to count items in infinite sequences.
@@ -259,75 +180,6 @@ public static class EnumerableHelper
     /// <param name="max">Maximal value returned by this function</param>
     [PureMethod, PublicAPI] public static int CountMax<T>(this IEnumerable<T> en, int max) => en.TakeWhile(_ => max-- > 0).Count();
 
-    /// <summary>
-    ///   Performs the specified action on each element of given enumeration
-    /// </summary>
-    /// <typeparam name="T">Type of enumeration's elements</typeparam>
-    /// <param name="items">Enumeration that is to be enumerated</param>
-    /// <param name="action">The <see cref="Action{T}" /> delegate to perform on each element of given enumeration</param>
-    /// <exception cref="ArgumentNullException">action is null</exception>
-    [PublicAPI]
-    public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
-    {
-        if (action == null) throw new ArgumentNullException(nameof(action), @"action parameter cannot be null");
-        if (items != null)
-            foreach (var item in items)
-                action(item);
-    }
-
-    [PublicAPI]
-    public static void ForEach<T>(this IEnumerable<T> items, Action<T, int> action)
-    {
-        if (action == null) throw new ArgumentNullException(nameof(action), @"action parameter cannot be null");
-        var i = 0;
-        if (items != null)
-            foreach (var item in items)
-                action(item, i++);
-    }
-
-    /// <summary>
-    ///   Performs the specified action on each element of given enumeration suppressing all exceptions during enumeration
-    ///   process
-    /// </summary>
-    /// <typeparam name="T">Type of enumeration's elements</typeparam>
-    /// <param name="items">Enumeration that is to be enumerated</param>
-    /// <param name="action">The <see cref="Action{T}" /> delegate to perform on each element of given enumeration</param>
-    /// <exception cref="ArgumentNullException">action is null</exception>
-    [PublicAPI]
-    public static void ForEachNoExceptions<T>(this IEnumerable<T> items, Action<T> action)
-    {
-        if (action == null) throw new ArgumentNullException(nameof(action), @"action parameter cannot be null");
-        if (items != null)
-            foreach (var item in items)
-                try
-                {
-                    action(item);
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine($"Error occured at {MethodBase.GetCurrentMethod().Name}");
-                    Debug.Indent();
-                    Debug.WriteLine(e.ToString());
-                    Debug.Unindent();
-                }
-    }
-
-    /// <summary>
-    ///   Generates action that can be performed on given enumeration
-    /// </summary>
-    /// <typeparam name="T">Type of element in enumeration</typeparam>
-    /// <param name="source">Enumeration</param>
-    /// <returns>Action that can be performed on given enumeration</returns>
-    /// <example>
-    ///   <code>
-    /// <![CDATA[
-    /// Action<Action<int>> forEachAction = new[] {1, 2, 3}.ForEach();
-    /// forEachAction(Console.WriteLine);
-    /// forEachAction(i => Console.WriteLine("{0} again", i));
-    /// ]]>
-    /// </code>
-    /// </example>
-    [PureMethod, PublicAPI] public static Action<Action<T>> ForEach<T>(this IEnumerable<T> source) => a => { foreach (var item in source) a(item); };
 
     /// <summary>
     ///   Flattens hierarchical enumerable type
@@ -358,162 +210,6 @@ public static class EnumerableHelper
 
             foreach (T child in descendBy(value).Descendants(descendBy))
                 yield return child;
-        }
-    }
-
-    [PureMethod, PublicAPI, JetBrains.Annotations.NotNull]
-    public static IEnumerable<T> OrEmpty<T>([CanBeNull] this IEnumerable<T> enumerable) => enumerable ?? Enumerable.Empty<T>();
-
-    [PureMethod, PublicAPI, ContractAnnotation("enumerable:null => true; enumerable:notnull=>false")]
-    public static bool IsNullOrEmpty<T>(this IEnumerable<T> enumerable) => enumerable == null || !enumerable.Any();
-
-    //Alternatively: ContractAnnotation("collection:null => true; collection:notnull=>false")]
-    [PureMethod, PublicAPI, ContractAnnotation("null => true; notnull=>false")]
-    public static bool IsNullOrEmpty<T>(this ICollection<T> collection) => collection == null || collection.Count == 0;
-
-    /// <summary>
-    ///   Gets the first key associated with the specified value.
-    /// </summary>
-    /// <typeparam name="TKey">Type of key</typeparam>
-    /// <typeparam name="TValue">Type of value</typeparam>
-    /// <param name="dict">Dictionary that is to be extended</param>
-    /// <param name="value">The value of the key to get</param>
-    /// <param name="key">
-    ///   When this method returns, contains the first associated key with the specified value, if the value is
-    ///   found; otherwise, the default value for the type of the key parameter.
-    /// </param>
-    /// <returns>
-    ///   <c>true</c> if the <see cref="IDictionary{TKey, TValue}" /> contains an element with the specified value;
-    ///   otherwise, false.
-    /// </returns>
-    /// <remarks>
-    ///   This is only proof-of-concept method. It's performance is poor thus it should be used only on small
-    ///   dictionaries.
-    /// </remarks>
-    /// <example>
-    ///   <code>
-    /// <![CDATA[
-    /// var dict = new Dictionary<int, string> { { 1, "One" }, { 2, "Two" }, { 3, "Three" }, };
-    /// int key;
-    /// bool ok = dict.TryGetKey("Two", out key);
-    /// ]]>
-    /// </code>
-    /// </example>
-    [PureMethod, PublicAPI]
-    public static bool TryGetKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, TValue value, out TKey key)
-    {
-        foreach (var pair in dict)
-            if (Equals(pair.Value, value))
-            {
-                key = pair.Key;
-                return true;
-            }
-
-        key = default;
-        return false;
-    }
-
-    /// <summary>
-    ///   Takes last elements of given enumeration that satisfy given condition
-    /// </summary>
-    /// <typeparam name="TSource"></typeparam>
-    /// <param name="source"></param>
-    /// <param name="count">Maximum number of elements to be taken</param>
-    /// <param name="predicate">A function to test each element for condition</param>
-    /// <returns></returns>
-    /// <example>
-    ///   For example see <see cref="TakeLast{TSource}" />
-    /// </example>
-    [PureMethod, PublicAPI]
-    public static IEnumerable<TSource> TakeLastWhile<TSource>(this IEnumerable<TSource> source, int count,
-      Func<TSource, bool> predicate) => TakeLastWhile(source, count, (s, i) => predicate(s));
-
-    /// <summary>
-    ///   Takes last elements of given enumeration that satisfy given condition
-    /// </summary>
-    /// <typeparam name="TSource"></typeparam>
-    /// <param name="source"></param>
-    /// <param name="count">Maximum number of elements to be taken</param>
-    /// <param name="predicate">A function to test each element for condition</param>
-    /// <returns></returns>
-    /// <example>
-    ///   For example see <see cref="TakeLast{TSource}" />
-    /// </example>
-    [PureMethod, PublicAPI]
-    public static IEnumerable<TSource> TakeLastWhile<TSource>(this IEnumerable<TSource> source, int count, Func<TSource, int, bool> predicate)
-    {
-        if (source == null) throw new ArgumentNullException(nameof(source));
-        if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), @"count should be greater than zero");
-
-#pragma warning disable IDE0063 // Use simple 'using' statement
-        // ReSharper disable once ConvertToUsingDeclaration
-        using (var enumerator = source.GetEnumerator())
-#pragma warning restore IDE0063 // Use simple 'using' statement
-        {
-            var i = 0;
-            var queue = new Queue<TSource>(count);
-            while (enumerator.MoveNext())
-            {
-                if (predicate(enumerator.Current, i++))
-                {
-                    if (queue.Count >= count) queue.Dequeue();
-                    queue.Enqueue(enumerator.Current);
-                }
-            }
-            return queue;
-        }
-    }
-
-    /// <summary>
-    ///   Takes last elements of given enumeration
-    /// </summary>
-    /// <typeparam name="TSource"></typeparam>
-    /// <param name="source"></param>
-    /// <param name="count">Maximum number of elements to be taken</param>
-    /// <returns></returns>
-    /// <example>
-    ///   <code>
-    /// <![CDATA[
-    /// var array = new[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12" };
-    /// var threeLastElements = array.TakeLast(3).ToList();
-    /// var tryToTakeMoreElementsThanCollectionHas = array.TakeLast(13).ToList();
-    /// 
-    /// var threeLastEvenElements = array.TakeLastWhile(3, s => int.Parse(s) % 2 == 0).ToList();
-    /// ]]>
-    /// </code>
-    /// </example>
-    [PureMethod, PublicAPI]
-    public static IEnumerable<TSource> TakeLast<TSource>(this IEnumerable<TSource> source, int count)
-    {
-        if (source == null) throw new ArgumentNullException(nameof(source));
-        if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), @"count should be greater than zero");
-
-        if (source is IList<TSource> list)
-        {
-            var listCount = list.Count;
-            var startIndex = Math.Max(0, listCount - count);
-            for (var i = startIndex; i < listCount; i++)
-                yield return list[i];
-        }
-        else
-        {
-#pragma warning disable IDE0063 // Use simple 'using' statement
-            // ReSharper disable ConvertToUsingDeclaration
-            using (var enumerator = source.GetEnumerator())
-            // ReSharper restore ConvertToUsingDeclaration
-#pragma warning restore IDE0063 // Use simple 'using' statement
-
-
-            {
-                var queue = new Queue<TSource>(count);
-                while (enumerator.MoveNext())
-                {
-                    if (queue.Count >= count) queue.Dequeue();
-                    queue.Enqueue(enumerator.Current);
-                }
-                foreach (var e in queue)
-                    yield return e;
-            }
         }
     }
 
@@ -700,274 +396,6 @@ public static class EnumerableHelper
         right = new T[array.Length - array.Length / 2];
         Array.Copy(array, 0, left, 0, left.Length);
         Array.Copy(array, left.Length, right, 0, right.Length);
-    }
-
-    /// <summary>Converts enumeration into HTML table</summary>
-    /// <example>
-    ///   <code>
-    /// <![CDATA[
-    /// [STAThread]
-    ///         static void Main()
-    ///         {
-    ///             var personList = new List<Person>();
-    ///             personList.Add(new Person
-    ///             {
-    ///                 FirstName = "Alex",
-    ///                 LastName = "Friedman",
-    ///                 Age = 27
-    ///             });
-    ///             personList.Add(new Person
-    ///             {
-    ///                 FirstName = "Jack",
-    ///                 LastName = "Bauer",
-    ///                 Age = 45
-    ///             });
-    ///             personList.Add(new Person
-    ///             {
-    ///                 FirstName = "Cloe",
-    ///                 LastName = "O'Brien",
-    ///                 Age = 35
-    ///             });
-    ///             personList.Add(new Person
-    ///             {
-    ///                 FirstName = "John",
-    ///                 LastName = "Doe",
-    ///                 Age = 30
-    ///             });
-    /// 
-    ///             string html = @"<style type = ""text/css""> .tableStyle{border: solid 5 green;} 
-    /// th.header{ background-color:#FF3300} tr.rowStyle { background-color:#33FFFF; 
-    /// border: solid 1 black; } tr.alternate { background-color:#99FF66; 
-    /// border: solid 1 black;}</style>";
-    ///             html += personList.ToHtmlTable("tableStyle", "header", "rowStyle", "alternate");
-    ///         }
-    /// 
-    ///         public class Person
-    ///         {
-    ///             public string FirstName { get; set; }
-    ///             public string LastName { get; set; }
-    ///             public int Age { get; set; }
-    ///         }
-    /// ]]>
-    /// </code>
-    /// </example>
-    [PureMethod, PublicAPI]
-    public static string ToHtmlTable<T>(IEnumerable<T> elements, string tableStyle = null, string headerStyle = null, string rowStyle = null, string alternateRowStyle = null)
-    {
-        bool applyTableStyle = !string.IsNullOrWhiteSpace(tableStyle);
-        bool applyHeaderStyle = !string.IsNullOrWhiteSpace(headerStyle);
-        bool applyRowStyle = !string.IsNullOrWhiteSpace(rowStyle);
-        bool applyAlternateRowStyle = applyRowStyle && !string.IsNullOrWhiteSpace(alternateRowStyle);
-
-        var table = new XElement("table", new XAttribute("id", typeof(T).Name + "Table"), applyTableStyle ? new XAttribute("class", tableStyle) : null);
-        var properties = typeof(T).GetProperties();
-
-        table.Add(properties.Select(p => new XElement("th", p.Name, applyHeaderStyle ? new XAttribute("class", headerStyle ?? "") : null)));
-
-        table.Add(
-        elements.Select(
-          (e, index) =>
-            new XElement(
-              "tr",
-              applyRowStyle ? new XAttribute("class", (applyAlternateRowStyle ? (index % 2 == 0 ? rowStyle : alternateRowStyle) : rowStyle) ?? "") : null,
-              properties.Select(p => new XElement("td", (p.GetValue(e) ?? "<NULL>").ToString()))
-            )
-          ));
-
-        return table.ToString();
-    }
-
-    /// <summary>
-    ///   Starts execution of IQueryable on a ThreadPool thread and returns immediately with a "end" method to call once the
-    ///   result is needed.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <typeparam name="TResult"></typeparam>
-    /// <param name="enumerable"></param>
-    /// <param name="asyncSelector"></param>
-    /// <returns></returns>
-    /// <example>
-    ///   <code>
-    /// <![CDATA[
-    /// // Define some expensive query
-    /// IQueryable<string> myExpensiveQuery = context.SystemLog.Where(l => l.Timestamp >= DateTime.Today.AddDays(-10));
-    /// // Start async processing
-    /// Func<string[]> waitForQueryData = myExpensiveQuery.Async(e => e.ToArray());
-    /// // Do a lot of other work, e.g. other queries
-    /// // Need my query result now, so block until it's ready and get result
-    /// string[] myQueryResults = waitForQueryData();
-    /// ]]>
-    /// </code>
-    /// </example>        
-    public static Func<TResult> Async<T, TResult>(this IEnumerable<T> enumerable,
-      Func<IEnumerable<T>, TResult> asyncSelector)
-    {
-        Debug.Assert(enumerable is not ICollection,
-          "Async does not work on arrays/lists/collections, only on true IEnumerable/IQueryable.");
-
-        // Create delegate to exec async
-        var work = asyncSelector;
-
-        // Launch it
-        var r = work.BeginInvoke(enumerable, null, null);
-
-        // Return method that will block until completed and rethrow exceptions if any
-        return () => work.EndInvoke(r);
-    }
-
-    #endregion
-
-    #region Iterators
-
-    /// <summary>
-    /// Iterate over enumeration and print it to console 
-    /// </summary>
-    /// <example><![CDATA[
-    /// Enumerable.Range(1, 10).LogLinq("all")
-    ///    .Take(8).LogLinq("Take8")
-    ///    .Where(i => i%2 == 0).LogLinq("Even")
-    ///    .OrderByDescending(i => i).LogLinq("Reversed") ]]></example>
-    public static IEnumerable<T> LogLinq<T>(this IEnumerable<T> enumerable, string logName = null, Func<T, string> printMethod = null)
-    {
-#if DEBUG
-        logName ??= "all";
-        int count = 0;
-
-        foreach (var item in enumerable)
-            Debug.WriteLine(
-                $"{(count == 0 ? logName : new string(' ', logName.Length))}{(count == 0 ? "┬" : "├")} {count++} ⇒ {printMethod?.Invoke(item) ?? item?.ToString() ?? "∅"}");
-        Debug.WriteLine($"{logName}:count = {count}");
-
-#endif
-        return enumerable;
-
-    }
-
-    /// <summary>
-    ///   Transforms enumerable type into reversed one.
-    /// </summary>
-    /// <param name="list">Enumerable that is to be extended</param>
-    /// <returns>Wrapped enumerable that is reversed version of input</returns>
-    [PureMethod, PublicAPI]
-    public static IEnumerable<T> AsReversedEnumerable<T>(this IList<T> list)
-    {
-        var count = list.Count;
-        for (var i = count - 1; i >= 0; --i)
-            yield return list[i];
-    }
-
-    /// <summary>
-    ///   Transforms enumerable type into the one that iterates to the end and starts from the beginning. This is done indefinitely.
-    /// </summary>
-    /// <param name="enumerable">Enumerable that is to be extended</param>
-    /// <returns>Wrapped enumerable that forms indefinite enumeration</returns>
-    [PureMethod, PublicAPI]
-    public static IEnumerable<T> AsCircularEnumerable<T>(this IEnumerable<T> enumerable)
-    {
-        while (true)
-            // ReSharper disable once PossibleMultipleEnumeration
-            foreach (var elem in enumerable)
-                yield return elem;
-        // ReSharper disable once IteratorNeverReturns
-    }
-
-    /// <summary>
-    ///   Transforms enumerable type into the one that skips given number of elements on each iteration.
-    /// </summary>
-    /// <param name="enumerable">Enumerable that is to be extended</param>
-    /// <param name="skip">Number of items to skip on each iteration</param>
-    /// <returns>Wrapped enumerable with some elements skipped</returns>
-    public static IEnumerable<T> AsSkippingEnumerable<T>(this IEnumerable<T> enumerable, int skip)
-    {
-        if (skip < 0) throw new ArgumentOutOfRangeException(nameof(skip), @"skip value must be greater than zero.");
-
-        using var enu = enumerable.GetEnumerator();
-
-        while (enu.MoveNext())
-        {
-            yield return enu.Current;
-
-            for (var i = skip; i > 0; i--)
-                if (!enu.MoveNext())
-                    break;
-        }
-    }
-
-    [PureMethod, PublicAPI]
-    [LinqTunnel]
-    public static IEnumerable<bool> ToBits(this IEnumerable<byte> bytes)
-    {
-        if (bytes == null) throw new ArgumentNullException(nameof(bytes));
-        //if (bytes.Count() == 0) yield break;
-        else
-        {
-            foreach (var @byte in bytes)
-                for (var mask = 1; mask != 256; mask <<= 1)
-                {
-                    var bit = (@byte & mask) == mask; //(@byte | mask) == @byte
-                    yield return bit;
-                }
-        }
-    }
-
-    [PureMethod, PublicAPI]
-    [LinqTunnel]
-    public static IEnumerable<bool> ToBits(this IEnumerable<int> intCollection)
-    {
-        if (intCollection == null) throw new ArgumentNullException(nameof(intCollection));
-        //if (intCollection.Count() == 0) yield break;
-        else
-        {
-            foreach (var @int in intCollection)
-                for (var bitPos = 0; bitPos < 32; bitPos++)
-                {
-                    var mask = 1 << bitPos;
-                    var bit = (@int & mask) == mask; //(@int | mask) == @int
-                    yield return bit;
-                }
-        }
-    }
-
-    /// <summary>
-    ///   Converts bits stream to bytes stream
-    /// </summary>
-    /// <param name="bits">Bits (<see cref="bool" />) stream</param>
-    /// <returns></returns>
-    /// <example>
-    ///   <code>
-    /// var bits = new bool[]
-    /// {
-    ///    false, true, false, true, false, true, false, true,
-    ///    false, true, false, true, false, true, false, true,
-    ///    false, true, false, true, false, true, false, true,
-    ///    true, 
-    /// };
-    /// var bytes = bits.ToBytes().ToArray();
-    /// </code>
-    /// </example>
-    [PureMethod, PublicAPI]
-    [LinqTunnel]
-    public static IEnumerable<byte> ToBytes(this IEnumerable<bool> bits)
-    {
-        if (bits == null) throw new ArgumentNullException(nameof(bits));
-        //if (bits.Count() == 0) yield break; //var byteLen = bits.Length/8 + 1;
-        else
-        {
-            byte bitIndex = 0, @byte = 0;
-            foreach (var bit in bits)
-            {
-                if (bit)
-                    @byte |= (byte)(1 << bitIndex);
-                bitIndex++;
-                if (bitIndex == 8)
-                {
-                    bitIndex = 0;
-                    yield return @byte;
-                    @byte = 0;
-                }
-            }
-            if (bitIndex != 0) yield return @byte; //return remaining byte
-        }
     }
 
     #endregion
